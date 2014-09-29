@@ -1,0 +1,31 @@
+EIC RICH STANDALONE SIMULATION README
+
+Step 1:
+source your set_eic environment
+$ source /your/path/set_eic
+
+Step 2:
+The commands to build the geometry, banks, hit defs
+mirrors and materials are:
+upload_parameters.pl config.dat   < only for MYSQL factory
+$ ./geometry.pl config.dat
+$ ./bank.pl config.dat
+$ ./hit.pl config.dat
+$ ./materials.pl config.dat
+$ ./mirrors.pl config.dat
+
+Step 3:
+$ eic_gemc meic_det1.gcard   (run simulation)
+
+Step 4:
+Check your text output if you choose "txt" format in *.gcard
+$ more output.txt            (view text output)
+Convert "evio" to "root" if you choose "evio" format in *.gcard
+$ evio2root -INPUTF=output.evio  -B=meic_det1
+
+Step 5:
+Analysis your root format output
+$ root output.root
+
+
+
