@@ -47,7 +47,22 @@ my $box_halfy = $agel_halfy + 1.0;
 my $box_halfz = (-1.0*$lens_z+2.0*$agel_halfz+$readout_z[1]+$readout_halfz+0.0 )/2.0;
 
 
-my $offset = 2*$box_halfz;
+my $offset = $box_halfz+50;
+
+my @detposZ = ( $offset, $lens_z-$agel_halfz-1.5+$BoxDelz+$offset, $lens_z+$BoxDelz+$offset, $phodet_z+$offset );
+my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0 );
+my @readoutposZ = ( $readout_z[0]+$offset, $readout_z[1]+$offset );
+sub print_detector()
+{
+	print "Printing detector positions and sizes ...\n\n";
+
+	print "hold box position: ( 0.0, 0.0, $detposZ[0] mm),  half size in XYZ: ( $box_halfx mm, $box_halfy mm, $box_halfz mm )\n";
+	print "aerogel position: ( 0.0, 0.0, $detposZ[1] mm),  half size in XYZ: ( $agel_halfx mm, $agel_halfy mm, $agel_halfz mm )\n";
+	print "fresnel lens position: ( 0.0, 0.0, $detposZ[2] mm), half  size in XY: ( $freslens[0] mm, $freslens[1] mm )\n";
+	print "photon detector position: ( 0.0, 0.0, $detposZ[3] mm), half size in XYZ: ($phodet_halfx mm, $phodet_halfy mm, $phodet_halfz mm )\n";
+	print "readout position: ( 0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
+
+}
 
 #######------ Define the holder Box for Detectors ------#######
 my $box_name = "detector_holder";
@@ -128,6 +143,7 @@ sub build_lens()
 		$detector{"dimensions"} = "$lens_holdbox_size[0]*mm $lens_holdbox_size[1]*mm $lens_holdbox_size[2]*mm";
 		$detector{"material"} = "$box_mat";
 		$detector{"rotation"} = "0*deg 0*deg $lens_holdbox_rotZ[$iholdbox]*deg";
+#		$detector{"visible"} = "0";
 		$detector{"identifiers"} = "no";
 		print_det(\%configuration, \%detector);
 
@@ -244,7 +260,7 @@ sub GetSagita
 ######------ photon detector ------######
 my $photondet_name = "Photondet";
 #my $photondet_mat  = "Aluminum";
-my $photondet_mat  = "G4_Al";
+my $photondet_mat  = "Air_Opt";
 sub build_photondet()
 {
 	my @photondet_pos  = ( 0.0, 0.0, $phodet_z );
@@ -300,7 +316,7 @@ sub build_mirrors()
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
-	$detector{"hit_type"} = "mirror";
+	$detector{"hit_type"} = "no";
         $detector{"identifiers"} = "no";
         print_det(\%configuration, \%detector);
 
@@ -320,7 +336,7 @@ sub build_mirrors()
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
-	$detector{"hit_type"} = "mirror";
+	$detector{"hit_type"} = "no";
         $detector{"identifiers"} = "no";
         print_det(\%configuration, \%detector);
 	
@@ -339,7 +355,7 @@ sub build_mirrors()
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
-	$detector{"hit_type"} = "mirror";
+	$detector{"hit_type"} = "no";
         $detector{"identifiers"} = "no";
         print_det(\%configuration, \%detector);
 
@@ -358,7 +374,7 @@ sub build_mirrors()
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
-	$detector{"hit_type"} = "mirror";
+	$detector{"hit_type"} = "no";
         $detector{"identifiers"} = "no";
         print_det(\%configuration, \%detector);
 }
@@ -397,6 +413,7 @@ sub build_readout()
 
 sub build_detector()
 {
+	print_detector();
 	build_box();
 	build_aerogel();
 	build_lens();
