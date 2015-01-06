@@ -4,7 +4,7 @@
 #  Define the geometry for the EIC RICH detector
 #  
 #  All dimensions are in mm
-#  Use the hit type flux
+#  Use the hit type eic_rich 
 #  
 #  The geometry are divided in 5 parts: 
 #  Aerogel, Fresnel lens, Mirrors, Photonsensor, and Readout
@@ -22,7 +22,7 @@ our %configuration;
 
 my $DetectorMother="root";
 my $DetectorName = 'meic_det1_rich';
-my $hittype="flux";
+my $hittype="eic_rich";
 
 #######------ Define detector size and location ------####### 
 my $agel_halfx = 55.25;
@@ -66,6 +66,7 @@ sub print_detector()
 
 #######------ Define the holder Box for Detectors ------#######
 my $box_name = "detector_holder";
+#my $box_mat = "G4_AIR";
 my $box_mat = "Air_Opt";
 sub build_box()
 {
@@ -78,8 +79,12 @@ sub build_box()
         $detector{"pos"} = "$box_pos[0]*mm $box_pos[1]*mm $box_pos[2]*mm";
         $detector{"color"} = "ffffff";
         $detector{"type"} = "Box";
+        $detector{"visible"} = "1";
         $detector{"dimensions"} = "$box_size[0]*mm $box_size[1]*mm $box_size[2]*mm";
         $detector{"material"} = "$box_mat";
+        $detector{"sensitivity"} = "no";
+        $detector{"hit_type"}    = "no";
+        $detector{"identifiers"} = "no";
         print_det(\%configuration, \%detector);
 }
 
@@ -99,14 +104,15 @@ sub build_aerogel()
         $detector{"type"} = "Box";
         $detector{"dimensions"} = "$agel_size[0]*mm $agel_size[1]*mm $agel_size[2]*mm";
         $detector{"material"} = "$agel_mat";
-        $detector{"sensitivity"} = "no";
-        $detector{"hit_type"}    = "no";
-        $detector{"identifiers"} = "aerogel manual 1";
+        $detector{"sensitivity"} = "$hittype";
+        $detector{"hit_type"}    = "$hittype";
+        $detector{"identifiers"} = "id manual 1";
         print_det(\%configuration, \%detector);
 }
 
 ######------ Fresnel lens ------######
 my $lens_holdbox = "lens_holder";
+my $lens_holdbox_mat  = "Air_Opt";
 my $lens_name = "lens";
 my $lens_mat  = "acrylic";
 sub build_lens()
@@ -115,7 +121,7 @@ sub build_lens()
 	my $lens_numOfGrooves = 100;   ### number of grooves for fresnel lens
 
 	###### Properites of the fresnel lens
-	my $GrooveWidth = ($LensDiameter/2.0)/$lens_numOfGrooves;
+	my $GrooveWidth = (($LensDiameter-1.)/2.0)/$lens_numOfGrooves; ## 1mm less avoid overlap
 	if($GrooveWidth<=0) { 
 		print "build_lens::GrooveWidth <= 0\n";
 	}
@@ -132,8 +138,9 @@ sub build_lens()
 	my @lens_holdbox_rotZ = ( 0, -90, -180, -270 );
 	my $lens_holdbox_col = "ff0000";
 
+	my %detector;
 	for(my $iholdbox=0; $iholdbox<$lens_numOfHoldBox; $iholdbox++){
-		my %detector=init_det();
+		%detector=init_det();
 		$detector{"name"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
 		$detector{"mother"} = "$DetectorName\_$box_name";
 		$detector{"description"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
@@ -141,9 +148,11 @@ sub build_lens()
 		$detector{"color"} = "$lens_holdbox_col";
 		$detector{"type"} = "Box";
 		$detector{"dimensions"} = "$lens_holdbox_size[0]*mm $lens_holdbox_size[1]*mm $lens_holdbox_size[2]*mm";
-		$detector{"material"} = "$box_mat";
+		$detector{"material"} = $lens_holdbox_mat;
 		$detector{"rotation"} = "0*deg 0*deg $lens_holdbox_rotZ[$iholdbox]*deg";
-#		$detector{"visible"} = "0";
+		$detector{"visible"} = "0";
+		$detector{"sensitivity"} = "no";
+		$detector{"hit_type"}    = "no";
 		$detector{"identifiers"} = "no";
 		print_det(\%configuration, \%detector);
 
@@ -155,6 +164,7 @@ sub build_lens()
 			my $circle_end = ($igroove/$lens_numOfGrooves)*(($lens_numOfGrooves+1)/$lens_numOfGrooves);
 			my $lens_startphi;
 			my $lens_deltaphi;
+
 			if ($circle_end>99.6*sqrt(2.0)) {          ## test marker at the tips 99.6->0.6
 				$lens_startphi = pi/2.0;
 				$lens_deltaphi = 0.1;
@@ -198,6 +208,7 @@ sub build_lens()
 			for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
 			$detector{"dimensions"} = "$dimen";
 			$detector{"material"} = "$lens_mat";
+			$detector{"visible"} = 1;
 			$detector{"sensitivity"} = "no";
 			$detector{"hit_type"}    = "no";
 			$detector{"identifiers"} = "no";
@@ -278,7 +289,7 @@ sub build_photondet()
 	$detector{"mfield"} = "no";
 	$detector{"sensitivity"} = "$hittype";
 	$detector{"hit_type"}    = "$hittype";
-	$detector{"identifiers"} = "photondet manual 1";
+	$detector{"identifiers"} = "id manual 2";
 	print_det(\%configuration, \%detector);
 }
 
@@ -287,8 +298,8 @@ sub build_photondet()
 my $mirror_mat  = "Aluminum";
 sub build_mirrors()
 {
-	my $dx1 = $agel_halfx;
-	my $dx2 = $agel_halfx*0.8;
+	my $dx1 = $agel_halfx-0.3;            ## 0.3 mm less avoiding overlap
+	my $dx2 = ($agel_halfx)*0.8-0.3;      ## 0.3 mm less avoiding overlap
 	my $dy1 = 0.1;
 	my $dy2 = 0.1;
 	my $dz = ($phodet_z - $lens_z - $phodet_halfz - 3.0)/2.0;
@@ -310,14 +321,14 @@ sub build_mirrors()
         $detector{"mother"} = "$DetectorName\_$box_name";
         $detector{"description"} = "$DetectorName\_$mirror_back_name";
         $detector{"pos"} = "$mirror_back_pos[0]*mm $mirror_back_pos[1]*mm $mirror_back_pos[2]*mm";
-        $detector{"rotation"} = "0*deg $phi_back*deg 90*deg";
-        $detector{"color"} = "00ff00";
+        $detector{"rotation"} = "0.0*deg $phi_back*deg 90*deg";
+        $detector{"color"} = "ffff00";
         $detector{"type"} = "Trd";
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
 	$detector{"hit_type"} = "no";
-        $detector{"identifiers"} = "no";
+        $detector{"identifiers"} = "id manual 3";
         print_det(\%configuration, \%detector);
 
 	
@@ -331,13 +342,13 @@ sub build_mirrors()
         $detector{"description"} = "$DetectorName\_$mirror_front_name";
         $detector{"pos"} = "$mirror_front_pos[0]*mm $mirror_front_pos[1]*mm $mirror_front_pos[2]*mm";
         $detector{"rotation"} = "0*deg $phi_front*deg 90*deg";
-        $detector{"color"} = "00ff00";
+        $detector{"color"} = "ffff00";
         $detector{"type"} = "Trd";
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
 	$detector{"hit_type"} = "no";
-        $detector{"identifiers"} = "no";
+        $detector{"identifiers"} = "id manual 4";
         print_det(\%configuration, \%detector);
 	
 	####### top mirror
@@ -350,13 +361,13 @@ sub build_mirrors()
         $detector{"description"} = "$DetectorName\_$mirror_top_name";
         $detector{"pos"} = "$mirror_top_pos[0]*mm $mirror_top_pos[1]*mm $mirror_top_pos[2]*mm";
         $detector{"rotation"} = "$phi_top*deg 0*deg 0*deg";
-        $detector{"color"} = "00ff00";
+        $detector{"color"} = "ffff00";
         $detector{"type"} = "Trd";
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
 	$detector{"hit_type"} = "no";
-        $detector{"identifiers"} = "no";
+        $detector{"identifiers"} = "id manual 5";
         print_det(\%configuration, \%detector);
 
 	####### bottom mirror
@@ -369,13 +380,13 @@ sub build_mirrors()
         $detector{"description"} = "$DetectorName\_$mirror_bottom_name";
         $detector{"pos"} = "$mirror_bottom_pos[0]*mm $mirror_bottom_pos[1]*mm $mirror_bottom_pos[2]*mm";
         $detector{"rotation"} = "$phi_bottom*deg 0*deg 0*deg";
-        $detector{"color"} = "00ff00";
+        $detector{"color"} = "ffff00";
         $detector{"type"} = "Trd";
         $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
         $detector{"material"} = "$mirror_mat";
 	$detector{"sensitivity"} = "mirror: rich_mirrors";
 	$detector{"hit_type"} = "no";
-        $detector{"identifiers"} = "no";
+        $detector{"identifiers"} = "id manual 6";
         print_det(\%configuration, \%detector);
 }
 
