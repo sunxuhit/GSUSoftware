@@ -19,14 +19,16 @@
 
 <option name="BEAM_P"   value="pi-, 9*GeV, 0*rad, 0*deg"/>
 <option name="SPREAD_P" value="0*GeV,0*deg,0*deg"/>
-<option name="BEAM_V"   value="(0, 0, 0)m"/>
+
+<option name="BEAM_V"   value="(0, 0, 50.5)mm"/> <!-- Ping changed BEAM_V from (0,0,0)m to (0,0, 50.5)mm to test B-field -->
+
 <option name="SPREAD_V" value="(0.,0)cm"/>
 
 <option name="USE_GUI"  value="1"/>
 
-<option name="N" value="1"/>    <!-- Total simulated events, changed by L. Xue from 1 to 100 -->
+<option name="N" value="100"/>    <!-- Total simulated events, changed by L. Xue from 1 to 100 -->
 <option name="NGENP"  value="100"/>   <!-- Add by Liang for number of events recorded -->
-<option name="OUTPUT" value="evio,output_By1.5T.evio"/>  <!-- changed by L. Xue from "txt" to "evio" -->
+<option name="OUTPUT" value="evio,output_By1.5T9GeV100PiDetectorFromAgel.evio"/>  <!-- changed by L. Xue from "txt" to "evio" -->
 
 <option name="RECORD_MIRRORS" value="1"/>
 <option name="RECORD_PASSBY" value="1"/>
@@ -34,7 +36,7 @@
 <option name="FIELD_DIR" value="field"/>
 <option name="HALL_FIELD" value="By1.5T"/>
 
-
+<option name="EXEC_MACRO" value="vis.mac"/>
 </gcard>
 
 <!--  comment out
