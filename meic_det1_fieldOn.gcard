@@ -24,18 +24,18 @@
 
 <option name="SPREAD_V" value="(0.,0)cm"/>
 
-<option name="USE_GUI"  value="1"/>
+<option name="USE_GUI"  value="0"/>
 <option name="SAVE_ALL_MOTHERS" value="1"/>
 
-<option name="N" value="1"/>    <!-- Total simulated events, changed by L. Xue from 1 to 100 -->
+<option name="N" value="100000"/>    <!-- Total simulated events, changed by L. Xue from 1 to 100 -->
 <option name="NGENP"  value="100"/>   <!-- Add by Liang for number of events recorded -->
-<option name="OUTPUT" value="evio,output_By1.5T9GeVMuElecHF0.5m.evio"/>  <!-- changed by L. Xue from "txt" to "evio" -->
+<option name="OUTPUT" value="evio,output_By3T9GeV100000MuHF0.5mRich.evio"/>  <!-- changed by L. Xue from "txt" to "evio" -->
 
 <option name="RECORD_MIRRORS" value="1"/>
 <option name="RECORD_PASSBY" value="1"/>
 
 <option name="FIELD_DIR" value="field"/>
-<option name="HALL_FIELD" value="By1.5T"/>
+<option name="HALL_FIELD" value="By3T"/>
 
 <option name="EXEC_MACRO" value="vis.mac"/>
 </gcard>
