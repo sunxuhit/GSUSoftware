@@ -19,6 +19,9 @@
 # The grooves of the Fresnel lens are now facing the aerogel,
 # the smooth side of the lens is facing the photon sensor.
 #############################################################
+# Ping 02-08-2016
+# add Get_dZ() to get sagitta of a spheric lens
+#############################################################
 use strict;
 use warnings;
 use Getopt::Long;
