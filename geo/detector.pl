@@ -273,7 +273,7 @@ sub Get_dZ()
 
     $r=($n-1)*$focalLength;
     #$y_s=sqrt($r**2+$LensDiameter**2);
-    $dZ=sqrt(r**2-(($par[0]+1)*$grooveWidth)**2)-sqrt(r**2-($par[0]*$grooveWidth)**2);
+    my $dZ=sqrt($r**2-(($_[0]+1)*$grooveWidth)**2)-sqrt($r**2-($_[0]*$grooveWidth)**2);
 
     return $dZ;
 }
