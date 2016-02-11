@@ -118,7 +118,7 @@ sub build_aerogel()
     my @agel_pos  = ( 0.0, 0.0, $lens_z - $agel_halfz + $BoxDelz );
     my @agel_size = ( $agel_halfx, $agel_halfy, $agel_halfz );
     #print agel boundary
-    print "============ z position of agel from $agel_pos[2]-$agel_size[2] to  $agel_pos[2]+$agel_size[2] ===============\n";
+    print "z position of agel from $agel_pos[2]-$agel_size[2] to  $agel_pos[2]+$agel_size[2]\n";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$agel_name";
     $detector{"mother"} = "$DetectorName\_$box_name";
@@ -146,17 +146,17 @@ sub build_lens()
 
     ###### Properites of the fresnel lens
     my $GrooveWidth = (($LensDiameter-1.)/2.0)/$lens_numOfGrooves; ## 1mm less avoid overlap
-    if($GrooveWidth<=0) { 
-	print "build_lens::GrooveWidth <= 0\n";
+    if($GrooveWidth<=0) {
+        print "build_lens::GrooveWidth <= 0\n";
     }
-    
-    ###the inner and outer ring radius of the groove at the edge of the lens
-    my $Rmin_edge = ($lens_numOfGrooves-1)*$GrooveWidth;
-    my $Rmax_edge = ($lens_numOfGrooves-0)*$GrooveWidth;
-    my $LensThickness = GetSagita($Rmax_edge)-GetSagita($Rmin_edge)+1.; #1 mm wider 
-    
+
+    #####inner & outer radius of the groove at the adge of the lens
+    my $Rmin1 = ($lens_numOfGrooves-1)*$GrooveWidth;
+    my $Rmax1 = ($lens_numOfGrooves-0)*$GrooveWidth;
+    my $LensThickness = GetSagita($Rmax1)-GetSagita($Rmin1)+1.; #1 mm wider 
+    #print"=============== Lens thickness = $LensThickness ==================\n";
     ###### build holder box for fresnel lens
-    my $quadpos = sqrt(2.0)*$LensDiameter/8.0; 
+    my $quadpos = sqrt(2.0)*$LensDiameter/8.0;
     my @lens_holdbox_posX = ( -1*$quadpos, -1*$quadpos, $quadpos, $quadpos );
     my @lens_holdbox_posY = ( $quadpos, -1*$quadpos, -1*$quadpos, $quadpos );
     #my @lens_holdbox_posZ = ( $lens_z+$BoxDelz, $lens_z+$BoxDelz, $lens_z+$BoxDelz, $lens_z+$BoxDelz);
@@ -164,102 +164,90 @@ sub build_lens()
     my @lens_holdbox_size = ( $quadpos, $quadpos, $LensThickness/2.0+0.25);
     my @lens_holdbox_rotZ = ( 0, -90, -180, -270 );
     my $lens_holdbox_col = "ff0000";
-    
+
     my %detector;
     for(my $iholdbox=0; $iholdbox<$lens_numOfHoldBox; $iholdbox++){
+    #for(my $iholdbox=0; $iholdbox<1; $iholdbox++){    
 	%detector=init_det();
-	$detector{"name"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
-	$detector{"mother"} = "$DetectorName\_$box_name";
-	$detector{"description"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
-	$detector{"pos"} = "$lens_holdbox_posX[$iholdbox]*mm $lens_holdbox_posY[$iholdbox]*mm $lens_holdbox_posZ[$iholdbox]*mm";
-	$detector{"color"} = "$lens_holdbox_col";
-	$detector{"type"} = "Box";
-	$detector{"dimensions"} = "$lens_holdbox_size[0]*mm $lens_holdbox_size[1]*mm $lens_holdbox_size[2]*mm";
-	$detector{"material"} = $lens_holdbox_mat;
-	$detector{"rotation"} = "0*deg 0*deg $lens_holdbox_rotZ[$iholdbox]*deg";
-	$detector{"visible"} = "0";
-	$detector{"sensitivity"} = "no";
-	$detector{"hit_type"}    = "no";
-	$detector{"identifiers"} = "no";
-	print_det(\%configuration, \%detector);
-	
+        $detector{"name"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
+        $detector{"mother"} = "$DetectorName\_$box_name";
+        $detector{"description"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
+        $detector{"pos"} = "$lens_holdbox_posX[$iholdbox]*mm $lens_holdbox_posY[$iholdbox]*mm $lens_holdbox_posZ[$iholdbox]*mm";
+        $detector{"color"} = "$lens_holdbox_col";
+        $detector{"type"} = "Box";
+        $detector{"dimensions"} = "$lens_holdbox_size[0]*mm $lens_holdbox_size[1]*mm $lens_holdbox_size[2]*mm";
+        $detector{"material"} = $lens_holdbox_mat;
+        $detector{"rotation"} = "0*deg 0*deg $lens_holdbox_rotZ[$iholdbox]*deg";
+        $detector{"visible"} = "1";
+        $detector{"sensitivity"} = "no";
+        $detector{"hit_type"}    = "no";
+        $detector{"identifiers"} = "no";
+        print_det(\%configuration, \%detector);
+
 ### build fresnel lens groove
-	for(my $igroove=0; $igroove<$lens_numOfGrooves; $igroove++){
+        for(my $igroove=0; $igroove<$lens_numOfGrooves; $igroove++){
+        # for(my $igroove=0; $igroove<71; $igroove++){ #skip the corner grooves
 	    my @lens_grooves_pos = ( sqrt(2.0)*$LensDiameter/8.0, -sqrt(2.0)*$LensDiameter/8.0, 0.0 );
-	    
-## Taper the outer part of the lens to a square shape, using PhiAngle (From Hubert)
-	    my $circle_end = ($igroove/$lens_numOfGrooves)*(($lens_numOfGrooves+1)/$lens_numOfGrooves);
-	    my $lens_startphi;
-	    my $lens_deltaphi;
-	    
-	    if ($circle_end>99.6*sqrt(2.0)) {          ## test marker at the tips 99.6->0.6
-		$lens_startphi = pi/2.0;
-		$lens_deltaphi = 0.1;
-	    }
-	    elsif ($circle_end<0.5*sqrt(2.0)) {      ## quarter-circle, as before
-		$lens_startphi = pi/2.0;
-		$lens_deltaphi = pi/2.0;
-	    }
-	    else {                                    ## taper to a point
-		my $start_angle = 0.5*asin( 1/($circle_end**2) -1.0 );
-		$lens_startphi = -1*$start_angle+0.75*pi;
-		$lens_deltaphi =  2.0*$start_angle;
-	    }
-	    
-	    $lens_startphi = $lens_startphi*180/pi;
-	    $lens_deltaphi = $lens_deltaphi*180/pi;
-	    
-	    #----------Flip the Fresnel Lens-----------#
-	    my $iRmin = $igroove*$GrooveWidth;
-	   
-	    my $iRmax1 = $iRmin+0.0001;
-	    my $iRmax2 = ($igroove+1)*$GrooveWidth; #iRmax-iRmin=GrooveWidth
-	    my $iRmax3 = $iRmax2;               #iRmax-iRmin=GrooveWidth
+            ## Taper the outer part of the lens to a square shape, using PhiAngle (From Hubert)
+            my $circle_end = ($igroove/$lens_numOfGrooves)*(($lens_numOfGrooves+1)/$lens_numOfGrooves);
+            my $lens_startphi;
+            my $lens_deltaphi;
 
-	    my $dZ 	   = GetSagita($iRmax3) - GetSagita($iRmin);
-	    if($dZ<=0) { 
-	    	print "build_lens::Groove depth<0 !\n";
-	    }
-	    #else {
-	    #	print "dZ=$dZ\n";
-	    #}
-	    #print"LensThickness=$LensThickness / groove width=$GrooveWidth\n";
-	    #if (40<=$igroove && $igroove<=50) {print"dZ=$dZ\n";}
-	    
-	    my @lens_poly_z    = (-1*$LensThickness/2.0, -$LensThickness/2.0+$dZ, $LensThickness/2.0);
-	    my @lens_poly_rmin = ($iRmin, $iRmin, $iRmin);
-	    my @lens_poly_rmax = ($iRmax1, $iRmax2, $iRmax3);
-	    #------------------------------------------#
+            if ($circle_end>99.6*sqrt(2.0)) {          ## test marker at the tips 99.6->0.6
+                $lens_startphi = pi/2.0;
+                $lens_deltaphi = 0.1;
+            }
+            elsif ($circle_end<0.5*sqrt(2.0)) {      ## quarter-circle, as before
+                $lens_startphi = pi/2.0;
+                $lens_deltaphi = pi/2.0;
+            }
+            else {                                    ## taper to a point
+                my $start_angle = 0.5*asin( 1/($circle_end**2) -1.0 );
+                $lens_startphi = -1*$start_angle+0.75*pi;
+                $lens_deltaphi =  2.0*$start_angle;
+            }
 
-	    %detector=init_det();
-	    $detector{"name"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
-	    $detector{"mother"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
-	    $detector{"description"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
-	    $detector{"pos"} = "$lens_grooves_pos[0]*mm $lens_grooves_pos[1]*mm $lens_grooves_pos[2]*mm";
-	    #$detector{"color"} = "ff00ff"; #megenta
-	    $detector{"color"} = "2eb7ed";  #blue-ish
+            $lens_startphi = $lens_startphi*180/pi;
+            $lens_deltaphi = $lens_deltaphi*180/pi;
+
+            my $iRmin1 = ($igroove+0)*$GrooveWidth;
+            my $iRmax1 = ($igroove+1)*$GrooveWidth;
+            my $iRmin2 = $iRmin1;
+            my $iRmax2 = $iRmin2+0.0001;
+            my $dZ         = GetSagita($iRmax1) - GetSagita($iRmin1);
+            if($dZ<=0) {
+                print "build_lens::Groove depth<0 !\n";
+            }
+            my @lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
+            my @lens_poly_rmin = ($iRmin1, $iRmin1, $iRmin2);
+            my @lens_poly_rmax = ($iRmax1, $iRmax1, $iRmax2);
+
+            %detector=init_det();
+            $detector{"name"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
+            $detector{"mother"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
+            $detector{"description"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
+            $detector{"pos"} = "$lens_grooves_pos[0]*mm $lens_grooves_pos[1]*mm $lens_grooves_pos[2]*mm";
+            #$detector{"color"} = "ff00ff";   #magenta
+            $detector{"color"} = "2eb7ed";    #blue-ish
 	    $detector{"type"} = "Polycone";
-	    my $dimen = "$lens_startphi*deg $lens_deltaphi*deg 3*counts";
-	    for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmin[$i]*mm";}
-	    for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmax[$i]*mm";}
-	    for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
-	    $detector{"dimensions"} = "$dimen";
-	    $detector{"material"} = "$lens_mat";
-	    #if ($igroove == 20) {
-		$detector{"style"} = 0;
-		$detector{"visible"} = 1;
-	    #}
-	    #else {
-	    #    $detector{"style"} = 0;
-	    #    $detector{"visible"} = 0;
-	    #}
-	    $detector{"sensitivity"} = "no";
-	    $detector{"hit_type"}    = "no";
-	    $detector{"identifiers"} = "no";
-	    print_det(\%configuration, \%detector);
+            my $dimen = "$lens_startphi*deg $lens_deltaphi*deg 3*counts";
+            for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmin[$i]*mm";}
+            for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmax[$i]*mm";}
+            for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
+            $detector{"dimensions"} = "$dimen";
+	    $detector{"rotation"} = "0*deg -180*deg 0*deg";
+            $detector{"material"} = "$lens_mat";
+	    $detector{"style"} = 1;
+            $detector{"visible"} = 1;
+            $detector{"sensitivity"} = "no";
+            $detector{"hit_type"}    = "no";
+            $detector{"identifiers"} = "no";
+            print_det(\%configuration, \%detector);
+
 	}
     }
 }
+
 
 #--------------Ping: get dZ=sagita, Spheric lens--------------#
 sub Get_dZ()
@@ -337,7 +325,7 @@ sub build_photondet()
 {
     my @photondet_pos  = ( 0.0, 0.0, $phodet_z );
     my @photondet_size = ( $phodet_halfx, $phodet_halfy, $phodet_halfz );
-    print "========= z position of photon detector from $photondet_pos[2]-$photondet_size[2] to $photondet_pos[2]+$photondet_size[2] =========\n";
+    print "z position of photon detector from $photondet_pos[2]-$photondet_size[2] to $photondet_pos[2]+$photondet_size[2]\n";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$photondet_name";
     $detector{"mother"} = "$DetectorName\_$box_name";
