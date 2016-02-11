@@ -118,7 +118,7 @@ sub build_aerogel()
     my @agel_pos  = ( 0.0, 0.0, $lens_z - $agel_halfz + $BoxDelz );
     my @agel_size = ( $agel_halfx, $agel_halfy, $agel_halfz );
     #print agel boundary
-    print "z position of agel from $agel_pos[2]-$agel_size[2] to  $agel_pos[2]+$agel_size[2]\n";
+    print "Aerogel: z position from $agel_pos[2]-$agel_size[2] to  $agel_pos[2]+$agel_size[2]\n";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$agel_name";
     $detector{"mother"} = "$DetectorName\_$box_name";
@@ -162,7 +162,7 @@ sub build_lens()
     #my @lens_holdbox_posZ = ( $lens_z+$BoxDelz, $lens_z+$BoxDelz, $lens_z+$BoxDelz, $lens_z+$BoxDelz);
     my @lens_holdbox_posZ = ( $lens_z, $lens_z, $lens_z, $lens_z);  #modified by Ping
     my @lens_holdbox_size = ( $quadpos, $quadpos, $LensThickness/2.0+0.25);
-    my @lens_holdbox_rotZ = ( 0, -90, -180, -270 );
+    my @lens_holdbox_rotZ = ( -270, -180, -90, 0 );
     my $lens_holdbox_col = "ff0000";
 
     my %detector;
@@ -177,8 +177,8 @@ sub build_lens()
         $detector{"type"} = "Box";
         $detector{"dimensions"} = "$lens_holdbox_size[0]*mm $lens_holdbox_size[1]*mm $lens_holdbox_size[2]*mm";
         $detector{"material"} = $lens_holdbox_mat;
-        $detector{"rotation"} = "0*deg 0*deg $lens_holdbox_rotZ[$iholdbox]*deg";
-        $detector{"visible"} = "1";
+        $detector{"rotation"} = "0*deg -180*deg $lens_holdbox_rotZ[$iholdbox]*deg";
+        $detector{"visible"} = "0";
         $detector{"sensitivity"} = "no";
         $detector{"hit_type"}    = "no";
         $detector{"identifiers"} = "no";
@@ -235,7 +235,7 @@ sub build_lens()
             for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmax[$i]*mm";}
             for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
             $detector{"dimensions"} = "$dimen";
-	    $detector{"rotation"} = "0*deg -180*deg 0*deg";
+	    #$detector{"rotation"} = "0*deg -180*deg 0*deg";
             $detector{"material"} = "$lens_mat";
 	    $detector{"style"} = 1;
             $detector{"visible"} = 1;
@@ -252,16 +252,15 @@ sub build_lens()
 #--------------Ping: get dZ=sagita, Spheric lens--------------#
 sub Get_dZ()
 {
+    ### $_[0]=grooveWidth, $_[1]=igroove
+    #
     my $focalLength=76.2;   #mm
     my $n=1.49;             #refractive index
     my $r;
-    my $grooveWidth;
-    #my $r_p=$LensDiameter;  #y=0 when x=r_p              
-    #my $y_s;                #shifted y position
 
     $r=($n-1)*$focalLength;
     #$y_s=sqrt($r**2+$LensDiameter**2);
-    my $dZ=sqrt($r**2-(($_[0]+1)*$grooveWidth)**2)-sqrt($r**2-($_[0]*$grooveWidth)**2);
+    my $dZ=sqrt($r**2-(($_[1]+1)*$_[0])**2)-sqrt($r**2-($_[1]*$_[0])**2);
 
     return $dZ;
 }
@@ -325,7 +324,7 @@ sub build_photondet()
 {
     my @photondet_pos  = ( 0.0, 0.0, $phodet_z );
     my @photondet_size = ( $phodet_halfx, $phodet_halfy, $phodet_halfz );
-    print "z position of photon detector from $photondet_pos[2]-$photondet_size[2] to $photondet_pos[2]+$photondet_size[2]\n";
+    print "Photon Sensor: z position from $photondet_pos[2]-$photondet_size[2] to $photondet_pos[2]+$photondet_size[2]\n";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$photondet_name";
     $detector{"mother"} = "$DetectorName\_$box_name";
