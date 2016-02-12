@@ -45,12 +45,15 @@ my $BoxDelz = -2.0;
 
 #my $lens_z = -25.0 + $BoxDelz;
 my $lens_z = -25.0;  #Ping: fix the value of lens_z
+my $focalLength=76.2;
 
 #my $phodet_z = 46.0 + $BoxDelz;
-my $phodet_z = 46.0;  #Ping: fix the value of phodet_z 
+#my $phodet_z = 46.0;  #Ping: fix the value of phodet_z 
+#my $phodet_z = $lens_z+$focalLength; 
 my $phodet_halfx = $agel_halfx*0.8;
 my $phodet_halfy = $agel_halfy*0.8;
 my $phodet_halfz = 1.0;
+my $phodet_z = $lens_z+$focalLength-$phodet_halfz;
 
 my $readout_halfz = 4.0;
 #my @readout_z = ($phodet_z-$phodet_halfz+3.0, $phodet_z-$phodet_halfz+2.0*$readout_halfz);
@@ -273,11 +276,11 @@ sub GetSagita #the arc shape, Aspheric lens
     my $Curvature;
     my @Aspher = (0, 0, 0, 0, 0, 0, 0, 0 );
     
-    if ($lens_type == 1) {
-	$Curvature = 0.00437636761488;
-	$Aspher[0] = 4.206739256e-05;
-	$Aspher[1] = 9.6440152e-10;
-	$Aspher[2] = -1.4884317e-15;
+   if ($lens_type == 1) {
+	#$Curvature = 0.00437636761488;
+	#$Aspher[0] = 4.206739256e-05;
+	#$Aspher[1] = 9.6440152e-10;
+	#$Aspher[2] = -1.4884317e-15;
     }
     
     if ($lens_type == 2) {			## r=77mm, f~14cm
@@ -301,10 +304,10 @@ sub GetSagita #the arc shape, Aspheric lens
     }
     
     my $TotAspher = 0.0;
-    
-    for(my $k=1;$k<9;$k++){
-	$TotAspher += $Aspher[$k-1]*($_[0]**(2*$k));
-    }
+    $Curvature=0.0267;                          ##Ping: curvature=1/(focalLength*(n-1)) 
+    #for(my $k=1;$k<9;$k++){
+	#$TotAspher += $Aspher[$k-1]*($_[0]**(2*$k));
+    #}
     
     my $ArgSqrt = 1.0-(1.0+$Conic)*($Curvature**2)*($_[0]**2);
     
