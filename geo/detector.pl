@@ -56,11 +56,11 @@ my $LensEffDiameter =101.6;   #effective diameter in mm. Edmund Optics stock#32-
 my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
 my $lens_halfz = 3.0;
 
-#my $phodet_z = 46.0 + $BoxDelz;
-#my $phodet_z = 46.0;  #Ping: fix the value of phodet_z 
 my $phodet_halfx = $agel_halfx*0.8;
 my $phodet_halfy = $agel_halfy*0.8;
 my $phodet_halfz = 1.0;
+#my $phodet_z = 46.0 + $BoxDelz;
+#my $phodet_z = 46.0;  #Ping: fix the value of phodet_z
 my $phodet_z = $lens_z+$focalLength-$phodet_halfz;
 
 my $readout_halfz = 4.0;
@@ -80,7 +80,7 @@ sub print_detector()
 {
     my $agelThickness=2*$agel_halfz/10;
     
-    print "================== $agelThickness cm thick Aerogel ==================\n";
+    print "========================== $agelThickness cm thick Aerogel =========================\n";
     print "Printing detector positions and sizes ...\n\n";
     
     print "hold box position: ( 0.0, 0.0, $detposZ[0] mm),  half size in XYZ: ( $box_halfx mm, $box_halfy mm, $box_halfz mm )\n";
@@ -151,6 +151,8 @@ sub build_lens()
     my $lens_numOfGrooves = 100;   ### number of grooves for fresnel lens
     #my $lens_numOfGrooves = $grooveDensity*($LensEffDiameter/2);
     print"Fresnel Lens: num. of grooves = $lens_numOfGrooves\n";
+    print"Fresnel Lens: Lens diameter = $LensDiameter\n";
+    print"Fresnel Lens: effective diameter = $LensEffDiameter\n";
 
     ###### Properites of the fresnel lens
     my $GrooveWidth = (($LensDiameter-1.)/2.0)/$lens_numOfGrooves; ## 1mm less avoid overlap
@@ -261,7 +263,6 @@ sub build_lens()
 		for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
 	    }
             $detector{"dimensions"} = "$dimen";
-	    #$detector{"rotation"} = "0*deg -180*deg 0*deg";
             $detector{"material"} = "$lens_mat";
 	    $detector{"style"} = 1;
             $detector{"visible"} = 1;
@@ -278,9 +279,11 @@ sub build_lens()
 sub GetSagita #the arc shape, Aspheric lens
 {
     my $Conic = -1.0;			## original
-    my $lens_type = 3;
+    #my $lens_type = 3;
+    my $lens_type = 5;                  #spherical Fresnel lens
     my $Curvature;
     my @Aspher = (0, 0, 0, 0, 0, 0, 0, 0 );
+    my $n=1.49;    ##refractive index of Fresnel lens
     
    if ($lens_type == 1) {
 	$Curvature = 0.00437636761488;
@@ -308,22 +311,19 @@ sub GetSagita #the arc shape, Aspheric lens
 	$Aspher[1] = -5.0e-7;
 	$Aspher[2] =  1.2e-13;
     }
-    
-    my $TotAspher = 0.0;
-    #$Curvature=0.0267;                          ##Ping: curvature=1/(focalLength*(n-1)) 
-     $Curvature=0.0287;   
+    if  ($lens_type == 5) {                     ##Ping: curvature=1/(focalLength*(n-1))
+	#$Curvature=0.0267;
+	#$Curvature=0.0287;   
+	$Curvature=1/($focalLength*($n-1));
+    }
 
-    #for(my $k=1;$k<9;$k++){
-	#$TotAspher += $Aspher[$k-1]*($_[0]**(2*$k));
-    #}
+    my $TotAspher = 0.0;
+    for(my $k=1;$k<9;$k++){ $TotAspher += $Aspher[$k-1]*($_[0]**(2*$k)); }
     
     my $ArgSqrt = 1.0-(1.0+$Conic)*($Curvature**2)*($_[0]**2);
-    
-    if ($ArgSqrt < 0.0){
-	print "build_lens::Sagita: Square Root of <0 ! \n";
-    }
+    if ($ArgSqrt < 0.0){ print "build_lens::Sagita: Square Root of <0 ! \n"; }
+   
     my $Sagita_value = $Curvature*($_[0]**2)/(1.0+sqrt($ArgSqrt)) + $TotAspher;
-    
     return $Sagita_value ;
 }
 
