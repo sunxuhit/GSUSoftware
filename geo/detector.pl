@@ -19,8 +19,12 @@
 # The grooves of the Fresnel lens are now facing the aerogel,
 # the smooth side of the lens is facing the photon sensor.
 #############################################################
-# Ping 02-08-2016
-# add Get_dZ() to get sagitta of a spheric lens
+#############################################################
+# Ping 02-13-2016
+# 1. change focal length & curvature to match Edmund Optics 
+#    Fresnel lens #32-683
+# 2. make corner flat (polycone) if inner radius of groove
+#    greater or equal to effective radius of Fresnel lens
 #############################################################
 use strict;
 use warnings;
@@ -44,12 +48,16 @@ my $agel_maxz =35;
 my $BoxDelz = -2.0;
 
 #my $lens_z = -25.0 + $BoxDelz;
-my $lens_z = -25.0;  #Ping: fix the value of lens_z
-my $focalLength=71.12;
+my $lens_z = -25.0;    #Ping: fix the value of lens_z
+my $focalLength=71.12; #Edmund Optics stock#32-683
+# Size of the optical active area of the lens.
+my $LensDiameter = 2.0*$agel_halfx*sqrt(2.0);
+my $LensEffDiameter =101.6;   #effective diameter in mm. Edmund Optics stock#32-683
+my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
+my $lens_halfz = 3.0;
 
 #my $phodet_z = 46.0 + $BoxDelz;
 #my $phodet_z = 46.0;  #Ping: fix the value of phodet_z 
-#my $phodet_z = $lens_z+$focalLength; 
 my $phodet_halfx = $agel_halfx*0.8;
 my $phodet_halfy = $agel_halfy*0.8;
 my $phodet_halfz = 1.0;
@@ -59,14 +67,9 @@ my $readout_halfz = 4.0;
 #my @readout_z = ($phodet_z-$phodet_halfz+3.0, $phodet_z-$phodet_halfz+2.0*$readout_halfz);
 my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
 
-# Size of the optical active area of the lens.
-my $LensDiameter = 2.0*$agel_halfx*sqrt(2.0);
-my $lens_halfz = 3.0;
-
 my $box_halfx = $agel_halfx + 1.0;
 my $box_halfy = $agel_halfy + 1.0;
 my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0;
-
 
 my $offset = $box_halfz+50;
 
@@ -146,18 +149,21 @@ sub build_lens()
 {
     my $lens_numOfHoldBox = 4;   ### number of hold box for fresnel lens
     my $lens_numOfGrooves = 100;   ### number of grooves for fresnel lens
+    #my $lens_numOfGrooves = $grooveDensity*($LensEffDiameter/2);
+    print"Fresnel Lens: num. of grooves = $lens_numOfGrooves\n";
 
     ###### Properites of the fresnel lens
     my $GrooveWidth = (($LensDiameter-1.)/2.0)/$lens_numOfGrooves; ## 1mm less avoid overlap
-    if($GrooveWidth<=0) {
-        print "build_lens::GrooveWidth <= 0\n";
-    }
+    #my $GrooveWidth=1/$grooveDensity;
+    if($GrooveWidth<=0) { print "build_lens::GrooveWidth <= 0\n" }
+    else {print"Fresnel Lens: groove width= $GrooveWidth\n";}
 
     #####inner & outer radius of the groove at the adge of the lens
     my $Rmin1 = ($lens_numOfGrooves-1)*$GrooveWidth;
     my $Rmax1 = ($lens_numOfGrooves-0)*$GrooveWidth;
     my $LensThickness = GetSagita($Rmax1)-GetSagita($Rmin1)+1.; #1 mm wider 
-    #print"=============== Lens thickness = $LensThickness ==================\n";
+    print"Fresnel Lens: Lens thickness = $LensThickness\n";
+    
     ###### build holder box for fresnel lens
     my $quadpos = sqrt(2.0)*$LensDiameter/8.0;
     my @lens_holdbox_posX = ( -1*$quadpos, -1*$quadpos, $quadpos, $quadpos );
@@ -187,10 +193,11 @@ sub build_lens()
         $detector{"identifiers"} = "no";
         print_det(\%configuration, \%detector);
 
-### build fresnel lens groove
+        ### build fresnel lens groove
         for(my $igroove=0; $igroove<$lens_numOfGrooves; $igroove++){
         # for(my $igroove=0; $igroove<71; $igroove++){ #skip the corner grooves
 	    my @lens_grooves_pos = ( sqrt(2.0)*$LensDiameter/8.0, -sqrt(2.0)*$LensDiameter/8.0, 0.0 );
+            
             ## Taper the outer part of the lens to a square shape, using PhiAngle (From Hubert)
             my $circle_end = ($igroove/$lens_numOfGrooves)*(($lens_numOfGrooves+1)/$lens_numOfGrooves);
             my $lens_startphi;
@@ -217,10 +224,13 @@ sub build_lens()
             my $iRmax1 = ($igroove+1)*$GrooveWidth;
             my $iRmin2 = $iRmin1;
             my $iRmax2 = $iRmin2+0.0001;
-            my $dZ         = GetSagita($iRmax1) - GetSagita($iRmin1);
-            if($dZ<=0) {
-                print "build_lens::Groove depth<0 !\n";
+	    
+	    my $dZ=0;
+	    if ($iRmin1<$LensEffDiameter/2) { #if iRmin>=effective radius, dZ=0, i.e. flat
+		$dZ = GetSagita($iRmax1) - GetSagita($iRmin1);
+		if($dZ<=0) { print "build_lens::Groove depth<0 !\n"; }
             }
+
             my @lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
             my @lens_poly_rmin = ($iRmin1, $iRmin1, $iRmin2);
             my @lens_poly_rmax = ($iRmax1, $iRmax1, $iRmax2);
@@ -233,10 +243,23 @@ sub build_lens()
             #$detector{"color"} = "ff00ff";   #magenta
             $detector{"color"} = "2eb7ed";    #blue-ish
 	    $detector{"type"} = "Polycone";
-            my $dimen = "$lens_startphi*deg $lens_deltaphi*deg 3*counts";
-            for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmin[$i]*mm";}
-            for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmax[$i]*mm";}
-            for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
+            #my $dimen = "$lens_startphi*deg $lens_deltaphi*deg 3*counts";
+	    my $dimen;
+	    if ($iRmin1>=$LensEffDiameter/2) {
+		$dimen = "$lens_startphi*deg $lens_deltaphi*deg 2*counts";
+		#print"(rmin0, rmax0, z0)= $lens_poly_rmin[0], $lens_poly_rmax[0], $lens_poly_z[0] \n";
+		#print"(rmin1, rmax1, z1)= $lens_poly_rmin[1], $lens_poly_rmax[1], $lens_poly_z[1] \n";
+		#print"--------------------------------------------------\n";
+		for(my $i = 0; $i <2; $i++) {$dimen = $dimen ." $lens_poly_rmin[$i]*mm";}
+		for(my $i = 0; $i <2; $i++) {$dimen = $dimen ." $lens_poly_rmax[$i]*mm";}
+		for(my $i = 0; $i <2; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
+	    }
+	    else{
+		$dimen = "$lens_startphi*deg $lens_deltaphi*deg 3*counts";
+		for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmin[$i]*mm";}
+		for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_rmax[$i]*mm";}
+		for(my $i = 0; $i <3; $i++) {$dimen = $dimen ." $lens_poly_z[$i]*mm";}
+	    }
             $detector{"dimensions"} = "$dimen";
 	    #$detector{"rotation"} = "0*deg -180*deg 0*deg";
             $detector{"material"} = "$lens_mat";
@@ -251,23 +274,6 @@ sub build_lens()
     }
 }
 
-
-#--------------Ping: get dZ=sagita, Spheric lens--------------#
-sub Get_dZ()
-{
-    ### $_[0]=grooveWidth, $_[1]=igroove
-    #
-    my $focalLength=76.2;   #mm
-    my $n=1.49;             #refractive index
-    my $r;
-
-    $r=($n-1)*$focalLength;
-    #$y_s=sqrt($r**2+$LensDiameter**2);
-    my $dZ=sqrt($r**2-(($_[1]+1)*$_[0])**2)-sqrt($r**2-($_[1]*$_[0])**2);
-
-    return $dZ;
-}
-#-----------------------------------------------#
 
 sub GetSagita #the arc shape, Aspheric lens
 {
