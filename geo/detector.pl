@@ -26,6 +26,9 @@
 # 2. make corner flat (polycone) if inner radius of groove
 #    greater or equal to effective radius of Fresnel lens
 #############################################################
+# Ping 02-17-2015
+# modify detector hold box to a acrylic box
+#############################################################
 use strict;
 use warnings;
 use Getopt::Long;
@@ -67,9 +70,10 @@ my $readout_halfz = 4.0;
 #my @readout_z = ($phodet_z-$phodet_halfz+3.0, $phodet_z-$phodet_halfz+2.0*$readout_halfz);
 my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
 
-my $box_halfx = $agel_halfx + 1.0;
-my $box_halfy = $agel_halfy + 1.0;
-my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0;
+my $box_thickness=(3/8)*25.4;   #3/8 inches convert to mm
+my $box_halfx = $agel_halfx + 1.0+$box_thickness;
+my $box_halfy = $agel_halfy + 1.0+$box_thickness;
+my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
 
 my $offset = $box_halfz+50;
 
@@ -95,17 +99,22 @@ sub print_detector()
 #######------ Define the holder Box for Detectors ------#######
 my $box_name = "detector_holder";
 #my $box_mat = "G4_AIR";
-my $box_mat = "Air_Opt";
+#my $box_mat = "Air_Opt";
+my $box_mat = "holder_acrylic";
+my $hollow_mat="Air_Opt";
+
 sub build_box()
 {
     my @box_pos  = ( 0.0, 0.0, $offset );
     my @box_size = ( $box_halfx, $box_halfy, $box_halfz );
+
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$box_name";
     $detector{"mother"} = "$DetectorMother";
     $detector{"description"} = "$DetectorName\_$box_name";
     $detector{"pos"} = "$box_pos[0]*mm $box_pos[1]*mm $box_pos[2]*mm";
-    $detector{"color"} = "ffffff";
+    #$detector{"color"} = "ffffff";
+    $detector{"color"} = "81f7f3";
     $detector{"type"} = "Box";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$box_size[0]*mm $box_size[1]*mm $box_size[2]*mm";
@@ -114,6 +123,24 @@ sub build_box()
     $detector{"hit_type"}    = "no";
     $detector{"identifiers"} = "no";
     print_det(\%configuration, \%detector);
+
+    my @hollow_size=($box_size[0]-$box_thickness,$box_size[1]-$box_thickness,$box_size[2]-$box_thickness);
+    %detector=init_det();
+    $detector{"name"} = "$DetectorName\_hollow";
+    $detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"description"} = "$DetectorName\_hollow";
+    $detector{"pos"} = "0*mm 0*mm 0*mm";
+    $detector{"color"} = "ffffff";
+    $detector{"type"} = "Box";
+    $detector{"style"} = "0";
+    $detector{"visible"} = "1";
+    $detector{"dimensions"} = "$hollow_size[0]*mm $hollow_size[1]*mm $hollow_size[2]*mm";
+    $detector{"material"} = "$hollow_mat";
+    $detector{"sensitivity"} = "no";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
+
 }
 
 #######------ Aerogel ------#######
@@ -127,7 +154,8 @@ sub build_aerogel()
     print "Aerogel: z position from $agel_pos[2]-$agel_size[2] to  $agel_pos[2]+$agel_size[2]\n";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$agel_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$agel_name";
     $detector{"pos"} = "$agel_pos[0]*mm $agel_pos[1]*mm $agel_pos[2]*mm";
     $detector{"color"} = "ffa500";
@@ -181,7 +209,8 @@ sub build_lens()
     #for(my $iholdbox=0; $iholdbox<1; $iholdbox++){    
 	%detector=init_det();
         $detector{"name"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
-        $detector{"mother"} = "$DetectorName\_$box_name";
+        #$detector{"mother"} = "$DetectorName\_$box_name";
+	$detector{"mother"} = "$DetectorName\_hollow";
         $detector{"description"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
         $detector{"pos"} = "$lens_holdbox_posX[$iholdbox]*mm $lens_holdbox_posY[$iholdbox]*mm $lens_holdbox_posZ[$iholdbox]*mm";
         $detector{"color"} = "$lens_holdbox_col";
@@ -227,20 +256,24 @@ sub build_lens()
             my $iRmin2 = $iRmin1;
             my $iRmax2 = $iRmin2+0.0001;
 	    
-	    my $dZ=0;
+	    #my $dZ=0;
+	    my $dZ=0.06*25.4;   #center thickness=0.06 inches
+	    my @lens_poly_z;
 	    if ($iRmin1<$LensEffDiameter/2) { #if iRmin>=effective radius, dZ=0, i.e. flat
 		$dZ = GetSagita($iRmax1) - GetSagita($iRmin1);
 		if($dZ<=0) { print "build_lens::Groove depth<0 !\n"; }
+		@lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
             }
-
-            my @lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
+	    else { @lens_poly_z    = (-1*$LensThickness/2.0, -1*$LensThickness/2.0+$dZ); }
+            #my @lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
             my @lens_poly_rmin = ($iRmin1, $iRmin1, $iRmin2);
             my @lens_poly_rmax = ($iRmax1, $iRmax1, $iRmax2);
 
             %detector=init_det();
             $detector{"name"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
             $detector{"mother"} = "$DetectorName\_$lens_holdbox\_$iholdbox";
-            $detector{"description"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
+            #$detector{"mother"} = "$DetectorName\_hollow";
+	    $detector{"description"} = "$DetectorName\_$lens_name\_$iholdbox\_$igroove";
             $detector{"pos"} = "$lens_grooves_pos[0]*mm $lens_grooves_pos[1]*mm $lens_grooves_pos[2]*mm";
             #$detector{"color"} = "ff00ff";   #magenta
             $detector{"color"} = "2eb7ed";    #blue-ish
@@ -338,7 +371,8 @@ sub build_photondet()
     print "Photon Sensor: z position from $photondet_pos[2]-$photondet_size[2] to $photondet_pos[2]+$photondet_size[2]\n";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$photondet_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$photondet_name";
     $detector{"pos"} = "$photondet_pos[0]*mm $photondet_pos[1]*mm $photondet_pos[2]*mm";
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
@@ -381,7 +415,8 @@ sub build_mirrors()
     my $mirror_back_name = "mirror_back";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_back_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$mirror_back_name";
     $detector{"pos"} = "$mirror_back_pos[0]*mm $mirror_back_pos[1]*mm $mirror_back_pos[2]*mm"; #Ping: checked
     $detector{"rotation"} = "0.0*deg $phi_back*deg 90*deg";
@@ -402,7 +437,8 @@ sub build_mirrors()
     my $mirror_front_name = "mirror_front";
     %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_front_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$mirror_front_name";
     $detector{"pos"} = "$mirror_front_pos[0]*mm $mirror_front_pos[1]*mm $mirror_front_pos[2]*mm";
     $detector{"rotation"} = "0*deg $phi_front*deg 90*deg";
@@ -423,7 +459,8 @@ sub build_mirrors()
     my $mirror_top_name = "mirror_top";
     %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_top_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$mirror_top_name";
     $detector{"pos"} = "$mirror_top_pos[0]*mm $mirror_top_pos[1]*mm $mirror_top_pos[2]*mm";
     $detector{"rotation"} = "$phi_top*deg 0*deg 0*deg";
@@ -443,7 +480,8 @@ sub build_mirrors()
     my $mirror_bottom_name = "mirror_bottom";
     %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_bottom_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$mirror_bottom_name";
     $detector{"pos"} = "$mirror_bottom_pos[0]*mm $mirror_bottom_pos[1]*mm $mirror_bottom_pos[2]*mm";
     $detector{"rotation"} = "$phi_bottom*deg 0*deg 0*deg";
@@ -469,7 +507,8 @@ sub build_readout()
 {
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$readoutdet_name";
-    $detector{"mother"} = "$DetectorName\_$box_name";
+    #$detector{"mother"} = "$DetectorName\_$box_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$readoutdet_name";
     $detector{"pos"} = "$readoutdet_pos[0]*mm $readoutdet_pos[1]*mm $readoutdet_pos[2]*mm"; #Ping : checked
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
