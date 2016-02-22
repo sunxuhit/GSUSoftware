@@ -110,6 +110,17 @@ sub define_material
 	$mat{"indexOfRefraction"} = arrayToString(@AcRefrIndex);
 	$mat{"absorptionLength"}  = arrayToString(@AcAbsLength);
 	print_mat(\%configuration, \%mat);
+
+	# Detector holder Acrylic
+	%mat = init_mat();
+	$mat{"name"}          = "holder_acrylic";
+	$mat{"description"}   = "eic rich detector holder material";
+	$mat{"density"}       = "1.19";  # in g/cm3
+	$mat{"ncomponents"}   = "3";
+	$mat{"components"}    = "C 5 H 8 O 2";
+	print_mat(\%configuration, \%mat);
+	
+	
 }
 
 define_material("Original");
