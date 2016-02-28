@@ -30,17 +30,27 @@ our %configuration = load_configuration($ARGV[0]);
 # $configuration{"variation"} = "myvar";
 
 
-# Photon energy bins
-my @PhotonEnergyBin = ( "2.034*eV", "2.068*eV", "2.103*eV", "2.139*eV",
-       	        	"2.177*eV", "2.216*eV", "2.256*eV", "2.298*eV",
-                	"2.341*eV", "2.386*eV", "2.433*eV", "2.481*eV",
-                	"2.532*eV", "2.585*eV", "2.640*eV", "2.697*eV",
-                	"2.757*eV", "2.820*eV", "2.885*eV", "2.954*eV",
-                	"3.026*eV", "3.102*eV", "3.181*eV", "3.265*eV",
-                	"3.353*eV", "3.446*eV", "3.545*eV", "3.649*eV",
-                	"3.760*eV", "3.877*eV", "4.002*eV", "4.136*eV" );
+#===============================  Photon energy bins ===================================#
+#my @PhotonEnergyBin = ( "2.034*eV", "2.068*eV", "2.103*eV", "2.139*eV",
+#       	        	"2.177*eV", "2.216*eV", "2.256*eV", "2.298*eV",
+#                	"2.341*eV", "2.386*eV", "2.433*eV", "2.481*eV",
+#                	"2.532*eV", "2.585*eV", "2.640*eV", "2.697*eV",
+#                	"2.757*eV", "2.820*eV", "2.885*eV", "2.954*eV",
+#                	"3.026*eV", "3.102*eV", "3.181*eV", "3.265*eV",
+#                	"3.353*eV", "3.446*eV", "3.545*eV", "3.649*eV",
+#                	"3.760*eV", "3.877*eV", "4.002*eV", "4.136*eV" );
 
-# Table of optical properties for aerogel
+my @PhotonEnergyBin = ( 2.034, 2.068, 2.103, 2.139,
+       	        	2.177, 2.216, 2.256, 2.298,
+                	2.341, 2.386, 2.433, 2.481,
+                	2.532, 2.585, 2.640, 2.697,
+                	2.757, 2.820, 2.885, 2.954,
+                	3.026, 3.102, 3.181, 3.265,
+                	3.353, 3.446, 3.545, 3.649,
+                	3.760, 3.877, 4.002, 4.136 );
+#=======================================================================================#
+#======================= Table of optical properties for aerogel =======================#
+
 #my @AgelRefrIndex = ( 1.02435, 1.0244,  1.02445, 1.0245,  1.02455,
 #              	      1.0246,  1.02465, 1.0247,  1.02475, 1.0248,
 #              	      1.02485, 1.02492, 1.025,   1.02505, 1.0251,
@@ -54,16 +64,39 @@ my @AgelRefrIndex = ( 1.03, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03,
 		      1.03, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03,
 		      1.03, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03 );
 
-my @AgelAbsLength = ( "3.448*m",  "4.082*m",  "6.329*m",  "9.174*m",
-		      "12.346*m", "13.889*m", "15.152*m", "17.241*m",
-		      "18.868*m", "20.000*m", "26.316*m", "35.714*m",
-		      "45.455*m", "47.619*m", "52.632*m", "52.632*m",
-	  	      "55.556*m", "52.632*m", "52.632*m", "47.619*m",
-		      "45.455*m", "41.667*m", "37.037*m", "33.333*m",
-		      "30.000*m", "28.500*m", "27.000*m", "24.500*m",
-		      "22.000*m", "19.500*m", "17.500*m", "14.500*m" );
+my @AgelAbsLength = ( 3.448,  4.082,  6.329,  9.174,
+		      12.346, 13.889, 15.152, 17.241,
+		      18.868, 20.000, 26.316, 35.714,
+		      45.455, 47.619, 52.632, 52.632,
+	  	      55.556, 52.632, 52.632, 47.619,
+		      45.455, 41.667, 37.037, 33.333,
+		      30.000, 28.500, 27.000, 24.500,
+		      22.000, 19.500, 17.500, 14.500 );
 
-# Table of optical properties for lens Acrylic
+my @AgelRScatLength;           #Rayleigh Scattering
+my $AgelTypeAClarity=0.0020;   #unit: micrometer^4*cm^-1
+my $Cparam=$AgelTypeAClarity;  #unit: dimensionless
+my $PhotMomWaveConv=1239;      #unit eV*nm
+my $i;
+
+if ($Cparam!=0) {
+    for ($i=0;$i<32;$i++) {
+	my $WaveLength=($PhotMomWaveConv/$PhotonEnergyBin[$i])/1000;   #unit: micrometer
+	$AgelRScatLength[$i]=($WaveLength**4)/$Cparam;
+    }
+}
+
+for ($i=0;$i<32;$i++) { 
+    $AgelAbsLength[$i]="$AgelAbsLength[$i]*m";
+    $PhotonEnergyBin[$i]="$PhotonEnergyBin[$i]*eV";
+}
+
+#print"Agel Rayleigh scattering: @AgelRScatLength \n";
+#print"AgelAbsLength array: @AgelAbsLength\n";
+#print"PhotonEnergyBin array: @PhotonEnergyBin\n";    
+
+#=======================================================================================#
+#==================== Table of optical properties for lens Acrylic =====================#
 my @AcRefrIndex = ( 1.4902, 1.4907, 1.4913, 1.4918, 1.4924,
                   1.4930,  1.4936,  1.4942,  1.4948,  1.4954,
                   1.4960,  1.4965,  1.4971,  1.4977,  1.4983,
@@ -80,7 +113,7 @@ my @AcAbsLength = (  "00.448*cm", "00.082*cm", "00.329*cm", "00.174*cm",
 		     "00.455*cm", "00.667*cm", "00.037*cm", "00.333*cm",
                      "00.001*cm", "00.001*cm", "00.001*cm", "00.001*cm",
 		     "00.001*cm", "00.001*cm", "00.001*cm", "00.001*cm" ); 
-
+#=======================================================================================#
 
 sub define_material
 {
@@ -97,6 +130,7 @@ sub define_material
 	$mat{"photonEnergy"}      = arrayToString(@PhotonEnergyBin);
 	$mat{"indexOfRefraction"} = arrayToString(@AgelRefrIndex);
 	$mat{"absorptionLength"}  = arrayToString(@AgelAbsLength);
+	$mat{"rayleigh"} = arrayToString(@AgelRScatLength);
 	print_mat(\%configuration, \%mat);
 
 	# Lens Acrylic
