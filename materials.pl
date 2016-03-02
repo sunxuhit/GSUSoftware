@@ -83,6 +83,7 @@ if ($Cparam!=0) {
     for ($i=0;$i<32;$i++) {
 	my $WaveLength=($PhotMomWaveConv/$PhotonEnergyBin[$i])/1000;   #unit: micrometer
 	$AgelRScatLength[$i]=($WaveLength**4)/$Cparam;
+	$AgelRScatLength[$i]="$AgelRScatLength[$i]*nm*nm*nm*nm";
     }
 }
 
@@ -91,7 +92,11 @@ for ($i=0;$i<32;$i++) {
     $PhotonEnergyBin[$i]="$PhotonEnergyBin[$i]*eV";
 }
 
-#print"Agel Rayleigh scattering: @AgelRScatLength \n";
+print"\n\n Agel Rayleigh scattering:\n";
+for ($i=0;$i<32;$i++) {
+    print"$AgelRScatLength[$i]\n";
+}
+
 #print"AgelAbsLength array: @AgelAbsLength\n";
 #print"PhotonEnergyBin array: @PhotonEnergyBin\n";    
 
