@@ -8,18 +8,18 @@ use materials;
 # Help Message
 sub help()
 {
-	print "\n Usage: \n";
-	print "   materials.pl <configuration filename>\n";
- 	print "   Will create a simple scintillator material\n";
-	exit;
+    print "\n Usage: \n";
+    print "   materials.pl <configuration filename>\n";
+    print "   Will create a simple scintillator material\n";
+    exit;
 }
 
 # Make sure the argument list is correct
 # If not pring the help
 if( scalar @ARGV != 1)
 {
-	help();
-	exit;
+    help();
+    exit;
 }
 
 
@@ -74,7 +74,7 @@ my @AgelAbsLength = ( 3.448,  4.082,  6.329,  9.174,
 		      22.000, 19.500, 17.500, 14.500 );
 
 my @AgelRScatLength;           #Rayleigh Scattering
-my $AgelTypeAClarity=0.0020;   #unit: micrometer^4*cm^-1
+my $AgelTypeAClarity=0.002;   #unit: micrometer^4*cm^-1
 my $Cparam=$AgelTypeAClarity;  #unit: dimensionless
 my $PhotMomWaveConv=1239;      #unit eV*nm
 my $i;
@@ -92,13 +92,60 @@ for ($i=0;$i<32;$i++) {
     $PhotonEnergyBin[$i]="$PhotonEnergyBin[$i]*eV";
 }
 
-print"\n\n Agel Rayleigh scattering:\n";
-for ($i=0;$i<32;$i++) {
-    print"$AgelRScatLength[$i]\n";
-}
+#print"\n\n Agel Rayleigh scattering:\n";
+#for ($i=0;$i<32;$i++) {
+#    print"$AgelRScatLength[$i]\n";
+#}
 
 #print"AgelAbsLength array: @AgelAbsLength\n";
 #print"PhotonEnergyBin array: @PhotonEnergyBin\n";    
+
+#--------------------------- Aerogel definition from Marco -----------------------------#
+my @RichAerogel_PhoE=
+    ("1.87855*eV","1.96673*eV","2.05490*eV","2.14308*eV","2.23126*eV",
+     "2.31943*eV","2.40761*eV","2.49579*eV","2.58396*eV","2.67214*eV",
+     "2.76032*eV","2.84849*eV","2.93667*eV","3.02485*eV","3.11302*eV",
+     "3.20120*eV","3.28938*eV","3.37755*eV","3.46573*eV","3.55391*eV",
+     "3.64208*eV","3.73026*eV","3.81844*eV","3.90661*eV","3.99479*eV",
+     "4.08297*eV","4.17114*eV","4.25932*eV","4.34750*eV","4.43567*eV",
+     "4.52385*eV","4.61203*eV","4.70020*eV","4.78838*eV","4.87656*eV",
+     "4.96473*eV","5.05291*eV","5.14109*eV","5.22927*eV","5.31744*eV",
+     "5.40562*eV","5.49380*eV","5.58197*eV","5.67015*eV","5.75833*eV",
+     "5.84650*eV","5.93468*eV","6.02286*eV","6.11103*eV","6.19921*eV" );
+my @RichAerogel_Rind3=
+    ("1.02825","1.02829","1.02834","1.02839","1.02844",
+     "1.02849","1.02854","1.02860","1.02866","1.02872",
+     "1.02878","1.02885","1.02892","1.02899","1.02906",
+     "1.02914","1.02921","1.02929","1.02938","1.02946",
+     "1.02955","1.02964","1.02974","1.02983","1.02993",
+     "1.03003","1.03014","1.03025","1.03036","1.03047",
+     "1.03059","1.03071","1.03084","1.03096","1.03109",
+     "1.03123","1.03137","1.03151","1.03166","1.03181",
+     "1.03196","1.03212","1.03228","1.03244","1.03261",
+     "1.03279","1.03297","1.03315","1.03334","1.03354" );
+my @RichAerogel_Abs=
+    ("17.5000*cm","17.7466*cm","17.9720*cm","18.1789*cm","18.3694*cm",
+     "18.5455*cm","18.7086*cm","18.8602*cm","19.0015*cm","19.1334*cm",
+     "19.2569*cm","19.3728*cm","19.4817*cm","19.5843*cm","19.6810*cm",
+     "19.7725*cm","19.8590*cm","19.9410*cm","20.0188*cm","20.0928*cm",
+     "18.4895*cm","16.0174*cm","13.9223*cm","12.1401*cm","10.6185*cm",
+     "9.3147*cm","8.1940*cm","7.2274*cm","6.3913*cm","5.6659*cm",
+     "5.0347*cm","4.4841*cm","4.0024*cm","3.5801*cm","3.2088*cm",
+     "2.8817*cm","2.5928*cm","2.3372*cm","2.1105*cm","1.9090*cm",
+     "1.7296*cm","1.5696*cm","1.4266*cm","1.2986*cm","1.1837*cm",
+     "1.0806*cm","0.9877*cm","0.9041*cm","0.8286*cm","0.7603*cm" );
+my @RichAerogel_Scat=
+    ("23.4256*cm","19.4987*cm","16.3612*cm","13.8302*cm","11.7702*cm",
+     "10.0798*cm","8.6823*cm","7.5188*cm","6.5439*cm","5.7219*cm",
+     "5.0251*cm","4.4312*cm","3.9225*cm","3.4847*cm","3.1064*cm",
+     "2.7780*cm","2.4919*cm","2.2417*cm","2.0221*cm","1.8288*cm",
+     "1.6580*cm","1.5067*cm","1.3723*cm","1.2525*cm","1.1455*cm",
+     "1.0497*cm","0.9637*cm","0.8864*cm","0.8166*cm","0.7536*cm",
+     "0.6965*cm","0.6448*cm","0.5977*cm","0.5549*cm","0.5159*cm",
+     "0.4802*cm","0.4475*cm","0.4176*cm","0.3901*cm","0.3649*cm",
+     "0.3417*cm","0.3203*cm","0.3005*cm","0.2822*cm","0.2653*cm",
+     "0.2497*cm","0.2352*cm","0.2217*cm","0.2092*cm","0.1975*cm" );
+
 
 #=======================================================================================#
 #==================== Table of optical properties for lens Acrylic =====================#
@@ -122,44 +169,58 @@ my @AcAbsLength = (  "00.448*cm", "00.082*cm", "00.329*cm", "00.174*cm",
 
 sub define_material
 {
-	# the first argument to this function become the variation
-	$configuration{"variation"} = shift;
+    my $Hubert=0;
+    my $Marco=1;
 
-	# Aerogel
-	my %mat = init_mat();
-	$mat{"name"}          = "aerogel";
-	$mat{"description"}   = "eic rich aerogel material";
-	$mat{"density"}       = "0.02";  # in g/cm3
-	$mat{"ncomponents"}   = "2";
-	$mat{"components"}    = "Si 1 O 2";
-	$mat{"photonEnergy"}      = arrayToString(@PhotonEnergyBin);
-	$mat{"indexOfRefraction"} = arrayToString(@AgelRefrIndex);
-	$mat{"absorptionLength"}  = arrayToString(@AgelAbsLength);
-	$mat{"rayleigh"} = arrayToString(@AgelRScatLength);
-	print_mat(\%configuration, \%mat);
+    my $agel=$Hubert;
+    my $RS=1; #Rayleigh Scattering: 0--Off, 1--On
 
-	# Lens Acrylic
-	%mat = init_mat();
-	$mat{"name"}          = "acrylic";
-	$mat{"description"}   = "eic rich lens material";
-	$mat{"density"}       = "1.19";  # in g/cm3
-	$mat{"ncomponents"}   = "3";
-	$mat{"components"}    = "C 5 H 8 O 2";
-	$mat{"photonEnergy"}      = arrayToString(@PhotonEnergyBin);
-	$mat{"indexOfRefraction"} = arrayToString(@AcRefrIndex);
-	$mat{"absorptionLength"}  = arrayToString(@AcAbsLength);
-	print_mat(\%configuration, \%mat);
+# the first argument to this function become the variation
+    $configuration{"variation"} = shift;
+    
+    # Aerogel
+    my %mat = init_mat();
+    $mat{"name"}          = "aerogel";
+    $mat{"description"}   = "eic rich aerogel material";
+    $mat{"density"}       = "0.02";  # in g/cm3
+    $mat{"ncomponents"}   = "2";
+    $mat{"components"}    = "Si 1 O 2";
 
-	# Detector holder Acrylic
-	%mat = init_mat();
-	$mat{"name"}          = "holder_acrylic";
-	$mat{"description"}   = "eic rich detector holder material";
-	$mat{"density"}       = "1.19";  # in g/cm3
-	$mat{"ncomponents"}   = "3";
-	$mat{"components"}    = "C 5 H 8 O 2";
-	print_mat(\%configuration, \%mat);
-	
-	
+    if ($agel == $Hubert) {
+        $mat{"photonEnergy"} = arrayToString(@PhotonEnergyBin);
+        $mat{"indexOfRefraction"} = arrayToString(@AgelRefrIndex);
+        $mat{"absorptionLength"}  = arrayToString(@AgelAbsLength);
+        if ($RS==1) {$mat{"rayleigh"} = arrayToString(@AgelRScatLength);}
+    }
+    elsif ($agel == $Marco) {
+        $mat{"photonEnergy"} = arrayToString(@RichAerogel_PhoE);                                          
+	$mat{"indexOfRefraction"} = arrayToString(@RichAerogel_Rind3);
+        $mat{"absorptionLength"}  = arrayToString(@RichAerogel_Abs);
+        if ($RS==1) {$mat{"rayleigh"} = arrayToString(@RichAerogel_Scat);}
+    }
+    print_mat(\%configuration, \%mat);
+    
+    # Lens Acrylic
+    %mat = init_mat();
+    $mat{"name"}          = "acrylic";
+    $mat{"description"}   = "eic rich lens material";
+    $mat{"density"}       = "1.19";  # in g/cm3
+    $mat{"ncomponents"}   = "3";
+    $mat{"components"}    = "C 5 H 8 O 2";
+    $mat{"photonEnergy"}      = arrayToString(@PhotonEnergyBin);
+    $mat{"indexOfRefraction"} = arrayToString(@AcRefrIndex);
+    $mat{"absorptionLength"}  = arrayToString(@AcAbsLength);
+    print_mat(\%configuration, \%mat);
+    
+    # Detector holder Acrylic
+    %mat = init_mat();
+    $mat{"name"}          = "holder_acrylic";
+    $mat{"description"}   = "eic rich detector holder material";
+    $mat{"density"}       = "1.19";  # in g/cm3
+    $mat{"ncomponents"}   = "3";
+    $mat{"components"}    = "C 5 H 8 O 2";
+    print_mat(\%configuration, \%mat);
+    	
 }
 
 define_material("Original");

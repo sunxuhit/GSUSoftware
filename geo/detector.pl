@@ -99,14 +99,16 @@ sub print_detector()
 #######------ Define the holder Box for Detectors ------#######
 my $box_name = "detector_holder";
 #my $box_mat = "G4_AIR";
-#my $box_mat = "Air_Opt";
-my $box_mat = "holder_acrylic";
+my $box_mat = "Air_Opt";
+#my $box_mat = "holder_acrylic";
 my $hollow_mat="Air_Opt";
 
 sub build_box()
 {
     my @box_pos  = ( 0.0, 0.0, $offset );
     my @box_size = ( $box_halfx, $box_halfy, $box_halfz );
+
+    print"\n box_pos_z=$box_pos[2], box_halfz=$box_size[2], box thickness=$box_thickness\n\n";
 
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$box_name";
@@ -146,6 +148,8 @@ sub build_box()
 #######------ Aerogel ------#######
 my $agel_name = "Aerogel";
 my $agel_mat  = "aerogel";
+#my $agel_mat  = "RichAerogel3";
+
 sub build_aerogel()
 {
     my @agel_pos  = ( 0.0, 0.0, $lens_z - $agel_halfz + $BoxDelz );
@@ -533,7 +537,7 @@ sub build_detector()
     print_detector();
     build_box();
     build_aerogel();
-    build_lens();
+    #build_lens();
     build_photondet();
     build_mirrors();
     build_readout();
