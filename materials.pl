@@ -137,7 +137,8 @@ my @RichAerogel_Abs=
 my @RichAerogel_Scat=
     ("23.4256*cm","19.4987*cm","16.3612*cm","13.8302*cm","11.7702*cm",
      "10.0798*cm","8.6823*cm","7.5188*cm","6.5439*cm","5.7219*cm",
-     "5.0251*cm","4.4312*cm","3.9225*cm","3.4847*cm","3.1064*cm",
+     #"5.0251*cm","4.4312*cm","3.9225*cm","3.4847*cm","3.1064*cm",
+     "5.0251*cm","4.4312*cm","3.9225*cm","3.4847*cm","4.6596*cm",  #change the 15th element from 3.1064 to 4.6596
      "2.7780*cm","2.4919*cm","2.2417*cm","2.0221*cm","1.8288*cm",
      "1.6580*cm","1.5067*cm","1.3723*cm","1.2525*cm","1.1455*cm",
      "1.0497*cm","0.9637*cm","0.8864*cm","0.8166*cm","0.7536*cm",
@@ -173,7 +174,7 @@ sub define_material
     my $Marco=1;
 
     my $agel=$Hubert;
-    my $RS=1; #Rayleigh Scattering: 0--Off, 1--On
+    my $RS=0; #Rayleigh Scattering: 0--Off, 1--On
 
 # the first argument to this function become the variation
     $configuration{"variation"} = shift;
