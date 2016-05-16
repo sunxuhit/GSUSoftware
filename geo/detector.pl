@@ -29,6 +29,11 @@
 # Ping 02-17-2015
 # modify detector hold box to a acrylic box
 #############################################################
+# Ping 05-10-2106
+# 1. change # of grooves of Fresnel lens from 100 to 200
+# 2. change dimension of photon sensor to fit beam test 2016
+#    prototype
+#############################################################
 use strict;
 use warnings;
 use Getopt::Long;
@@ -45,7 +50,8 @@ my $hittype="eic_rich";
 my $agel_halfx = 55.25;
 my $agel_halfy = 55.25;
 #my $agel_halfz = 10.0; #2cm thick agel 
-my $agel_halfz = 15.0;  #Ping: 3cm thick agel
+#my $agel_halfz = 15.0;  #Ping: 3cm thick agel
+my $agel_halfz = 16.5; #3.3cm thick agel
 my $agel_maxz =35;
 
 my $BoxDelz = -2.0;
@@ -59,8 +65,8 @@ my $LensEffDiameter =101.6;   #effective diameter in mm. Edmund Optics stock#32-
 my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
 my $lens_halfz = 3.0;
 
-my $phodet_halfx = $agel_halfx*0.8;
-my $phodet_halfy = $agel_halfy*0.8;
+my $phodet_halfx = 48.0;
+my $phodet_halfy = 48.0;
 my $phodet_halfz = 1.0;
 #my $phodet_z = 46.0 + $BoxDelz;
 #my $phodet_z = 46.0;  #Ping: fix the value of phodet_z
@@ -74,6 +80,8 @@ my $box_thickness=(3/8)*25.4;   #3/8 inches convert to mm
 my $box_halfx = $agel_halfx + 1.0+$box_thickness;
 my $box_halfy = $agel_halfy + 1.0+$box_thickness;
 my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
+
+#print"box_halfz=$box_halfz\n";
 
 my $offset = $box_halfz+50;
 
@@ -180,11 +188,11 @@ my $lens_mat  = "acrylic";
 sub build_lens()
 {
     my $lens_numOfHoldBox = 4;   ### number of hold box for fresnel lens
-    my $lens_numOfGrooves = 100;   ### number of grooves for fresnel lens
+    my $lens_numOfGrooves = 200;   ### number of grooves for fresnel lens
     #my $lens_numOfGrooves = $grooveDensity*($LensEffDiameter/2);
     print"Fresnel Lens: num. of grooves = $lens_numOfGrooves\n";
     print"Fresnel Lens: Lens diameter = $LensDiameter\n";
-    print"Fresnel Lens: effective diameter = $LensEffDiameter\n";
+    print"Fresnel Lens: effective diameter = $LensEffDiameter inches \n";
 
     ###### Properites of the fresnel lens
     my $GrooveWidth = (($LensDiameter-1.)/2.0)/$lens_numOfGrooves; ## 1mm less avoid overlap
@@ -263,7 +271,7 @@ sub build_lens()
 	    #my $dZ=0;
 	    my $dZ=0.06*25.4;   #center thickness=0.06 inches
 	    my @lens_poly_z;
-	    if ($iRmin1<$LensEffDiameter/2) { #if iRmin>=effective radius, dZ=0, i.e. flat
+	    if ($iRmin1<$LensEffDiameter/2.0) { #if iRmin>=effective radius, dZ=0, i.e. flat
 		$dZ = GetSagita($iRmax1) - GetSagita($iRmin1);
 		if($dZ<=0) { print "build_lens::Groove depth<0 !\n"; }
 		@lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
@@ -284,7 +292,7 @@ sub build_lens()
 	    $detector{"type"} = "Polycone";
             #my $dimen = "$lens_startphi*deg $lens_deltaphi*deg 3*counts";
 	    my $dimen;
-	    if ($iRmin1>=$LensEffDiameter/2) {
+	    if ($iRmin1>=$LensEffDiameter/2.0) {
 		$dimen = "$lens_startphi*deg $lens_deltaphi*deg 2*counts";
 		#print"(rmin0, rmax0, z0)= $lens_poly_rmin[0], $lens_poly_rmax[0], $lens_poly_z[0] \n";
 		#print"(rmin1, rmax1, z1)= $lens_poly_rmin[1], $lens_poly_rmax[1], $lens_poly_z[1] \n";
@@ -396,11 +404,10 @@ sub build_photondet()
 my $mirror_mat  = "Aluminum";
 sub build_mirrors()
 {
-    #my $dx1 = $agel_halfx-0.3;            ## 0.3 mm less avoiding overlap
-    #my $dx2 = ($agel_halfx)*0.8-0.3;      ## 0.3 mm less avoiding overlap
     my $dx1 = $agel_halfx;                 # modified by Ping
-    my $dx2 = ($agel_halfx)*0.8;  	       # modified by Ping	
-    
+    #my $dx2 = ($agel_halfx)*0.8;  	       # modified by Ping	
+    my $dx2 =$phodet_halfx;
+
     my $dy1 = 0.1;
     my $dy2 = 0.1;
     my $dz = ($phodet_z - $lens_z - $phodet_halfz - 3.0)/2.0;
@@ -537,7 +544,7 @@ sub build_detector()
     print_detector();
     build_box();
     build_aerogel();
-    #build_lens();
+    build_lens();
     build_photondet();
     build_mirrors();
     build_readout();
