@@ -65,8 +65,10 @@ my $LensEffDiameter =101.6;   #effective diameter in mm. Edmund Optics stock#32-
 my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
 my $lens_halfz = 3.0;
 
-my $phodet_halfx = 48.0;
-my $phodet_halfy = 48.0;
+#my $phodet_halfx = 48.0;
+#my $phodet_halfy = 48.0;
+my $phodet_halfx = 52.0;
+my $phodet_halfy = 52.0;
 my $phodet_halfz = 1.0;
 #my $phodet_z = 46.0 + $BoxDelz;
 #my $phodet_z = 46.0;  #Ping: fix the value of phodet_z
