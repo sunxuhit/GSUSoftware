@@ -29,11 +29,15 @@
 # Ping 02-17-2015
 # modify detector hold box to a acrylic box
 #############################################################
-# Ping 05-10-2106
+# Ping 05-10-2016
 # 1. change # of grooves of Fresnel lens from 100 to 200
 # 2. change dimension of photon sensor to fit beam test 2016
 #    prototype
 #############################################################
+# Ping 05-21-2016
+# Lens modification to match beam test 2016 prototype
+#############################################################
+
 use strict;
 use warnings;
 use Getopt::Long;
@@ -41,72 +45,74 @@ use Math::Trig;
 
 our %configuration;
 
-
 my $DetectorMother="root";
 my $DetectorName = 'meic_det1_rich';
 my $hittype="eic_rich";
 
-#######------ Define detector size and location ------####### 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~ Define detector size and location ~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+my $BoxDelz = -2.0;   #gap ?
+#========================================#
+#---------------  Aerogel ---------------#
 my $agel_halfx = 55.25;
-my $agel_halfy = 55.25;
-#my $agel_halfz = 10.0; #2cm thick agel 
-#my $agel_halfz = 15.0;  #Ping: 3cm thick agel
+my $agel_halfy = $agel_halfx;
 my $agel_halfz = 16.5; #3.3cm thick agel
 my $agel_maxz =35;
-
-my $BoxDelz = -2.0;
-
-#my $lens_z = -25.0 + $BoxDelz;
+#========================================#
+#---- Fresnel lens dimension and info ---#
 my $lens_z = -25.0;    #Ping: fix the value of lens_z
-my $focalLength=71.12; #Edmund Optics stock#32-683
-# Size of the optical active area of the lens.
+my $lens_halfz = 3.0;  #redundent?
 my $LensDiameter = 2.0*$agel_halfx*sqrt(2.0);
+
+my $focalLength=71.12;        #Edmund Optics stock#32-683 
 my $LensEffDiameter =101.6;   #effective diameter in mm. Edmund Optics stock#32-683
 my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
-my $lens_halfz = 3.0;
-
-#my $phodet_halfx = 48.0;
-#my $phodet_halfy = 48.0;
-my $phodet_halfx = 52.0;
+#========================================#
+#------------ Photon Sensor -------------#
+my $phodet_halfx = 52.0;   #change from 48mm to 52mm to match beam test 2016 prototype
 my $phodet_halfy = 52.0;
 my $phodet_halfz = 1.0;
-#my $phodet_z = 46.0 + $BoxDelz;
-#my $phodet_z = 46.0;  #Ping: fix the value of phodet_z
 my $phodet_z = $lens_z+$focalLength-$phodet_halfz;
-
+#========================================#
+#---------- Readout electronics ---------#
 my $readout_halfz = 4.0;
-#my @readout_z = ($phodet_z-$phodet_halfz+3.0, $phodet_z-$phodet_halfz+2.0*$readout_halfz);
 my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
-
+#========================================#
+#------------- Detector box -------------#
 my $box_thickness=(3/8)*25.4;   #3/8 inches convert to mm
 my $box_halfx = $agel_halfx + 1.0+$box_thickness;
 my $box_halfy = $agel_halfy + 1.0+$box_thickness;
 my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
+my $offset = $box_halfz+50;   #detector box pos_z
 
-#print"box_halfz=$box_halfz\n";
+my $hollow_halfx=$box_halfx-$box_thickness;
+my $hollow_halfy=$box_halfy-$box_thickness;
+my $hollow_halfz=$box_halfz-$box_thickness;
+#========================================#
 
-my $offset = $box_halfz+50;
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my @detposZ = ( $offset, $lens_z-$agel_halfz-1.5+$BoxDelz+$offset, $lens_z+$BoxDelz+$offset, $phodet_z+$offset );
 my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0 );
 my @readoutposZ = ( $readout_z[0]+$offset, $readout_z[1]+$offset );
 sub print_detector()
 {
-    my $agelThickness=2*$agel_halfz/10;
-    
-    print "========================== $agelThickness cm thick Aerogel =========================\n";
-    print "Printing detector positions and sizes ...\n\n";
-    
-    print "hold box position: ( 0.0, 0.0, $detposZ[0] mm),  half size in XYZ: ( $box_halfx mm, $box_halfy mm, $box_halfz mm )\n";
-    print "aerogel position: ( 0.0, 0.0, $detposZ[1] mm),  half size in XYZ: ( $agel_halfx mm, $agel_halfy mm, $agel_halfz mm )\n";
-    print "fresnel lens position: ( 0.0, 0.0, $detposZ[2] mm), half  size in XY: ( $freslens[0] mm, $freslens[1] mm )\n";
-    print "photon detector position: ( 0.0, 0.0, $detposZ[3] mm), half size in XYZ: ($phodet_halfx mm, $phodet_halfy mm, $phodet_halfz mm )\n";
-    print "readout position: ( 0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
-    print "=====================================================================\n";
-    
+  my $agelThickness=2*$agel_halfz/10;
+  
+  print "========================== $agelThickness cm thick Aerogel =========================\n";
+  print "Printing detector positions and sizes ...\n\n";
+  
+  print "hold box position: ( 0.0, 0.0, $detposZ[0] mm),  half size in XYZ: ( $box_halfx mm, $box_halfy mm, $box_halfz mm )\n";
+  print "aerogel position: ( 0.0, 0.0, $detposZ[1] mm),  half size in XYZ: ( $agel_halfx mm, $agel_halfy mm, $agel_halfz mm )\n";
+  print "fresnel lens position: ( 0.0, 0.0, $detposZ[2] mm), half  size in XY: ( $freslens[0] mm, $freslens[1] mm )\n";
+  print "photon detector position: ( 0.0, 0.0, $detposZ[3] mm), half size in XYZ: ($phodet_halfx mm, $phodet_halfy mm, $phodet_halfz mm )\n";
+  print "readout position: ( 0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
+  print "=====================================================================\n";
+  
 }
-
-#######------ Define the holder Box for Detectors ------#######
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~ Define the holder Box for Detectors ~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $box_name = "detector_holder";
 #my $box_mat = "G4_AIR";
 my $box_mat = "Air_Opt";
@@ -115,74 +121,66 @@ my $hollow_mat="Air_Opt";
 
 sub build_box()
 {
-    my @box_pos  = ( 0.0, 0.0, $offset );
-    my @box_size = ( $box_halfx, $box_halfy, $box_halfz );
-
-    print"\n box_pos_z=$box_pos[2], box_halfz=$box_size[2], box thickness=$box_thickness\n\n";
-
-    my %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$box_name";
-    $detector{"mother"} = "$DetectorMother";
-    $detector{"description"} = "$DetectorName\_$box_name";
-    $detector{"pos"} = "$box_pos[0]*mm $box_pos[1]*mm $box_pos[2]*mm";
-    #$detector{"color"} = "ffffff";
-    $detector{"color"} = "81f7f3";
-    $detector{"type"} = "Box";
-    $detector{"visible"} = "1";
-    $detector{"dimensions"} = "$box_size[0]*mm $box_size[1]*mm $box_size[2]*mm";
-    $detector{"material"} = "$box_mat";
-    $detector{"sensitivity"} = "no";
-    $detector{"hit_type"}    = "no";
-    $detector{"identifiers"} = "no";
-    print_det(\%configuration, \%detector);
-
-    my @hollow_size=($box_size[0]-$box_thickness,$box_size[1]-$box_thickness,$box_size[2]-$box_thickness);
-    %detector=init_det();
-    $detector{"name"} = "$DetectorName\_hollow";
-    $detector{"mother"} = "$DetectorName\_$box_name";
-    $detector{"description"} = "$DetectorName\_hollow";
-    $detector{"pos"} = "0*mm 0*mm 0*mm";
-    $detector{"color"} = "ffffff";
-    $detector{"type"} = "Box";
-    $detector{"style"} = "0";
-    $detector{"visible"} = "1";
-    $detector{"dimensions"} = "$hollow_size[0]*mm $hollow_size[1]*mm $hollow_size[2]*mm";
-    $detector{"material"} = "$hollow_mat";
-    $detector{"sensitivity"} = "no";
-    $detector{"hit_type"}    = "no";
-    $detector{"identifiers"} = "no";
-    print_det(\%configuration, \%detector);
-
+  my %detector=init_det();
+  $detector{"name"} = "$DetectorName\_$box_name";
+  $detector{"mother"} = "$DetectorMother";
+  $detector{"description"} = "$DetectorName\_$box_name";
+  $detector{"pos"} = "0*mm 0*mm $offset*mm";
+  $detector{"color"} = "81f7f3";
+  $detector{"type"} = "Box";
+  $detector{"visible"} = "1";
+  $detector{"dimensions"} = "$box_halfx*mm $box_halfy*mm $box_halfz*mm";
+  $detector{"material"} = "$box_mat";
+  $detector{"sensitivity"} = "no";
+  $detector{"hit_type"}    = "no";
+  $detector{"identifiers"} = "no";
+  print_det(\%configuration, \%detector);
+  
+  %detector=init_det();
+  $detector{"name"} = "$DetectorName\_hollow";
+  $detector{"mother"} = "$DetectorName\_$box_name";
+  $detector{"description"} = "$DetectorName\_hollow";
+  $detector{"pos"} = "0*mm 0*mm 0*mm";   #w.r.t. detector
+  $detector{"color"} = "ffffff";
+  $detector{"type"} = "Box";
+  $detector{"style"} = "0";
+  $detector{"visible"} = "1";
+  $detector{"dimensions"} = "$hollow_halfx*mm $hollow_halfy*mm $hollow_halfz*mm";
+  $detector{"material"} = "$hollow_mat";
+  $detector{"sensitivity"} = "no";
+  $detector{"hit_type"}    = "no";
+  $detector{"identifiers"} = "no";
+  print_det(\%configuration, \%detector);
+  
 }
-
-#######------ Aerogel ------#######
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Aerogel ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $agel_name = "Aerogel";
 my $agel_mat  = "aerogel";
 #my $agel_mat  = "RichAerogel3";
 
+my $agel_posx=0;                                                                                                                         
+my $agel_posy=0;                                                                                                                        
+my $agel_posz=$lens_z - $agel_halfz + $BoxDelz;
+
 sub build_aerogel()
 {
-    my @agel_pos  = ( 0.0, 0.0, $lens_z - $agel_halfz + $BoxDelz );
-    my @agel_size = ( $agel_halfx, $agel_halfy, $agel_halfz );
-    #print agel boundary
-    print "Aerogel: z position from $agel_pos[2]-$agel_size[2] to  $agel_pos[2]+$agel_size[2]\n";
-    my %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$agel_name";
-    #$detector{"mother"} = "$DetectorName\_$box_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$agel_name";
-    $detector{"pos"} = "$agel_pos[0]*mm $agel_pos[1]*mm $agel_pos[2]*mm";
-    $detector{"color"} = "ffa500";
-    $detector{"type"} = "Box";
-    $detector{"dimensions"} = "$agel_size[0]*mm $agel_size[1]*mm $agel_size[2]*mm";
-    $detector{"material"} = "$agel_mat";
-    $detector{"sensitivity"} = "$hittype";
-    $detector{"hit_type"}    = "$hittype";
-    $detector{"identifiers"} = "id manual 1";
-    print_det(\%configuration, \%detector);
+  my %detector=init_det();
+  $detector{"name"} = "$DetectorName\_$agel_name";
+  $detector{"mother"} = "$DetectorName\_hollow";
+  $detector{"description"} = "$DetectorName\_$agel_name";
+  $detector{"pos"} = "$agel_posx*mm $agel_posy*mm $agel_posz*mm";
+  $detector{"color"} = "ffa500";
+  $detector{"type"} = "Box";
+  $detector{"dimensions"} = "$agel_halfx*mm $agel_halfy*mm $agel_halfz*mm";
+  $detector{"material"} = "$agel_mat";
+  $detector{"sensitivity"} = "$hittype";
+  $detector{"hit_type"}    = "$hittype";
+  $detector{"identifiers"} = "id manual 1";
+  print_det(\%configuration, \%detector);
 }
-
-######------ Fresnel lens ------######
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Fresnel lens ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $lens_holdbox = "lens_holder";
 my $lens_holdbox_mat  = "Air_Opt";
 my $lens_name = "lens";
@@ -373,8 +371,8 @@ sub GetSagita #the arc shape, Aspheric lens
     my $Sagita_value = $Curvature*($_[0]**2)/(1.0+sqrt($ArgSqrt)) + $TotAspher;
     return $Sagita_value ;
 }
-
-######------ photon detector ------######
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ photon detector ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $photondet_name = "Photondet";
 #my $photondet_mat  = "Aluminum";
 my $photondet_mat  = "Air_Opt";
@@ -400,9 +398,8 @@ sub build_photondet()
     $detector{"identifiers"} = "id manual 2";
     print_det(\%configuration, \%detector);
 }
-
-
-######------ reflection mirrors ------######
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ reflection mirrors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $mirror_mat  = "Aluminum";
 sub build_mirrors()
 {
@@ -507,9 +504,8 @@ sub build_mirrors()
     $detector{"identifiers"} = "id manual 6";
     print_det(\%configuration, \%detector);
 }
-
-
-######------ readout hardware ------######
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ readout hardware ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $readoutdet_name = "readout";
 my $readout_mat  = "Aluminum";
 my @readoutdet_pos  = ( 0.0, 0.0, 0.0 );
@@ -539,8 +535,8 @@ sub build_readout()
     print_det(\%configuration, \%detector);
     
 }
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Main function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 sub build_detector()
 {
     print_detector();
