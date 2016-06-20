@@ -81,8 +81,10 @@ my $glassWindow_halfy= $glassWindow_halfx;
 my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
 my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
 
-my $phodet_halfx = 48.0;      #1/2 effective area of Hamamatsu HA12700a
-my $phodet_halfy = 48.0;
+#my $phodet_halfx = 48.0;      #eff. area of Hamamatsu H12700a
+#my $phodet_halfy = 48.0;
+my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
+my $phodet_halfy = $phodet_halfx;
 my $phodet_halfz = 1.0;
 #my $phodet_z = $lens_z+$focalLength-$phodet_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
@@ -203,7 +205,6 @@ my $lens_holdbox_mat  = "Air_Opt";
 
 
 my $lens_mat  = "acrylic";
-#my $lens_mat  = "holder_acrylic"; #testing
 my $lens_numOfGrooves = floor($grooveDensity*($LensEffDiameter/2));
 my $max_numOfGrooves=1000;
 
@@ -388,12 +389,11 @@ sub GetSagita
 my $photondet_name = "Photondet";
 #my $photondet_mat  = "Aluminum";
 my $photondet_mat  = "Air_Opt";
+
+my $last_x=$glassWindow_halfx/2;   #1st quandrant
+my $last_y=$glassWindow_halfx/2;   #1st quandrant
 sub build_photondet()
 {
-    #my @photondet_pos  = ( 0.0, 0.0, $phodet_z );
-    #my @photondet_size = ( $phodet_halfx, $phodet_halfy, $phodet_halfz );
-    #print 'Photon Sensor: z position from ', $photondet_pos[2]-$photondet_size[2],' to ',$photondet_pos[2]+$photondet_size[2],'\n';
-
     #========================================#
     #--------- build glass window -----------#
     my %detector=init_det();
@@ -412,23 +412,44 @@ sub build_photondet()
     $detector{"identifiers"} = "no";
     print_det(\%configuration, \%detector);
 
-    #========================================#                                                                                                    #------------ build sensor --------------#
-    %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$photondet_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$photondet_name";
-    $detector{"pos"} = "0*mm 0*mm $phodet_z*mm";
-    $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "0000A0";
-    $detector{"type"} = "Box";
-    $detector{"dimensions"} = "$phodet_halfx*mm $phodet_halfy*mm $phodet_halfz*mm";
-    $detector{"material"} = "$photondet_mat";
-    $detector{"mfield"} = "no";
-    $detector{"sensitivity"} = "$hittype";
-    $detector{"hit_type"}    = "$hittype";
-    $detector{"identifiers"} = "id manual 2";
-    print_det(\%configuration, \%detector);
+    #========================================#
+    #------------ build sensor --------------#
+    my $photondet_x;
+    my $photondet_y;
     
+    for (my $i=1;$i<5;$i++) {
+	#--------------------------------------------------------#
+	# change quandrant
+	if ($i==0) {
+	    $photondet_x=$last_x;
+	    $photondet_y=$last_y;
+	}
+	else {
+	    $photondet_x=-$last_y;
+	    $photondet_y=$last_x;
+	}
+	#--------------------------------------------------------#
+	
+	%detector=init_det();
+	$detector{"name"} = "$DetectorName\_$photondet_name\_$i";
+	$detector{"mother"} = "$DetectorName\_hollow";
+	$detector{"description"} = "$DetectorName\_$photondet_name\_$i";
+	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $phodet_z*mm";
+	$detector{"rotation"} = "0*deg 0*deg 0*deg";
+	$detector{"color"} = "0000A0";
+	$detector{"type"} = "Box";
+	$detector{"dimensions"} = "$phodet_halfx*mm $phodet_halfy*mm $phodet_halfz*mm";
+	$detector{"material"} = "$photondet_mat";
+	$detector{"mfield"} = "no";
+	$detector{"sensitivity"} = "$hittype";
+	$detector{"hit_type"}    = "$hittype";
+	$detector{"identifiers"} = "id manual 2";
+	print_det(\%configuration, \%detector);
+	
+	print'photondet_x=',$photondet_x,', photondet_y=',$photondet_y,'\n'; 
+	$last_x=$photondet_x;
+	$last_y=$photondet_y;
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ reflection mirrors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -436,33 +457,22 @@ my $mirror_mat  = "Aluminum";
 sub build_mirrors()
 {
     my $dx1 = $agel_halfx;          # modified by Ping
-    #my $dx1 = $lens_halfx;
-    #my $dx2 =$phodet_halfx;
     my $dx2 =$glassWindow_halfx;
 
     my $dy1 = 0.1;
     my $dy2 = 0.1;
-    #my $dz = ($phodet_z - $lens_z - $phodet_halfz - 3.0)/2.0;
     my $dz = ($glassWindow_z - $lens_z - $glassWindow_halfz - 3.0)/2.0;
-    #my $phi = atan2($agel_halfx-$phodet_halfx, 2.0*$dz);
     my $phi = atan2($agel_halfx-$glassWindow_halfx, 2.0*$dz);
-    #my $phi = atan2($lens_halfx-$phodet_halfx, 2.0*$dz);
     my $delxy = $dz*sin($phi) + 1.0;
-    #my $dz_update = sqrt( $dz**2 + ($agel_halfx-$phodet_halfx)**2 );
-    #my $dz_update = sqrt( $dz**2 + ($lens_halfx-$phodet_halfx)**2 );
     my $dz_update = sqrt( $dz**2 + ($agel_halfx-$glassWindow_halfx)**2 );
     
     my $mirror_halfx = $agel_halfx;
-    #my $mirror_halfx = $lens_halfx;
     my $mirror_halfy = 1.0;
-    #my $mirror_halfz = ($phodet_z-$lens_z-$phodet_halfz-1.0)/2.0;
     my $mirror_halfz = ($glassWindow_z-$lens_z-$glassWindow_halfz-1.0)/2.0;
 
     ####### back mirror
     my $phi_back = $phi*180.0/pi;
-    #my @mirror_back_pos  = ( $agel_halfy+$mirror_halfy-$delxy, 0.0, ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0 ); #Ping: checked
     my @mirror_back_pos  = ( $agel_halfy+$mirror_halfy-$delxy, 0.0, ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0 );
-    #my @mirror_back_pos  = ( $lens_halfy+$mirror_halfy-$delxy, 0.0, ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0 );
     my $mirror_back_name = "mirror_back";
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_back_name";
@@ -482,9 +492,7 @@ sub build_mirrors()
     
     ####### front mirror
     my $phi_front = -1.0*$phi*180.0/pi;
-    #my @mirror_front_pos  = ( -1.*($agel_halfy+$mirror_halfy-$delxy), 0.0, ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0); #modified by Ping
     my @mirror_front_pos  = ( -1.*($agel_halfy+$mirror_halfy-$delxy), 0.0, ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0);
-    #my @mirror_front_pos  = ( -1.*($lens_halfx+$mirror_halfy-$delxy), 0.0, ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0);
     my $mirror_front_name = "mirror_front";
     %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_front_name";
@@ -503,9 +511,7 @@ sub build_mirrors()
     
     ####### top mirror
     my $phi_top = -1.0*$phi*180.0/pi;
-    #my @mirror_top_pos  = ( 0.0, $agel_halfy+$mirror_halfy-$delxy, ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0 ); #modified by Ping
     my @mirror_top_pos  = ( 0.0, $agel_halfy+$mirror_halfy-$delxy, ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0 );
-    #my @mirror_top_pos  = ( 0.0, $lens_halfx+$mirror_halfy-$delxy, ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0 );
     my $mirror_top_name = "mirror_top";
     %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_top_name";
@@ -524,9 +530,7 @@ sub build_mirrors()
 
     ####### bottom mirror
     my $phi_bottom = $phi*180.0/pi;
-    #my @mirror_bottom_pos  = ( 0.0, -1.0*($agel_halfy+$mirror_halfy-$delxy), ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0 ); #modified by Ping
     my @mirror_bottom_pos  = ( 0.0, -1.0*($agel_halfy+$mirror_halfy-$delxy), ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0 );
-    #my @mirror_bottom_pos  = ( 0.0, -1.0*($lens_halfx+$mirror_halfy-$delxy), ($lens_z+$lens_halfz+($phodet_z-$phodet_halfz))/2.0 );
     my $mirror_bottom_name = "mirror_bottom";
     %detector=init_det();
     $detector{"name"} = "$DetectorName\_$mirror_bottom_name";
@@ -580,7 +584,7 @@ sub build_detector()
     print_detector();
     build_box();
     build_aerogel();
-    build_lens();
+    #build_lens();
     build_photondet();
     build_mirrors();
     #build_readout();
