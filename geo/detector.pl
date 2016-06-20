@@ -86,7 +86,6 @@ my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
 my $phodet_halfy = $phodet_halfx;
 my $phodet_halfz = 1.0;
-#my $phodet_z = $lens_z+$focalLength-$phodet_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 #========================================#
 #---------- Readout electronics ---------#
@@ -429,7 +428,6 @@ sub build_photondet()
 	    $photondet_y=$last_x;
 	}
 	#--------------------------------------------------------#
-	
 	%detector=init_det();
 	$detector{"name"} = "$DetectorName\_$photondet_name\_$i";
 	$detector{"mother"} = "$DetectorName\_hollow";
@@ -449,7 +447,7 @@ sub build_photondet()
 	print'photondet_x=',$photondet_x,', photondet_y=',$photondet_y,'\n'; 
 	$last_x=$photondet_x;
 	$last_y=$photondet_y;
-    }
+    }# end of for loop
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ reflection mirrors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -458,94 +456,56 @@ sub build_mirrors()
 {
     my $dx1 = $agel_halfx;          # modified by Ping
     my $dx2 =$glassWindow_halfx;
-
     my $dy1 = 0.1;
     my $dy2 = 0.1;
-    my $dz = ($glassWindow_z - $lens_z - $glassWindow_halfz - 3.0)/2.0;
-    my $phi = atan2($agel_halfx-$glassWindow_halfx, 2.0*$dz);
-    my $delxy = $dz*sin($phi) + 1.0;
+    my $dz = ($glassWindow_z - $lens_z - $glassWindow_halfz - 3.0)/2.0;   #should eqaul focal length/2
+    
+    my $phi = atan2($agel_halfx-$glassWindow_halfx, 2.0*$dz)*180/pi;
+    my $delxy = $dz*sin($phi*pi/180) + 1.0;
     my $dz_update = sqrt( $dz**2 + ($agel_halfx-$glassWindow_halfx)**2 );
     
-    my $mirror_halfx = $agel_halfx;
     my $mirror_halfy = 1.0;
-    my $mirror_halfz = ($glassWindow_z-$lens_z-$glassWindow_halfz-1.0)/2.0;
+    my $mirror_z=($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0;
+    
+    my @mirrorName=("back", "top", "front", "bottom");
+    my @angle_x=(0.0, -$phi, 0.0, $phi);   #in degree
+    my @angle_y=($phi, 0.0, -$phi, 0.0);   #in degree
+    my @angle_z=(90, 0.0, 90, 0.0);        #in degree
 
-    ####### back mirror
-    my $phi_back = $phi*180.0/pi;
-    my @mirror_back_pos  = ( $agel_halfy+$mirror_halfy-$delxy, 0.0, ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0 );
-    my $mirror_back_name = "mirror_back";
-    my %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$mirror_back_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$mirror_back_name";
-    $detector{"pos"} = "$mirror_back_pos[0]*mm $mirror_back_pos[1]*mm $mirror_back_pos[2]*mm"; #Ping: checked
-    $detector{"rotation"} = "0.0*deg $phi_back*deg 90*deg";
-    $detector{"color"} = "ffff00";
-    $detector{"type"} = "Trd";
-    $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
-    $detector{"material"} = "$mirror_mat";
-    $detector{"sensitivity"} = "mirror: rich_mirrors";
-    $detector{"hit_type"} = "no";
-    $detector{"identifiers"} = "id manual 3";
-    print_det(\%configuration, \%detector);
-    
-    
-    ####### front mirror
-    my $phi_front = -1.0*$phi*180.0/pi;
-    my @mirror_front_pos  = ( -1.*($agel_halfy+$mirror_halfy-$delxy), 0.0, ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0);
-    my $mirror_front_name = "mirror_front";
-    %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$mirror_front_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$mirror_front_name";
-    $detector{"pos"} = "$mirror_front_pos[0]*mm $mirror_front_pos[1]*mm $mirror_front_pos[2]*mm";
-    $detector{"rotation"} = "0*deg $phi_front*deg 90*deg";
-    $detector{"color"} = "ffff00";
-    $detector{"type"} = "Trd";
-    $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
-    $detector{"material"} = "$mirror_mat";
-    $detector{"sensitivity"} = "mirror: rich_mirrors";
-    $detector{"hit_type"} = "no";
-    $detector{"identifiers"} = "id manual 4";
-    print_det(\%configuration, \%detector);
-    
-    ####### top mirror
-    my $phi_top = -1.0*$phi*180.0/pi;
-    my @mirror_top_pos  = ( 0.0, $agel_halfy+$mirror_halfy-$delxy, ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0 );
-    my $mirror_top_name = "mirror_top";
-    %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$mirror_top_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$mirror_top_name";
-    $detector{"pos"} = "$mirror_top_pos[0]*mm $mirror_top_pos[1]*mm $mirror_top_pos[2]*mm";
-    $detector{"rotation"} = "$phi_top*deg 0*deg 0*deg";
-    $detector{"color"} = "ffff00";
-    $detector{"type"} = "Trd";
-    $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
-    $detector{"material"} = "$mirror_mat";
-    $detector{"sensitivity"} = "mirror: rich_mirrors";
-    $detector{"hit_type"} = "no";
-    $detector{"identifiers"} = "id manual 5";
-    print_det(\%configuration, \%detector);
+    my $last_x=$agel_halfy+$mirror_halfy-$delxy;
+    my $last_y=0.0;
 
-    ####### bottom mirror
-    my $phi_bottom = $phi*180.0/pi;
-    my @mirror_bottom_pos  = ( 0.0, -1.0*($agel_halfy+$mirror_halfy-$delxy), ($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0 );
-    my $mirror_bottom_name = "mirror_bottom";
-    %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$mirror_bottom_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$mirror_bottom_name";
-    $detector{"pos"} = "$mirror_bottom_pos[0]*mm $mirror_bottom_pos[1]*mm $mirror_bottom_pos[2]*mm";
-    $detector{"rotation"} = "$phi_bottom*deg 0*deg 0*deg";
-    $detector{"color"} = "ffff00";
-    $detector{"type"} = "Trd";
-    $detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
-    $detector{"material"} = "$mirror_mat";
-    $detector{"sensitivity"} = "mirror: rich_mirrors";
-    $detector{"hit_type"} = "no";
-    $detector{"identifiers"} = "id manual 6";
-    print_det(\%configuration, \%detector);
+    my $mirror_x;
+    my $mirror_y;
+    my $idManual=3;
+    for (my $i=0;$i<4;$i++) {
+	if ($i==0) {
+	    $mirror_x=$last_x;
+	    $mirror_y=$last_y;
+	}
+	else {
+	    $mirror_x=-$last_y;
+	    $mirror_y=$last_x;
+	}
+	$idManual=3+$i;
+	my %detector=init_det();
+	$detector{"name"} = "$DetectorName\_mirror\_$mirrorName[$i]";
+	$detector{"mother"} = "$DetectorName\_hollow";
+	$detector{"description"} = "$DetectorName\_mirror\_$mirrorName[$i]";
+	$detector{"pos"} = "$mirror_x*mm $mirror_y*mm $mirror_z*mm";
+	$detector{"rotation"} = "$angle_x[$i]*deg $angle_y[$i]*deg $angle_z[$i]*deg";
+	$detector{"color"} = "ffff00";
+	$detector{"type"} = "Trd";
+	$detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
+	$detector{"material"} = "$mirror_mat";
+	$detector{"sensitivity"} = "mirror: rich_mirrors";
+	$detector{"hit_type"} = "no";
+	$detector{"identifiers"} = "id manual $idManual";
+	print_det(\%configuration, \%detector);
+	
+	$last_x=$mirror_x;
+	$last_y=$mirror_y;
+    }#end of for loop
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ readout hardware ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
