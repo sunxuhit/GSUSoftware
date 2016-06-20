@@ -151,12 +151,12 @@ my @RichAerogel_Scat=
 #=======================================================================================#
 #==================== Table of optical properties for lens Acrylic =====================#
 my @AcRefrIndex = ( 1.4902, 1.4907, 1.4913, 1.4918, 1.4924,
-                  1.4930,  1.4936,  1.4942,  1.4948,  1.4954,
-                  1.4960,  1.4965,  1.4971,  1.4977,  1.4983,
-                  1.4991,  1.5002,  1.5017,  1.5017,  1.5017,
-                  1.5017,  1.5017,  1.5017,  1.5017,  1.5017,
-                  1.5017,  1.5017,  1.5017,  1.5017,  1.5017,
-                  1.5017,  1.5017 );
+		    1.4930,  1.4936,  1.4942,  1.4948,  1.4954,
+		    1.4960,  1.4965,  1.4971,  1.4977,  1.4983,
+		    1.4991,  1.5002,  1.5017,  1.5017,  1.5017,
+		    1.5017,  1.5017,  1.5017,  1.5017,  1.5017,
+		    1.5017,  1.5017,  1.5017,  1.5017,  1.5017,
+		    1.5017,  1.5017 );
 
 my @AcAbsLength = ( "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
 		    "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
@@ -166,18 +166,29 @@ my @AcAbsLength = ( "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
 		    "25.25*cm", "00.667*cm", "00.037*cm", "00.333*cm",
                     "00.001*cm", "00.001*cm", "00.001*cm", "00.001*cm",
 		    "00.001*cm", "00.001*cm", "00.001*cm", "00.001*cm" );
-		    
+#=======================================================================================#                                                  #=============== Table of optical properties for photon sensor glass window ============# 
+my @glassRefrIndex=(1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47,
+		    1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47,
+		    1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47,
+		    1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47, 1.47);
 
+my @glassAbsLength=("25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
+                    "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
+                    "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
+                    "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
+                    "25.25*cm", "25.25*cm", "25.25*cm", "25.25*cm",
+                    "25.25*cm", "00.667*cm", "00.037*cm", "00.333*cm",
+                    "00.001*cm", "00.001*cm", "00.001*cm", "00.001*cm",
+                    "00.001*cm", "00.001*cm", "00.001*cm", "00.001*cm");
 #=======================================================================================#
-
 sub define_material
 {
     my $Hubert=0;
     my $Marco=1;
-
+    
     my $agel=$Marco;
     my $RS=1; #Rayleigh Scattering: 0--Off, 1--On
-
+    
 # the first argument to this function become the variation
     $configuration{"variation"} = shift;
     
@@ -188,7 +199,7 @@ sub define_material
     $mat{"density"}       = "0.02";  # in g/cm3
     $mat{"ncomponents"}   = "2";
     $mat{"components"}    = "Si 1 O 2";
-
+    
     if ($agel == $Hubert) {
 	print"Hubert's Agel\n";
         $mat{"photonEnergy"} = arrayToString(@PhotonEnergyBin);
@@ -225,7 +236,18 @@ sub define_material
     $mat{"ncomponents"}   = "3";
     $mat{"components"}    = "C 5 H 8 O 2";
     print_mat(\%configuration, \%mat);
-    	
+    
+    # Photon sensor glass window
+    %mat = init_mat();
+    $mat{"name"}          = "glass";
+    $mat{"description"}   = "Pyrex glass (Borosilicate glass)";
+    $mat{"density"}       = "2.23";  # in g/cm3                                                                                            
+    $mat{"ncomponents"}   = "1";
+    $mat{"components"}    = "G4_Pyrex_Glass 1";
+    $mat{"photonEnergy"}      = arrayToString(@PhotonEnergyBin);
+    $mat{"indexOfRefraction"} = arrayToString(@glassRefrIndex);
+    $mat{"absorptionLength"}  = arrayToString(@glassAbsLength);
+    print_mat(\%configuration, \%mat);
 }
 
 define_material("Original");
