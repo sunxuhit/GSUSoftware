@@ -71,6 +71,7 @@ my $lens_halfy=$lens_halfx;
 my $LensDiameter = 2.0*sqrt(2.0)*$lens_halfx;
 
 my $focalLength=76.2;         #Edmund Optics stock#32-593 
+#my $focalLength=100;          #testing
 my $LensEffDiameter =152.4;   #effective diameter in mm. Edmund Optics stock#32-593
 my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
 my $halfThickness=1.02;       #type in manually after configuration, and then recongfig
@@ -79,20 +80,29 @@ my $halfThickness=1.02;       #type in manually after configuration, and then re
 #my $glassWindow_halfx= 52;
 my $glassWindow_halfx=52/2;
 my $glassWindow_halfy= $glassWindow_halfx;
-my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
+#my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
+my $glassWindow_halfz= 1;      #for finding absorption length
 my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
+#print 'glass window: pos_z=',$glassWindow_z,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
 
-my $sensorGap=0.1;             #half the gap between sensor 
+my $sensorGap=0.5;             #half the gap between sensor 
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
 my $phodet_halfy = $phodet_halfx;
-my $phodet_halfz = 1.0;
+my $phodet_halfz = 0.75;       #Hamamatsu H12700
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
+
+my $metalSheet_halfx=$glassWindow_halfx;
+my $metalSheet_halfy=$metalSheet_halfx;
+#my $metalSheet_halfz=0.5;     #estimation
+#my $metalSheet_z=$phodet_z-$phodet_halfz+27.4-$metalSheet_halfz;
+#print 'mateal halfx=',$metalSheet_halfx,', halfz=',$metalSheet_halfz,"\n";
 
 my $sensor_total_halfx=2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
 #========================================#
 #---------- Readout electronics ---------#
 my $readout_halfz = 4.0;
 my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
+#my @readout_z = ($phodet_z-$phodet_halfz, $metalSheet_z-$metalSheet_halfz+2.0*$readout_halfz+$BoxDelz);
 #========================================#
 #------------- Detector box -------------#
 my @all_halfx=($agel_halfx,$lens_halfx,$sensor_total_halfx); # to find the max. halfx                                                     
@@ -100,9 +110,10 @@ my $box_thickness=(3/8)*25.4;   #3/8 inches convert to mm
 
 my $box_halfx = max(@all_halfx) + $box_thickness+1.0;
 my $box_halfy=$box_halfx;
-my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
-
+#my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
+my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness+10; #testing
 my $offset = $box_halfz+50;     #detector box pos_z
+#my $offset = $box_halfz;
 
 my $hollow_halfx=$box_halfx-$box_thickness;
 my $hollow_halfy=$box_halfy-$box_thickness;
@@ -111,7 +122,7 @@ my $hollow_halfz=$box_halfz-$box_thickness;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-my @detposZ = ( $offset, $lens_z-$agel_halfz-1.5+$BoxDelz+$offset, $lens_z+$BoxDelz+$offset, $phodet_z+$offset );
+my @detposZ = ( $offset, $lens_z-$agel_halfz+$BoxDelz+$offset, $lens_z+$offset, $phodet_z+$offset );
 my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0 );
 my @readoutposZ = ( $readout_z[0]+$offset, $readout_z[1]+$offset );
 sub print_detector()
@@ -124,10 +135,11 @@ sub print_detector()
   print "hold box position: ( 0.0, 0.0, $detposZ[0] mm),  half size in XYZ: ( $box_halfx mm, $box_halfy mm, $box_halfz mm )\n";
   print "aerogel position: ( 0.0, 0.0, $detposZ[1] mm),  half size in XYZ: ( $agel_halfx mm, $agel_halfy mm, $agel_halfz mm )\n";
   print "fresnel lens position: ( 0.0, 0.0, $detposZ[2] mm), half  size in XY: ( $freslens[0] mm, $freslens[1] mm )\n";
-  print "photon detector position: ( 1.0, 0.0, $detposZ[3] mm), half size in XYZ: ($phodet_halfx mm, $phodet_halfy mm, $phodet_halfz mm )\n";
+  print "photon detector position: ( 0.0, 0.0, $detposZ[3] mm), half size in XYZ: ($phodet_halfx mm, $phodet_halfy mm, $phodet_halfz mm )\n";
   print "readout position: ( 0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
   print "=====================================================================\n";
-  
+
+  print 'glass window: pos_z=',$glassWindow_z+$offset,'mm, half_z=',$glassWindow_halfz,'mm',"\n";  
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~ Define the holder Box for Detectors ~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -448,9 +460,28 @@ sub build_photondet()
 	$detector{"identifiers"} = "id manual 2";
 	print_det(\%configuration, \%detector);
 	
-	print'photondet_x=',$photondet_x,', photondet_y=',$photondet_y,'\n'; 
-	$last_x=$photondet_x;
-	$last_y=$photondet_y;
+	print'photondet_x=',$photondet_x,', photondet_y=',$photondet_y,"\n"; 
+
+	#========================================#
+	#--------- build metal sheet ------------#
+	#%detector=init_det();
+        #$detector{"name"} = "$DetectorName\_sensorMetalSheet\_$i";
+        #$detector{"mother"} = "$DetectorName\_hollow";
+        #$detector{"description"} = "$DetectorName\_sensorMetalSheet\_$i";
+        #$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $metalSheet_z*mm";
+        #$detector{"rotation"} = "0*deg 0*deg 0*deg";
+        #$detector{"color"} = "ffcc00";
+        #$detector{"type"} = "Box";
+        #$detector{"dimensions"} = "$metalSheet_halfx*mm $metalSheet_halfy*mm $metalSheet_halfz*mm";
+        #$detector{"material"} = "G4_Cu";
+        #$detector{"mfield"} = "no";
+        #$detector{"sensitivity"} = "no";
+        #$detector{"hit_type"}    = "no";
+        #$detector{"identifiers"} = "no";
+        #print_det(\%configuration, \%detector);
+
+        $last_x=$photondet_x;
+        $last_y=$photondet_y;
     }# end of for loop
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
