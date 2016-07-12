@@ -80,8 +80,8 @@ my $halfThickness=1.02;       #type in manually after configuration, and then re
 #my $glassWindow_halfx= 52;
 my $glassWindow_halfx=52/2;
 my $glassWindow_halfy= $glassWindow_halfx;
-#my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
-my $glassWindow_halfz= 1;      #for finding absorption length
+my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
+#my $glassWindow_halfz= 1;      #for finding absorption length
 my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
 #print 'glass window: pos_z=',$glassWindow_z,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
 
