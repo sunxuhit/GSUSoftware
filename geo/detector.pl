@@ -403,8 +403,10 @@ my $photondet_name = "Photondet";
 #my $photondet_mat  = "Aluminum";
 my $photondet_mat  = "Air_Opt";
 
-my $last_x=$sensor_total_halfx/2;
+#my $last_x=$sensor_total_halfx/2+$sensorGap;
+my $last_x=$glassWindow_halfx+$sensorGap;
 my $last_y=$last_x;   #1st quandrant
+print 'gap=',$last_x-$phodet_halfx,"\n";
 sub build_photondet()
 {
     my $photondet_x;
