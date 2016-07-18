@@ -54,7 +54,7 @@ my $hittype="eic_rich";
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~ Define detector size and location ~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-my $BoxDelz = -2.0;   #gap ?
+my $BoxDelz = 2.0;   #gap ?
 #========================================#
 #---------------  Aerogel ---------------#
 my $agel_halfx = 55.25;
@@ -63,7 +63,7 @@ my $agel_halfz = 16.5; #3.3cm thick agel
 my $agel_maxz =35;
 #========================================#
 #---- Fresnel lens dimension and info ---#
-my $lens_z = -25.0;      #Ping: fix the value of lens_z
+#my $lens_z = -25.0;      #Ping: fix the value of lens_z
 
 my $lens_halfz = 3.0;    #redundent? lens holder halfz?
 my $lens_halfx=66.675;   #beam test 2016
@@ -82,14 +82,14 @@ my $glassWindow_halfx=52/2;
 my $glassWindow_halfy= $glassWindow_halfx;
 my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
 #my $glassWindow_halfz= 1;      #for finding absorption length
-my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
-#print 'glass window: pos_z=',$glassWindow_z,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
+#my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
+
 
 my $sensorGap=0.5;             #half the gap between sensor 
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
 my $phodet_halfy = $phodet_halfx;
 my $phodet_halfz = 0.75;       #Hamamatsu H12700
-my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
+#my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 
 my $metalSheet_halfx=$glassWindow_halfx;
 my $metalSheet_halfy=$metalSheet_halfx;
@@ -101,8 +101,7 @@ my $sensor_total_halfx=2*$glassWindow_halfx+$sensorGap;   #Glass window larger t
 #========================================#
 #---------- Readout electronics ---------#
 my $readout_halfz = 4.0;
-my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
-#my @readout_z = ($phodet_z-$phodet_halfz, $metalSheet_z-$metalSheet_halfz+2.0*$readout_halfz+$BoxDelz);
+#my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
 #========================================#
 #------------- Detector box -------------#
 my @all_halfx=($agel_halfx,$lens_halfx,$sensor_total_halfx); # to find the max. halfx                                                     
@@ -111,7 +110,9 @@ my $box_thickness=(3/8)*25.4;   #3/8 inches convert to mm
 my $box_halfx = max(@all_halfx) + $box_thickness+1.0;
 my $box_halfy=$box_halfx;
 #my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
-my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness+10; #testing
+#my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness+10; #testing
+my $box_halfz = ((2*$agel_halfz+$BoxDelz)+2*$lens_halfz+$focalLength+2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz))/2.0+$box_thickness;
+
 my $offset = $box_halfz+50;     #detector box pos_z
 #my $offset = $box_halfz;
 
@@ -122,7 +123,16 @@ my $hollow_halfz=$box_halfz-$box_thickness;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-my @detposZ = ( $offset, $lens_z-$agel_halfz+$BoxDelz+$offset, $lens_z+$offset, $phodet_z+$offset );
+#my @detposZ = ( $offset, $lens_z-$agel_halfz+$BoxDelz+$offset, $lens_z+$offset, $phodet_z+$offset );
+my $agel_posz=-$hollow_halfz+$agel_halfz+$BoxDelz;
+my $lens_z=$agel_posz+$agel_halfz+$lens_halfz;
+my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
+my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
+my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
+
+#my @detposZ = ( $offset, $offset-$agel_halfz+$BoxDelz, $lens_z+$offset, $phodet_z+$offset );
+my @detposZ = ( $offset, $offset+$agel_posz, $lens_z+$offset, $phodet_z+$offset );
+
 my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0 );
 my @readoutposZ = ( $readout_z[0]+$offset, $readout_z[1]+$offset );
 sub print_detector()
@@ -192,7 +202,7 @@ my $agel_mat  = "aerogel";
 
 my $agel_posx=0;
 my $agel_posy=0;
-my $agel_posz=$lens_z - $agel_halfz + $BoxDelz;
+#my $agel_posz=$lens_z - $agel_halfz + $BoxDelz;
 
 sub build_aerogel()
 {
