@@ -93,11 +93,13 @@ my $phodet_halfz = 0.75;       #Hamamatsu H12700
 
 my $metalSheet_halfx=$glassWindow_halfx;
 my $metalSheet_halfy=$metalSheet_halfx;
-#my $metalSheet_halfz=0.5;     #estimation
+my $metalSheet_halfz=0.5;     #estimation
+my $insulation=27.4;          #gap between sensor and metal sheet
 #my $metalSheet_z=$phodet_z-$phodet_halfz+27.4-$metalSheet_halfz;
 #print 'mateal halfx=',$metalSheet_halfx,', halfz=',$metalSheet_halfz,"\n";
 
 my $sensor_total_halfx=2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
+my $build_copper=1;            #1: build copper plate
 #========================================#
 #---------- Readout electronics ---------#
 my $readout_halfz = 4.0;
@@ -112,6 +114,7 @@ my $box_halfy=$box_halfx;
 #my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
 #my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness+10; #testing
 my $box_halfz = ((2*$agel_halfz+$BoxDelz)+2*$lens_halfz+$focalLength+2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz))/2.0+$box_thickness;
+if ($build_copper) { $box_halfz = $box_halfz+(2*$metalSheet_halfz+$insulation)/2.0;}
 
 my $offset = $box_halfz+50;     #detector box pos_z
 #my $offset = $box_halfz;
@@ -128,7 +131,10 @@ my $agel_posz=-$hollow_halfz+$agel_halfz+$BoxDelz;
 my $lens_z=$agel_posz+$agel_halfz+$lens_halfz;
 my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
-my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
+my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
+		     
+my @readout_z= ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
+if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
 
 #my @detposZ = ( $offset, $offset-$agel_halfz+$BoxDelz, $lens_z+$offset, $phodet_z+$offset );
 my @detposZ = ( $offset, $offset+$agel_posz, $lens_z+$offset, $phodet_z+$offset );
@@ -476,21 +482,23 @@ sub build_photondet()
 
 	#========================================#
 	#--------- build metal sheet ------------#
-	#%detector=init_det();
-        #$detector{"name"} = "$DetectorName\_sensorMetalSheet\_$i";
-        #$detector{"mother"} = "$DetectorName\_hollow";
-        #$detector{"description"} = "$DetectorName\_sensorMetalSheet\_$i";
-        #$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $metalSheet_z*mm";
-        #$detector{"rotation"} = "0*deg 0*deg 0*deg";
-        #$detector{"color"} = "ffcc00";
-        #$detector{"type"} = "Box";
-        #$detector{"dimensions"} = "$metalSheet_halfx*mm $metalSheet_halfy*mm $metalSheet_halfz*mm";
-        #$detector{"material"} = "G4_Cu";
-        #$detector{"mfield"} = "no";
-        #$detector{"sensitivity"} = "no";
-        #$detector{"hit_type"}    = "no";
-        #$detector{"identifiers"} = "no";
-        #print_det(\%configuration, \%detector);
+	if ($build_copper) {
+	    %detector=init_det();
+	    $detector{"name"} = "$DetectorName\_sensorMetalSheet\_$i";
+	    $detector{"mother"} = "$DetectorName\_hollow";
+	    $detector{"description"} = "$DetectorName\_sensorMetalSheet\_$i";
+	    $detector{"pos"} = "$photondet_x*mm $photondet_y*mm $metalSheet_z*mm";
+	    $detector{"rotation"} = "0*deg 0*deg 0*deg";
+	    $detector{"color"} = "ffcc00";
+	    $detector{"type"} = "Box";
+	    $detector{"dimensions"} = "$metalSheet_halfx*mm $metalSheet_halfy*mm $metalSheet_halfz*mm";
+	    $detector{"material"} = "G4_Cu";
+	    $detector{"mfield"} = "no";
+	    $detector{"sensitivity"} = "no";
+	    $detector{"hit_type"}    = "no";
+	    $detector{"identifiers"} = "no";
+	    print_det(\%configuration, \%detector);
+	}
 
         $last_x=$photondet_x;
         $last_y=$photondet_y;
