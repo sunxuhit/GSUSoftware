@@ -1,7 +1,7 @@
 #############################################################
 #############################################################
 #
-#  Define the geometry for the EIC RICH detector
+#  Geometry of the 2nd mRICH prototype detector
 #  
 #  All dimensions are in mm
 #  Use the hit type eic_rich 
@@ -10,32 +10,6 @@
 #  Aerogel, Fresnel lens, Mirrors, Photonsensor, and Readout
 #
 #############################################################
-#############################################################
-#  Ping 11-11-2015
-#  Changed detector dimension to fit the 3cm Agel
-#############################################################
-# Ping 02-04-2016
-# flip the orientation of the Fresnel Lens.
-# The grooves of the Fresnel lens are now facing the aerogel,
-# the smooth side of the lens is facing the photon sensor.
-#############################################################
-#############################################################
-# Ping 02-13-2016
-# 1. change focal length & curvature to match Edmund Optics 
-#    Fresnel lens #32-683
-# 2. make corner flat (polycone) if inner radius of groove
-#    greater or equal to effective radius of Fresnel lens
-#############################################################
-# Ping 02-17-2015
-# modify detector hold box to a acrylic box
-#############################################################
-# Ping 05-10-2016
-# 1. change # of grooves of Fresnel lens from 100 to 200
-# 2. change dimension of photon sensor to fit beam test 2016
-#    prototype
-#############################################################
-# Ping 05-21-2016
-# Lens modification to match beam test 2016 prototype
 #############################################################
 
 use strict;
@@ -60,18 +34,15 @@ my $BoxDelz = 2.0;   #gap ?
 my $agel_halfx = 55.25;
 my $agel_halfy = $agel_halfx;
 my $agel_halfz = 16.5; #3.3cm thick agel
-#my $agel_halfz =  10;
 my $agel_maxz =35;
 #========================================#
 #---- Fresnel lens dimension and info ---#
-#my $lens_z = -25.0;      #Ping: fix the value of lens_z
-
 my $lens_halfz = 3.0;    #redundent? lens holder halfz?
 my $lens_halfx=66.675;   #beam test 2016
 my $lens_halfy=$lens_halfx;
 my $LensDiameter = 2.0*sqrt(2.0)*$lens_halfx;
 
-my $focalLength=76.2;         #Edmund Optics stock#32-593 
+my $focalLength=152.4;         #Edmund Optics stock#32-593 
 #my $focalLength=100;          #testing
 my $LensEffDiameter =152.4;   #effective diameter in mm. Edmund Optics stock#32-593
 my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
@@ -79,19 +50,16 @@ my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm
 my $halfThickness=1.02;       #type in manually after configuration, and then recongfig
 #========================================#
 #------------ Photon Sensor -------------#
-#my $glassWindow_halfx= 52;
+#my $glassWindow_halfx= 100;    #testing
 my $glassWindow_halfx=52/2;
 my $glassWindow_halfy= $glassWindow_halfx;
 my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
-#my $glassWindow_halfz= 1;      #for finding absorption length
-#my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
-
 
 my $sensorGap=0.5;             #half the gap between sensor 
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
+#my $phodet_halfx = 100.0;        #testing
 my $phodet_halfy = $phodet_halfx;
 my $phodet_halfz = 0.75;       #Hamamatsu H12700
-#my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 
 my $metalSheet_halfx=$glassWindow_halfx;
 my $metalSheet_halfy=$metalSheet_halfx;
@@ -105,22 +73,18 @@ my $build_copper=0;            #1: build copper plate
 #========================================#
 #---------- Readout electronics ---------#
 my $readout_halfz = 4.0;
-#my @readout_z = ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz); #modified by Ping
+my $readout_thickness=2.0;
 #========================================#
 #------------- Detector box -------------#
-my @all_halfx=($agel_halfx,$lens_halfx,$sensor_total_halfx); # to find the max. halfx                                                     
-my $box_thickness=(3/8)*25.4;   #3/8 inches convert to mm
-#my $box_thickness=(1/4)*25.4;    #1/4 inches aluminum sheet
+my @all_halfx=($agel_halfx,$lens_halfx,$sensor_total_halfx+$readout_thickness); # to find the max. halfx                                                     
+my $box_thickness=(1/4)*25.4;    #1/4 inches aluminum sheet
 
 my $box_halfx = max(@all_halfx) + $box_thickness+1.0;
 my $box_halfy=$box_halfx;
-#my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness;
-#my $box_halfz = (-1.0*$lens_z+2.0*$lens_halfz+$readout_z[1]+2*$readout_halfz+$agel_maxz )/2.0+$box_thickness+10; #testing
 my $box_halfz = ((2*$agel_halfz+$BoxDelz)+2*$lens_halfz+$focalLength+2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz))/2.0+$box_thickness;
 if ($build_copper) { $box_halfz = $box_halfz+(2*$metalSheet_halfz+$insulation)/2.0;}
 
 my $offset = $box_halfz+50;     #detector box pos_z
-#my $offset = $box_halfz;
 
 my $hollow_halfx=$box_halfx-$box_thickness;
 my $hollow_halfy=$box_halfy-$box_thickness;
@@ -139,7 +103,6 @@ my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
 my @readout_z= ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
 if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
 
-#my @detposZ = ( $offset, $offset-$agel_halfz+$BoxDelz, $lens_z+$offset, $phodet_z+$offset );
 my @detposZ = ( $offset, $offset+$agel_posz, $lens_z+$offset, $phodet_z+$offset );
 
 my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0 );
@@ -160,13 +123,14 @@ sub print_detector()
   print'glass window   pos_z=',$glassWindow_z+$offset,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
   print"readout        position=(0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
   print"=====================================================================\n";
+  print"sensor_total_halfx= $sensor_total_halfx mm\n";
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~ Define the holder Box for Detectors ~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $box_name = "detector_holder";
-#my $box_mat = "G4_Al";
+my $box_mat = "G4_Al";
 #my $box_mat = "Air_Opt";
-my $box_mat = "holder_acrylic";
+#my $box_mat = "holder_acrylic";
 
 my $hollow_mat="Air_Opt";
 
@@ -240,14 +204,10 @@ my $lens_numOfHoldBox = 4;        #number of hold box for fresnel lens
 my $lens_holdbox_name="$DetectorName\_lensHoldBox";
 my $lens_holdbox_mat  = "Air_Opt";
 
-
 my $lens_mat  = "acrylic";
 my $lens_numOfGrooves = floor($grooveDensity*($LensEffDiameter/2));
 my $max_numOfGrooves=1000;
 
-#print"\tFresnel Lens: num. of grooves = $lens_numOfGrooves\n";
-#print"\tFresnel Lens: Lens diameter = $LensDiameter\n";
-#print"\tFresnel Lens: effective diameter = $LensEffDiameter mm \n";
 #========================================#
 #---------- build Fresnel Lens ----------#
 sub build_lens()
@@ -462,7 +422,6 @@ sub build_photondet()
 	$detector{"name"} = "$DetectorName\_glassWindow$i";
 	$detector{"mother"} = "$DetectorName\_hollow";
 	$detector{"description"} = "$DetectorName\_glassWindow$i";
-	#$detector{"pos"} = "0*mm 0*mm $glassWindow_z*mm";
 	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $glassWindow_z*mm";
 	$detector{"rotation"} = "0*deg 0*deg 0*deg";
 	$detector{"color"} = "1ABC9C";
@@ -529,66 +488,43 @@ sub build_mirrors()
 {
     print"building mirror set...\n";
 
-    my $dx1 = $agel_halfx;          # modified by Ping
-    my $dx2 =$sensor_total_halfx;
-    my $dy1 = 0.1;
-    my $dy2 = 0.1;
-    my $dz = ($glassWindow_z - $lens_z - $glassWindow_halfz - 3.0)/2.0;   #should eqaul focal length/2
-    
-    my $phi = atan2($dx1-$dx2, 2.0*$dz)*180/pi;
-    my $delxy = $dz*sin($phi*pi/180) + 1.0;
-    my $dz_update = sqrt( $dz**2 + ($dx1-$dx2)**2 );
-
-    my $mirror_halfy = 1.0;
     my $mirror_z=($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0;
-    
-    my @mirrorName=("back", "top", "front", "bottom");
-    my @angle_x=(0.0, -$phi, 0.0, $phi);   #in degree
-    my @angle_y=($phi, 0.0, -$phi, 0.0);   #in degree
-    my @angle_z=(90, 0.0, 90, 0.0);        #in degree
+    my $mirror_thickness=2;
+    my @mirror_z=($lens_z+$lens_halfz,$glassWindow_z-$glassWindow_halfz);
+    my @mirror_router = ( $agel_halfx+$mirror_thickness, $sensor_total_halfx+$mirror_thickness );
+    my @mirror_rinner = ( $agel_halfx, $sensor_total_halfx);
 
-    my $last_x=$agel_halfy+$mirror_halfy-$delxy;
-    my $last_y=0.0;
-
-    my $mirror_x;
-    my $mirror_y;
     my $idManual=3;
-    for (my $i=0;$i<4;$i++) {
-	if ($i==0) {
-	    $mirror_x=$last_x;
-	    $mirror_y=$last_y;
-	}
-	else {
-	    $mirror_x=-$last_y;
-	    $mirror_y=$last_x;
-	}
-	$idManual=3+$i;
-	my %detector=init_det();
-	$detector{"name"} = "$DetectorName\_mirror\_$mirrorName[$i]";
-	$detector{"mother"} = "$DetectorName\_hollow";
-	$detector{"description"} = "$DetectorName\_mirror\_$mirrorName[$i]";
-	$detector{"pos"} = "$mirror_x*mm $mirror_y*mm $mirror_z*mm";
-	$detector{"rotation"} = "$angle_x[$i]*deg $angle_y[$i]*deg $angle_z[$i]*deg";
-	$detector{"color"} = "ffff00";
-	$detector{"type"} = "Trd";
-	$detector{"dimensions"} = "$dx1*mm $dx2*mm $dy1*mm $dy2*mm $dz_update*mm";
-	$detector{"material"} = "$mirror_mat";
-	$detector{"sensitivity"} = "mirror: rich_mirrors";
-	$detector{"hit_type"} = "no";
-	$detector{"identifiers"} = "id manual $idManual";
-	print_det(\%configuration, \%detector);
-	
-	$last_x=$mirror_x;
-	$last_y=$mirror_y;
-    }#end of for loop
+    my %detector=init_det();
+    $detector{"name"} = "$DetectorName\_mirror";
+    $detector{"mother"} = "$DetectorName\_hollow";
+    $detector{"description"} = "$DetectorName\_mirror";
+    $detector{"pos"} = "0*mm 0*mm 0*mm";
+    $detector{"color"} = "ffff00";
+    $detector{"type"} = "Pgon";
+
+    my $dimen = "45*deg 360*deg 4*counts 2*counts";
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_rinner[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_router[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_z[$i]*mm";}
+
+    $detector{"dimensions"} = "$dimen";
+    $detector{"material"} = "$mirror_mat";
+    $detector{"sensitivity"} = "mirror: rich_mirrors";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
+    
+
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ readout hardware ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $readoutdet_name = "readout";
 my $readout_mat  = "Aluminum";
 my @readoutdet_pos  = ( 0.0, 0.0, 0.0 );
-my @readout_rinner = ( $sensor_total_halfx+1, $sensor_total_halfx+1 );
-my @readout_router = ( $agel_halfx, $agel_halfy );
+my @readout_rinner = ( $sensor_total_halfx, $sensor_total_halfx ); 
+my @readout_router = ( $sensor_total_halfx+$readout_thickness, $sensor_total_halfx+$readout_thickness );
+
 
 sub build_readout()
 {
@@ -601,6 +537,7 @@ sub build_readout()
     $detector{"pos"} = "$readoutdet_pos[0]*mm $readoutdet_pos[1]*mm $readoutdet_pos[2]*mm"; #Ping : checked
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
     $detector{"color"} = "ff0000";
+    $detector{"style"} = "1";
     $detector{"type"} = "Pgon";    ### Polyhedra
     my $dimen = "45*deg 360*deg 4*counts 2*counts";
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_rinner[$i]*mm";}
