@@ -34,30 +34,41 @@ my $BoxDelz = 2.0;   #gap ?
 my $agel_halfx = 55.25;
 my $agel_halfy = $agel_halfx;
 my $agel_halfz = 16.5; #3.3cm thick agel
-my $agel_maxz =35;
+
+my $foamHolderThicknessX=10.0;
+my $foamHolderThicknessZ=10.0;
+my $foamHolder_halfx=$agel_halfx+$foamHolderThicknessX;
+my $foamHolder_halfy=$foamHolder_halfx;
+my $foamHolder_halfz=$foamHolderThicknessZ/2.0;
 #========================================#
 #---- Fresnel lens dimension and info ---#
-my $lens_halfz = 3.0;    #redundent? lens holder halfz?
 my $lens_halfx=66.675;   #beam test 2016
 my $lens_halfy=$lens_halfx;
 my $LensDiameter = 2.0*sqrt(2.0)*$lens_halfx;
 
-my $focalLength=152.4;         #Edmund Optics stock#32-593 
-#my $focalLength=100;          #testing
-my $LensEffDiameter =152.4;   #effective diameter in mm. Edmund Optics stock#32-593
-my $grooveDensity=100/25.4;   #100 grooves per inch. converted to grooves per mm. Edmund Optics stock#32-683 &#32-593
-#my $grooveDensity=50/25.4;     #testing
-my $halfThickness=1.02;       #type in manually after configuration, and then recongfig
+my $focalLength=152.4;        #=6"
+my $LensEffDiameter =152.4;   #effective diameter in mm.
+my $grooveDensity=125/25.4;   #100 grooves per inch. converted to grooves per mm.
+my $centerThickness=0.06*25.4;
+#my $halfThickness=1.12;       #type in manually after configuration, and then recongfig
+my $lens_gap=25.4/8.0;
+
+my $lens_numOfGrooves = floor($grooveDensity*($LensEffDiameter/2));
+my $GrooveWidth=1/$grooveDensity;
+my $R_min = ($lens_numOfGrooves-1)*$GrooveWidth;
+my $R_max = ($lens_numOfGrooves-0)*$GrooveWidth;
+my $lens_halfz = (GetSagita($R_max)-GetSagita($R_min)+$centerThickness)/2.0; #dZ + center thickness
+
+print"Num. of grooves=",$lens_numOfGrooves," groove width=",$GrooveWidth,"\n";
+
 #========================================#
 #------------ Photon Sensor -------------#
-#my $glassWindow_halfx= 100;    #testing
 my $glassWindow_halfx=52/2;
 my $glassWindow_halfy= $glassWindow_halfx;
 my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
 
 my $sensorGap=0.5;             #half the gap between sensor 
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
-#my $phodet_halfx = 100.0;        #testing
 my $phodet_halfy = $phodet_halfx;
 my $phodet_halfz = 0.75;       #Hamamatsu H12700
 
@@ -65,24 +76,26 @@ my $metalSheet_halfx=$glassWindow_halfx;
 my $metalSheet_halfy=$metalSheet_halfx;
 my $metalSheet_halfz=0.5;     #estimation
 my $insulation=27.4;          #gap between sensor and metal sheet
-#my $metalSheet_z=$phodet_z-$phodet_halfz+27.4-$metalSheet_halfz;
-#print 'mateal halfx=',$metalSheet_halfx,', halfz=',$metalSheet_halfz,"\n";
 
 my $sensor_total_halfx=2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
 my $build_copper=0;            #1: build copper plate
 #========================================#
 #---------- Readout electronics ---------#
-my $readout_halfz = 4.0;
+my $readout_halfz = 4.0;           # I don't like it.
 my $readout_thickness=2.0;
 #========================================#
 #------------- Detector box -------------#
-my @all_halfx=($agel_halfx,$lens_halfx,$sensor_total_halfx+$readout_thickness); # to find the max. halfx                                                     
-my $box_thickness=(1/4)*25.4;    #1/4 inches aluminum sheet
+my @all_halfx=($foamHolder_halfx,$lens_halfx,$sensor_total_halfx+$readout_thickness);
+
+my $box_thickness=(3.0/8.0)*25.4;    #1/4 inches aluminum sheet
 
 my $box_halfx = max(@all_halfx) + $box_thickness+1.0;
 my $box_halfy=$box_halfx;
-my $box_halfz = ((2*$agel_halfz+$BoxDelz)+2*$lens_halfz+$focalLength+2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz))/2.0+$box_thickness;
-if ($build_copper) { $box_halfz = $box_halfz+(2*$metalSheet_halfz+$insulation)/2.0;}
+my $box_halfz = ($BoxDelz+2*$foamHolder_halfz+2*$agel_halfz
+		 +$lens_gap+2*$lens_halfz+$focalLength
+		 +2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz))/2.0+$box_thickness; 
+
+if ($build_copper) { $box_halfz = $box_halfz+(1*$metalSheet_halfz+$insulation)/2.0;}
 
 my $offset = $box_halfz+50;     #detector box pos_z
 
@@ -93,19 +106,21 @@ my $hollow_halfz=$box_halfz-$box_thickness;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#my @detposZ = ( $offset, $lens_z-$agel_halfz+$BoxDelz+$offset, $lens_z+$offset, $phodet_z+$offset );
-my $agel_posz=-$hollow_halfz+$agel_halfz+$BoxDelz;
-my $lens_z=$agel_posz+$agel_halfz+$lens_halfz;
-my $glassWindow_z= $lens_z+$focalLength-$glassWindow_halfz;
+my $foamHolder_posz=-$hollow_halfz+$BoxDelz+$foamHolder_halfz;
+my $agel_posz=$foamHolder_posz+$foamHolder_halfz+$agel_halfz;
+
+my $lens_z=$agel_posz+$agel_halfz+$lens_halfz+$lens_gap;
+my $glassWindow_z= $lens_z-$lens_halfz+$focalLength+$glassWindow_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
 		     
-my @readout_z= ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
+#my @readout_z= ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
+my @readout_z= ($glassWindow_z-$glassWindow_halfz, $phodet_z+$phodet_halfz);
 if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
 
 my @detposZ = ( $offset, $offset+$agel_posz, $lens_z+$offset, $phodet_z+$offset );
 
-my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0 );
+my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0, $lens_halfz );
 my @readoutposZ = ( $readout_z[0]+$offset, $readout_z[1]+$offset );
 sub print_detector()
 {
@@ -118,7 +133,7 @@ sub print_detector()
   
   print"hold box       position=(0.0, 0.0, $detposZ[0])mm, half size in XYZ=($box_halfx, $box_halfy, $box_halfz)mm\n";
   print"aerogel        position=(0.0, 0.0, $detposZ[1])mm, half size in XYZ=($agel_halfx, $agel_halfy, $agel_halfz)mm\n";
-  print"fresnel lens   position=(0.0, 0.0, $detposZ[2])mm, half size in XY=($freslens[0], $freslens[1])mm\n";
+  print"fresnel lens   position=(0.0, 0.0, $detposZ[2])mm, half size in XYZ=($freslens[0], $freslens[1], $freslens[2])mm\n";
   print"photon sensor  position=(0.0, 0.0, $detposZ[3])mm, half size in XYZ=($phodet_halfx, $phodet_halfy, $phodet_halfz)mm\n";
   print'glass window   pos_z=',$glassWindow_z+$offset,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
   print"readout        position=(0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
@@ -168,8 +183,55 @@ sub build_box()
     $detector{"hit_type"}    = "no";
     $detector{"identifiers"} = "no";
     print_det(\%configuration, \%detector);
-    
+
 }
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Foam holder ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+my $foamHolder_name="FoamHolder";
+my $foamHolder_mat="Air_Opt";
+
+sub build_foamHolder()
+{
+    print"building foam holder...\n";
+
+    my %detector=init_det();
+    $detector{"name"} = "$DetectorName\_$foamHolder_name";
+    $detector{"mother"} = "$DetectorName\_hollow";
+    $detector{"description"} = "$DetectorName\_$foamHolder_name";
+    $detector{"pos"} = "0*mm 0*mm $foamHolder_posz*mm";
+    $detector{"color"} = "00ff00";
+    $detector{"type"} = "Box";
+    $detector{"dimensions"} = "$foamHolder_halfx*mm $foamHolder_halfy*mm $foamHolder_halfz*mm";
+    $detector{"material"} = "$foamHolder_mat";
+    $detector{"sensitivity"} = "no";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
+
+    my @foamHolder_z=($agel_posz-$agel_halfz,$agel_posz+$agel_halfz);
+    my @foamHolder_rinner = ( $agel_halfx, $agel_halfx );
+    my @foamHolder_router = ( $agel_halfx+$foamHolderThicknessX, $agel_halfx+$foamHolderThicknessX );
+
+    $detector{"name"} = "$DetectorName\_$foamHolder_name\_1";
+    $detector{"mother"} = "$DetectorName\_hollow";
+    $detector{"description"} = "$DetectorName\_foamHolder_name";
+    $detector{"pos"} = "0*mm 0*mm 0*mm";
+    $detector{"rotation"} = "0*deg 0*deg 0*deg";
+    $detector{"color"} = "00ff00";
+    #$detector{"style"} = "1";
+    $detector{"type"} = "Pgon";    ### Polyhedra                                                                            
+    my $dimen = "45*deg 360*deg 4*counts 2*counts";
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_rinner[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_router[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_z[$i]*mm";}
+    $detector{"dimensions"} = "$dimen";
+    $detector{"material"} = "$foamHolder_mat";
+    $detector{"sensitivity"} = "no";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
+}
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Aerogel ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $agel_name = "Aerogel";
@@ -178,7 +240,6 @@ my $agel_mat  = "aerogel";
 
 my $agel_posx=0;
 my $agel_posy=0;
-#my $agel_posz=$lens_z - $agel_halfz + $BoxDelz;
 
 sub build_aerogel()
 {
@@ -205,7 +266,6 @@ my $lens_holdbox_name="$DetectorName\_lensHoldBox";
 my $lens_holdbox_mat  = "Air_Opt";
 
 my $lens_mat  = "acrylic";
-my $lens_numOfGrooves = floor($grooveDensity*($LensEffDiameter/2));
 my $max_numOfGrooves=1000;
 
 #========================================#
@@ -219,19 +279,8 @@ sub build_lens()
 
     my $count=0;
     #========================================#
-    #---- Properites of the fresnel lens ----#
-    my $GrooveWidth=1/$grooveDensity;
-    if($GrooveWidth<=0) { print "\tbuild_lens::GrooveWidth <= 0\n" }
-    else {print"\tFresnel Lens: groove width= $GrooveWidth\n";}
-    
-    #inner & outer radius of the groove at the adge of the lens
-    my $Rmin1 = ($lens_numOfGrooves-1)*$GrooveWidth;
-    my $Rmax1 = ($lens_numOfGrooves-0)*$GrooveWidth;
-    my $LensThickness = GetSagita($Rmax1)-GetSagita($Rmin1)+0.06*25.4; #dZ + center thickness
-    print"\tFresnel Lens: Lens thickness = $LensThickness\n";
-    #========================================#
     #----- holder box for fresnel lens ------#
-    my $lens_holdbox_halfz=$LensThickness/2.0+0.25;
+    my $lens_holdbox_halfz=$lens_halfz;
     print"\tholdbox half thickness= ",$lens_holdbox_halfz,"\n";
     #my @lens_holdbox_rotZ = ( -270, -180, -90, 0 );
     #========================================#
@@ -294,11 +343,11 @@ sub build_lens()
 	    $dZ = GetSagita($iRmax1) - GetSagita($iRmin1);
 	    #print "alpha=",atan($GrooveWidth/$dZ)*180/pi," deg\n";
 	    if($dZ<=0) { print "build_lens::Groove depth<0 !\n"; }
-	    @lens_poly_z    = (-1*$LensThickness/2.0, $LensThickness/2.0-$dZ, $LensThickness/2.0);
+	    @lens_poly_z    = (-1*$lens_halfz, $lens_halfz-$dZ, $lens_halfz);
 	}
 	else {
 	    $numOfLayer=2;
-	    @lens_poly_z    = (-1*$LensThickness/2.0, -1*$LensThickness/2.0+$dZ);
+	    @lens_poly_z    = (-1*$lens_halfz, -1*$lens_halfz+$dZ);
 	}
 	#--------------------------------------------------------#
 	my $repeat=1;
@@ -393,7 +442,6 @@ my $photondet_name = "Photondet";
 #my $photondet_mat  = "Aluminum";
 my $photondet_mat  = "Air_Opt";
 
-#my $last_x=$sensor_total_halfx/2+$sensorGap;
 my $last_x=$glassWindow_halfx+$sensorGap;
 my $last_y=$last_x;   #1st quandrant
 sub build_photondet()
@@ -488,11 +536,12 @@ sub build_mirrors()
 {
     print"building mirror set...\n";
 
-    my $mirror_z=($lens_z+$lens_halfz+($glassWindow_z-$glassWindow_halfz))/2.0;
     my $mirror_thickness=2;
-    my @mirror_z=($lens_z+$lens_halfz,$glassWindow_z-$glassWindow_halfz);
+    my @mirror_z=($lens_z+$lens_halfz+$lens_gap,$glassWindow_z-$glassWindow_halfz);
     my @mirror_router = ( $agel_halfx+$mirror_thickness, $sensor_total_halfx+$mirror_thickness );
     my @mirror_rinner = ( $agel_halfx, $sensor_total_halfx);
+    
+    print"\t",'mirror: length in z direction =',$mirror_z[1]-$mirror_z[0],"\n";
 
     my $idManual=3;
     my %detector=init_det();
@@ -558,6 +607,7 @@ sub build_detector()
     print_detector();
     print"=====================================================================\n";
     build_box();
+    build_foamHolder();
     build_aerogel();
     build_lens();
     build_photondet();
