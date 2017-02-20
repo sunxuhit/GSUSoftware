@@ -87,25 +87,30 @@ my $readout_thickness=2.0;
 #------------- Detector box -------------#
 my @all_halfx=($foamHolder_halfx,$lens_halfx,$sensor_total_halfx+$readout_thickness);
 
-my $box_thickness=(3.0/8.0)*25.4;    #1/4 inches aluminum sheet
+my $box_thicknessX=(1.0/4.0)*25.4;    #1/4 inches aluminum sheet
+my $box_thicknessZ1=(1.0/16.0)*25.4;
+my $box_thicknessZ2=(1.0/4.0)*25.4;
 
-my $box_halfx = max(@all_halfx) + $box_thickness+1.0;
+my $box_halfx = max(@all_halfx) + $box_thicknessX+1.0;
 my $box_halfy=$box_halfx;
 my $box_halfz = ($BoxDelz+2*$foamHolder_halfz+2*$agel_halfz
 		 +$lens_gap+2*$lens_halfz+$focalLength
-		 +2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz))/2.0+$box_thickness; 
+		 +2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz)
+		 +$box_thicknessZ1+$box_thicknessZ2)/2.0;
 
 if ($build_copper) { $box_halfz = $box_halfz+(1*$metalSheet_halfz+$insulation)/2.0;}
 
 my $offset = $box_halfz+50;     #detector box pos_z
 
-my $hollow_halfx=$box_halfx-$box_thickness;
-my $hollow_halfy=$box_halfy-$box_thickness;
-my $hollow_halfz=$box_halfz-$box_thickness;
+my $hollow_halfx=$box_halfx-$box_thicknessX;
+my $hollow_halfy=$hollow_halfx;
+my $hollow_halfz=(2.0*$box_halfz-$box_thicknessZ1-$box_thicknessZ2)/2.0;
 #========================================#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+my $hollow_z=-$box_halfz+$hollow_halfz+$box_thicknessZ1;
+
 my $foamHolder_posz=-$hollow_halfz+$BoxDelz+$foamHolder_halfz;
 my $agel_posz=$foamHolder_posz+$foamHolder_halfz+$agel_halfz;
 
@@ -114,14 +119,14 @@ my $glassWindow_z= $lens_z-$lens_halfz+$focalLength+$glassWindow_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
 		     
-#my @readout_z= ($phodet_z-$phodet_halfz, $phodet_z-$phodet_halfz+2.0*$readout_halfz+$BoxDelz);
 my @readout_z= ($glassWindow_z-$glassWindow_halfz, $phodet_z+$phodet_halfz);
 if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
 
-my @detposZ = ( $offset, $offset+$agel_posz, $lens_z+$offset, $phodet_z+$offset );
+my $hollowOffset=$hollow_z+$offset;   #accumulated offset due to asymmetric detector walls (z-direction)
+my @detposZ = ( $offset, $hollowOffset,$hollowOffset+$agel_posz, $hollowOffset+$lens_z, $hollowOffset+$phodet_z);
 
 my @freslens = ( 2.0*sqrt(2.0)*$LensDiameter/8.0, 2.0*sqrt(2.0)*$LensDiameter/8.0, $lens_halfz );
-my @readoutposZ = ( $readout_z[0]+$offset, $readout_z[1]+$offset );
+my @readoutposZ = ( $hollowOffset+$readout_z[0], $hollowOffset+$readout_z[1]);
 sub print_detector()
 {
   my $agelThickness=2*$agel_halfz/10;
@@ -132,10 +137,11 @@ sub print_detector()
   print"Printing detector positions and sizes ...\n\n";
   
   print"hold box       position=(0.0, 0.0, $detposZ[0])mm, half size in XYZ=($box_halfx, $box_halfy, $box_halfz)mm\n";
-  print"aerogel        position=(0.0, 0.0, $detposZ[1])mm, half size in XYZ=($agel_halfx, $agel_halfy, $agel_halfz)mm\n";
-  print"fresnel lens   position=(0.0, 0.0, $detposZ[2])mm, half size in XYZ=($freslens[0], $freslens[1], $freslens[2])mm\n";
-  print"photon sensor  position=(0.0, 0.0, $detposZ[3])mm, half size in XYZ=($phodet_halfx, $phodet_halfy, $phodet_halfz)mm\n";
-  print'glass window   pos_z=',$glassWindow_z+$offset,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
+  print"hollowVol      position=(0.0, 0.0, $detposZ[1])mm, half size in XYZ=($hollow_halfx, $hollow_halfy, $hollow_halfz)mm\n";
+  print"aerogel        position=(0.0, 0.0, $detposZ[2])mm, half size in XYZ=($agel_halfx, $agel_halfy, $agel_halfz)mm\n";
+  print"fresnel lens   position=(0.0, 0.0, $detposZ[3])mm, half size in XYZ=($freslens[0], $freslens[1], $freslens[2])mm\n";
+  print"photon sensor  position=(0.0, 0.0, $detposZ[4])mm, half size in XYZ=($phodet_halfx, $phodet_halfy, $phodet_halfz)mm\n";
+  print'glass window   pos_z=',$hollowOffset+$glassWindow_z,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
   print"readout        position=(0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
   print"=====================================================================\n";
   print"sensor_total_halfx= $sensor_total_halfx mm\n";
@@ -172,7 +178,7 @@ sub build_box()
     $detector{"name"} = "$DetectorName\_hollow";
     $detector{"mother"} = "$DetectorName\_$box_name";
     $detector{"description"} = "$DetectorName\_hollow";
-    $detector{"pos"} = "0*mm 0*mm 0*mm";   #w.r.t. detector
+    $detector{"pos"} = "0*mm 0*mm $hollow_z*mm";   #w.r.t. detector
     $detector{"color"} = "ffffff";
     $detector{"type"} = "Box";
     $detector{"style"} = "0";
@@ -473,7 +479,7 @@ sub build_photondet()
 	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $glassWindow_z*mm";
 	$detector{"rotation"} = "0*deg 0*deg 0*deg";
 	$detector{"color"} = "1ABC9C";
-	$detector{"style"} = "1";
+	#$detector{"style"} = "1";
 	$detector{"type"} = "Box";
 	$detector{"dimensions"} = "$glassWindow_halfx*mm $glassWindow_halfy*mm $glassWindow_halfz*mm";
 	$detector{"material"} = "glass";
@@ -493,7 +499,7 @@ sub build_photondet()
 	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $phodet_z*mm";
 	$detector{"rotation"} = "0*deg 0*deg 0*deg";
 	$detector{"color"} = "0000A0";
-	$detector{"style"} = "1";
+	#$detector{"style"} = "1";
 	$detector{"type"} = "Box";
 	$detector{"dimensions"} = "$phodet_halfx*mm $phodet_halfy*mm $phodet_halfz*mm";
 	$detector{"material"} = "$photondet_mat";
