@@ -307,14 +307,16 @@ void MyMainFrame::FillHistos()
 
 void MyMainFrame::ResetHistos()
 {
-  for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+  if(isFilled)
   {
-    fHpx[i_Amp]->Reset();
-    c_Histo->cd(i_Amp+1);
-    fHpx[i_Amp]->Draw();
-    c_Histo->cd(i_Amp+1)->Update();
+    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    {
+      fHpx[i_Amp]->Reset();
+      c_Histo->cd(i_Amp+1);
+      fHpx[i_Amp]->Draw();
+      c_Histo->cd(i_Amp+1)->Update();
+    }
   }
-
 }
 
 void MyMainFrame::SaveDataTree(string outputfile)
