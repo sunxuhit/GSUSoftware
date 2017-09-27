@@ -1,5 +1,4 @@
-// example.C
-
+#include <RQ_OBJECT.h>
 #include "TGClient.h"
 #include "TCanvas.h"
 #include "TF1.h"
@@ -7,9 +6,10 @@
 #include "TGButton.h"
 #include "TGFrame.h"
 #include "TRootEmbeddedCanvas.h"
-#include "TDatime.h"
 #include "TH1F.h"
-#include <RQ_OBJECT.h>
+#include "TDatime.h"
+#include "TTimer.h"
+#include "TGProgressBar.h"
 
 class MyMainFrame {
   RQ_OBJECT("MyMainFrame")
@@ -24,6 +24,7 @@ class MyMainFrame {
     TGTextButton *bResetHistos;
     TGTextButton *bHVStatus;
     TGTextButton *bSaveDataTree;
+    TGTextButton *bTestRun;
 
     TGTab *mTab;
     TGCompositeFrame *fConfiguration;
@@ -33,36 +34,50 @@ class MyMainFrame {
     TGCheckButton *bChanEnaTrig[10];
     TGCompositeFrame *fAllHistos;
     TH1F *fHpx[8] = NULL;
-    bool isFilled = 0;
     TCanvas *c_Histo;
-
+    bool isFilled;
     bool fFillHistos;
+
+    TDatime *Time_Start;
+    TDatime *Time_Stop;
+    long StartTime;
+    long StopTime;
+    long TestRunTime; // 60s => 1min
     TFile *File_OutPut;
-    TDatime *time;
+
+    TGHProgressBar *ProgTimer;
+
+    bool fClose;
+
   public:
-    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
+    MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h);
     virtual ~MyMainFrame();
+
+    // slots
+    void HandleButtons(Int_t id = -1);
     void SendAllChecked();
     void SendAllUnChecked();
+    void DoClose();
 
-    void DAQ_Start(); // *SIGNAL*
-    void HV_On(); // *SIGNAL*
-    void HV_Off(); // *SIGNAL*
-    void DAQ_Stop(); // *SIGNAL*
-
-    void HandleButtons(Int_t id = -1);
+    // functions
+    void HV_On();
+    void HV_Off();
     void FillHistos();
     void ResetHistos();
     void SaveDataTree(string outputfile = "test.root");
+    void ProcessTime();
+    void CloseWindow();
 };
 
 
-MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) 
+MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h) 
 {
-  // main frame
-  fMain = new TGMainFrame(p,w,h);
-  fMain->SetName("fMain");
-  // fMain->SetLayoutBroken(kTRUE);
+  fClose = kTRUE;
+  isFilled = kFALSE;
+
+  fMain = new TGMainFrame(p,w,h); // main frame
+  fMain->SetName("HCAL_GUI_Test");
+  fMain->Connect("CloseWindow()", "MyMainFrame", this, "DoClose()");
 
   hframe = new TGHorizontalFrame(fMain,200,200);
 
@@ -70,7 +85,6 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h)
   fGroupFrame = new TGGroupFrame(hframe,"DAQ FEB controls");
 
   bStartDAQ = new TGTextButton(fGroupFrame,"Start DAQ",415);
-  // bStartDAQ->Connect("Clicked()","MyMainFrame",this,"DAQ_Start()");
   bStartDAQ->Connect("Clicked()","MyMainFrame", this, "HandleButtons(Int_t)");
   fGroupFrame->AddFrame(bStartDAQ, new TGLayoutHints(kLHintsCenterX,10,10,10,10));
 
@@ -89,6 +103,14 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h)
   bSaveDataTree = new TGTextButton(fGroupFrame,"Save Data TTree",419);
   bSaveDataTree->Connect("Clicked()","MyMainFrame",this,"HandleButtons(Int_t)");
   fGroupFrame->AddFrame(bSaveDataTree, new TGLayoutHints(kLHintsCenterX,10,10,10,10));
+
+  bTestRun = new TGTextButton(fGroupFrame,"Test Run",420);
+  bTestRun->Connect("Clicked()","MyMainFrame",this,"HandleButtons(Int_t)");
+  fGroupFrame->AddFrame(bTestRun, new TGLayoutHints(kLHintsCenterX,10,10,10,10));
+
+  ProgTimer = new TGHProgressBar(fGroupFrame,100);
+  ProgTimer->ShowPosition();
+  fGroupFrame->AddFrame(ProgTimer, new TGLayoutHints(kLHintsCenterX,10,10,10,10));
 
   hframe->AddFrame(fGroupFrame, new TGLayoutHints(kLHintsTop | kLHintsLeft | kLHintsExpandY,2,2,2,2));
   //-----------------------------------------------
@@ -217,11 +239,17 @@ void MyMainFrame::HandleButtons(Int_t id)
        if(bChanEnaAmp[0]->IsOn() || bChanEnaAmp[1]->IsOn() || bChanEnaAmp[2]->IsOn() || bChanEnaAmp[3]->IsOn() || bChanEnaAmp[4]->IsOn() || bChanEnaAmp[5]->IsOn() || bChanEnaAmp[6]->IsOn() || bChanEnaAmp[7]->IsOn())
        {
 	 fFillHistos = kTRUE;
+	 Time_Start = new TDatime();
+	 string Radio_RunStart = Form("Start Run at: %d:%d:%d",Time_Start->GetHour(),Time_Start->GetMinute(),Time_Start->GetSecond());
+	 cout << Radio_RunStart.c_str() << endl;
 	 FillHistos();
        }
        break;
      case 416:  // Stop DAQ
        fFillHistos = kFALSE;
+       Time_Stop = new TDatime();
+       string Radio_RunStop = Form("Stop Run at: %d:%d:%d",Time_Stop->GetHour(),Time_Stop->GetMinute(),Time_Stop->GetSecond());
+       cout << Radio_RunStop.c_str() << endl;
        HV_Off();
        break;
      case 417: // Rest Histograms
@@ -231,8 +259,34 @@ void MyMainFrame::HandleButtons(Int_t id)
        cout << "Do not play with High Voltage!!" << endl;
        break;
      case 419: // Save Data TTree
-       time = new TDatime();
-       string outputfile = Form("HCALTileTest_%d_%d.root",time->GetDate(),time->GetTime());
+       if(!Time_Stop) Time_Stop = new TDatime();
+       string outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+       cout << "Save data to " << outputfile.c_str() << endl;
+       SaveDataTree(outputfile);
+       break;
+     case 420: // test run
+       SendAllChecked(); // set configuration
+       HV_On(); // turn on High Voltage
+
+       mTab->SetTab(1); // switch to all histos tab 
+       ResetHistos(); // reset histograms
+
+       Time_Start = new TDatime(); // broadcast start time
+       string Radio_RunStart = Form("Start Test Run at: %d:%d:%d",Time_Start->GetHour(),Time_Start->GetMinute(),Time_Start->GetSecond());
+       cout << Radio_RunStart.c_str() << endl;
+
+       StartTime = gSystem->Now(); // get start time in milliseconds 
+       TestRunTime = 60000; // in milliseconds
+       ProcessTime(); // start taking data
+
+       Time_Stop = new TDatime(); // broadcast stop time
+       string Radio_RunStop = Form("Stop Run at: %d:%d:%d",Time_Stop->GetHour(),Time_Stop->GetMinute(),Time_Stop->GetSecond());
+       cout << Radio_RunStop.c_str() << endl;
+       StopTime = gSystem->Now(); // get start time in milliseconds 
+       // cout << "StartTime = " << StartTime << ", StopTime = " << StopTime << endl;
+       cout << "time duration = " << (StopTime-StartTime)/1000.0 << endl;
+
+       string outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
        cout << "Save data to " << outputfile.c_str() << endl;
        SaveDataTree(outputfile);
        break;
@@ -273,7 +327,7 @@ void MyMainFrame::FillHistos()
       c_Histo->cd(i_Amp+1)->Update();
       cnt[i_Amp] = 0;
     }
-    isFilled = 1;
+    isFilled = kTRUE;
   }
 
   const int kUPDATE = 1000;
@@ -328,6 +382,118 @@ void MyMainFrame::SaveDataTree(string outputfile)
     if(fHpx[i_Amp]) fHpx[i_Amp]->Write();
   }
   File_OutPut->Close();
+}
+
+void MyMainFrame::CloseWindow()
+{
+  // Called when window is closed via the window manager.
+
+  gApplication->Terminate();
+}
+
+void MyMainFrame::DoClose()
+{
+  // If fClose is false we are still in event processing loop in DoGo().
+  // In that case, set the close flag true and use a timer to call
+  // CloseWindow(). This gives us change to get out of the DoGo() loop.
+  // Note: calling SendCloseMessage() will not work since that will
+  // bring us back here (CloseWindow() signal is connected to this method)
+  // with the fClose flag true, which will cause window deletion while
+  // still being in the event processing loop (since SendCloseMessage()
+  // is directly processed in ProcessEvents() without exiting DoGo()).
+
+  if (fClose)
+    CloseWindow();
+  else {
+    fClose = kTRUE;
+    TTimer::SingleShot(150, "MyMainFrame", this, "CloseWindow()");
+  }
+}
+
+void MyMainFrame::ProcessTime()
+{
+  // Handle TextRun button.
+  // Fill histograms on selected channel till user clicks "Stop Filling" button.
+
+  static int cnt[8];
+
+  if (!isFilled) 
+  {
+    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    {
+      string HistName = Form("hpx_%d",i_Amp);
+      cout << "Declare Histograms: " << HistName.c_str() << endl;
+      fHpx[i_Amp] = new TH1F(HistName.c_str(),"This is the px distribution",100,-4,4);
+      fHpx[i_Amp]->SetFillColor(1+i_Amp);
+      fHpx[i_Amp]->Reset();
+      c_Histo->cd(i_Amp+1);
+      fHpx[i_Amp]->Draw();
+      c_Histo->cd(i_Amp+1)->Update();
+      cnt[i_Amp] = 0;
+    }
+    isFilled = kTRUE;
+  }
+
+  const int kUPDATE = 1;
+  float px, py;
+
+  fClose = kFALSE;
+  float counter = 0;
+  float inc = 1;
+  ProgTimer->Reset();
+  ProgTimer->SetBarColor("blue");
+  fFillHistos = kTRUE;
+  cout << "TestRunTime = " << TestRunTime << endl;
+  long const DeltaTime = TestRunTime/100;
+  cout << "DeltaTime = " << DeltaTime << endl;
+
+  while (fFillHistos) 
+  {
+    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    {
+      if(bChanEnaAmp[i_Amp]->IsOn())
+      {
+	gRandom->Rannor(px,py); //px and py will be two gaussian random numbers
+	cnt[i_Amp]++;
+	fHpx[i_Amp]->Fill(px);
+	if (!(cnt[i_Amp] % kUPDATE)) 
+	{
+	  if (cnt[i_Amp] == kUPDATE) 
+	  {
+	    c_Histo->cd(i_Amp+1);
+	    fHpx[i_Amp]->Draw();
+	    // fHpxpy->Draw("cont");
+	  }
+	  c_Histo->cd(i_Amp+1)->Modified();
+	  c_Histo->cd(i_Amp+1)->Update();
+	}
+      }
+    }
+    gSystem->ProcessEvents();  // handle GUI events
+
+    long ContTime = gSystem->Now() - StartTime; // in second
+    if( ContTime/DeltaTime > counter ) // update every DeltaTime
+    {
+      cout << "ContTime = " << ContTime/1000.0 << ", counter = " << counter << endl;
+      counter += inc;
+      ProgTimer->Increment(inc);
+    }
+
+    if(counter > 100)
+    {
+      fFillHistos = kFALSE;
+      HV_Off();
+    }
+
+    // if user closed window return
+    if (fClose) 
+    {
+      cout << "stopping..." << endl;
+      return;
+    }
+  }
+  fClose = kTRUE;
+  return;
 }
 
 void HCAL_GUI() {
