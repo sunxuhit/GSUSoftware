@@ -10,6 +10,11 @@
 #include "TDatime.h"
 #include "TTimer.h"
 #include "TGProgressBar.h"
+#include "TGNumberEntry.h"
+#include "TGLabel.h"
+
+#define MAXPACKLEN 1500
+#define NumOfChannels 8;
 
 class MyMainFrame {
   RQ_OBJECT("MyMainFrame")
@@ -27,13 +32,26 @@ class MyMainFrame {
     TGTextButton *bTestRun;
 
     TGTab *mTab;
-    TGCompositeFrame *fConfiguration;
-    TGVButtonGroup *bAmplifier;
-    TGCheckButton *bChanEnaAmp[10];
-    TGVButtonGroup *bTrigger;
-    TGCheckButton *bChanEnaTrig[10];
+    TGCompositeFrame  *fConfiguration;
+
+    TGVButtonGroup    *bAmplifier;
+    TGCheckButton     *bChanEnaAmp[NumOfChannels+2];
+
+    TGVButtonGroup    *bTrigger;
+    TGCheckButton     *bChanEnaTrig[NumOfChannels];
+
+    TGGroupFrame      *fGainBias;
+    TGHorizontalFrame *fLabel, *fGainBiasSub[NumOfChannels];
+    TGNumberEntry     *nGain[NumOfChannels];
+    TGNumberEntry     *nBias[NumOfChannels];
+    TGLabel           *lChannel[NumOfChannels];
+    TGLayoutHints     *lhGainBias;
+    UChar_t bufPMR[MAXPACKLEN];
+    UChar_t bufSCR[MAXPACKLEN];
+    int Verbose=0;
+
     TGCompositeFrame *fAllHistos;
-    TH1F *fHpx[8] = NULL;
+    TH1F *fHpx[NumOfChannels] = NULL;
     TCanvas *c_Histo;
     bool isFilled;
     bool fFillHistos;
@@ -67,6 +85,12 @@ class MyMainFrame {
     void SaveDataTree(string outputfile = "test.root");
     void ProcessTime();
     void CloseWindow();
+
+    void UpdateConfig();
+    int ReadBitStream(const char * fname, UChar_t* buf);
+    bool ConfigGetBit(UChar_t *buffer, UShort_t bitlen, UShort_t bit_index);
+    UChar_t ConfigGetGain(int channel);
+    UChar_t ConfigGetBias(int channel);
 };
 
 
@@ -124,43 +148,71 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h)
 
   bAmplifier = new TGVButtonGroup(fConfiguration,"Enable Amplifier");
   char str[32];
-  for(int i=0;i<8;i++)
+  for(int i_amp = 0; i_amp < NumOfChannels;++i_amp)
   {
-    sprintf(str,"ch%d",i);
-    bChanEnaAmp[i] = new TGCheckButton(bAmplifier,str);
-    bChanEnaAmp[i]->SetTextJustify(36);
-    bChanEnaAmp[i]->SetMargins(0,0,0,0);
-    bChanEnaAmp[i]->SetWrapLength(-1);
+    sprintf(str,"ch%d",i_amp);
+    bChanEnaAmp[i_amp] = new TGCheckButton(bAmplifier,str);
+    bChanEnaAmp[i_amp]->SetTextJustify(36);
+    bChanEnaAmp[i_amp]->SetMargins(0,0,0,0);
+    bChanEnaAmp[i_amp]->SetWrapLength(-1);
     // bChanEnaAmp[i]->SetCommand("SendConfig()");
   }
-  bChanEnaAmp[8] = new TGCheckButton(bAmplifier,"All");
-  bChanEnaAmp[8]->SetTextJustify(36);
-  bChanEnaAmp[8]->SetMargins(0,0,0,0);
-  bChanEnaAmp[8]->SetWrapLength(-1);
-  bChanEnaAmp[8]->Connect("Clicked()","MyMainFrame",this,"SendAllChecked()");
-  bChanEnaAmp[9] = new TGCheckButton(bAmplifier,"None");
-  bChanEnaAmp[9]->SetTextJustify(36);
-  bChanEnaAmp[9]->SetMargins(0,0,0,0);
-  bChanEnaAmp[9]->SetWrapLength(-1);
-  bChanEnaAmp[9]->Connect("Clicked()","MyMainFrame",this,"SendAllUnChecked()");
+  bChanEnaAmp[NumOfChannels] = new TGCheckButton(bAmplifier,"All");
+  bChanEnaAmp[NumOfChannels]->SetTextJustify(36);
+  bChanEnaAmp[NumOfChannels]->SetMargins(0,0,0,0);
+  bChanEnaAmp[NumOfChannels]->SetWrapLength(-1);
+  bChanEnaAmp[NumOfChannels]->Connect("Clicked()","MyMainFrame",this,"SendAllChecked()");
+  bChanEnaAmp[NumOfChannels+1] = new TGCheckButton(bAmplifier,"None");
+  bChanEnaAmp[NumOfChannels+1]->SetTextJustify(36);
+  bChanEnaAmp[NumOfChannels+1]->SetMargins(0,0,0,0);
+  bChanEnaAmp[NumOfChannels+1]->SetWrapLength(-1);
+  bChanEnaAmp[NumOfChannels+1]->Connect("Clicked()","MyMainFrame",this,"SendAllUnChecked()");
 
   fConfiguration->AddFrame(bAmplifier, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandY,2,2,2,2));
   bAmplifier->Show();
    
 
   bTrigger = new TGVButtonGroup(fConfiguration,"Enable Trigger");
-  for(int i=0;i<8;i++)
+  for(int i_trig = 0; i_trig < NumOfChannels; ++i_trig)
   {
-    sprintf(str,"ch%d",i);
-    bChanEnaTrig[i] = new TGCheckButton(bTrigger,str);
-    bChanEnaTrig[i]->SetTextJustify(36);
-    bChanEnaTrig[i]->SetMargins(0,0,0,0);
-    bChanEnaTrig[i]->SetWrapLength(-1);
+    sprintf(str,"ch%d",i_trig);
+    bChanEnaTrig[i_trig] = new TGCheckButton(bTrigger,str);
+    bChanEnaTrig[i_trig]->SetTextJustify(36);
+    bChanEnaTrig[i_trig]->SetMargins(0,0,0,0);
+    bChanEnaTrig[i_trig]->SetWrapLength(-1);
     // bChanEnaTrig[i]->SetCommand("SendConfig()");
   }
    
   fConfiguration->AddFrame(bTrigger, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandY,2,2,2,2));
   bTrigger->Show();
+
+  fGainBias = new TGGroupFrame(fConfiguration,"default config");
+  lhGainBias = new TGLayoutHints(kLHintsCenterX | kLHintsCenterY,2,2,2,2);
+  fLabel = new TGHorizontalFrame(fGainBias, 200, 30);
+  fLabel->AddFrame(new TGLabel(fLabel,"    "),lhGainBias);
+  fLabel->AddFrame(new TGLabel(fLabel,"gain"),lhGainBias);
+  fLabel->AddFrame(new TGLabel(fLabel,"bias"),lhGainBias);
+  fGainBias->AddFrame(fLabel, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX,2,2,2,2));
+
+  for(int i_num = 0; i_num < NumOfChannels; ++i_num)
+  {
+    sprintf(str,"ch%d",i_num);
+    fGainBiasSub[i_num] = new TGHorizontalFrame(fGainBias, 200, 30);
+    lChannel[i_num] = new TGLabel(fGainBiasSub[i_num],str);
+
+    nGain[i_num] = new TGNumberEntry(fGainBiasSub[i_num], (Double_t)i_num,3,-1,(TGNumberFormat::EStyle)0,(TGNumberFormat::EAttribute)1,(TGNumberFormat::ELimit)2,0,64);
+    nGain[i_num]->SetHeight(20);
+
+    nBias[i_num] = new TGNumberEntry(fGainBiasSub[i_num],(Double_t)i_num,3,-1,(TGNumberFormat::EStyle)0,(TGNumberFormat::EAttribute)1,(TGNumberFormat::ELimit)2,0,256);
+    nBias[i_num]->SetHeight(20);
+
+    fGainBiasSub[i_num]->AddFrame(lChannel[i_num],lhGainBias);
+    fGainBiasSub[i_num]->AddFrame(nGain[i_num],lhGainBias);
+    fGainBiasSub[i_num]->AddFrame(nBias[i_num],lhGainBias);
+    fGainBias->AddFrame(fGainBiasSub[i_num], new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX,2,2,2,2));
+  }
+
+  fConfiguration->AddFrame(fGainBias, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandY,2,2,2,2));
 
 
   // container of "All histos"
@@ -172,7 +224,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h)
   int fEcanvasID = fEcanvas->GetCanvasWindowId();
   c_Histo = new TCanvas("c_Histo",10,10,fEcanvasID);
   c_Histo->Divide(4,2);
-  for(int i_pad = 0; i_pad < 8; ++i_pad)
+  for(int i_pad = 0; i_pad < NumOfChannels; ++i_pad)
   {
     c_Histo->cd(i_pad+1);
     c_Histo->cd(i_pad+1)->SetLeftMargin(0.15);
@@ -205,20 +257,20 @@ MyMainFrame::~MyMainFrame() {
 
 void MyMainFrame::SendAllChecked()
 {
-  for(int i=0; i<8;i++)
+  for(int i=0; i<NumOfChannels;i++)
   {
      bChanEnaAmp[i]->SetOn(); 
   }
-  bChanEnaAmp[9]->SetOn(kFALSE);bChanEnaAmp[8]->SetOn(kFALSE);
+  bChanEnaAmp[9]->SetOn(kFALSE);bChanEnaAmp[NumOfChannels]->SetOn(kFALSE);
 }
 
 void MyMainFrame::SendAllUnChecked()
 {
-  for(int i=0; i<8;i++)
+  for(int i=0; i<NumOfChannels;i++)
   {
      bChanEnaAmp[i]->SetOn(kFALSE); 
   }
-  bChanEnaAmp[9]->SetOn(kFALSE);bChanEnaAmp[8]->SetOn(kFALSE);
+  bChanEnaAmp[9]->SetOn(kFALSE);bChanEnaAmp[NumOfChannels]->SetOn(kFALSE);
 }
 
 void MyMainFrame::HandleButtons(Int_t id)
@@ -311,11 +363,11 @@ void MyMainFrame::FillHistos()
 {
   // Fill histograms on selected channel till user clicks "Stop Filling" button.
 
-  static int cnt[8];
+  static int cnt[NumOfChannels];
 
   if (!isFilled) 
   {
-    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    for(int i_Amp = 0; i_Amp < NumOfChannels; ++i_Amp )
     {
       string HistName = Form("hpx_%d",i_Amp);
       cout << "Declare Histograms: " << HistName.c_str() << endl;
@@ -335,7 +387,7 @@ void MyMainFrame::FillHistos()
 
   while (fFillHistos) 
   {
-    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    for(int i_Amp = 0; i_Amp < NumOfChannels; ++i_Amp )
     {
       if(bChanEnaAmp[i_Amp]->IsOn())
       {
@@ -363,7 +415,7 @@ void MyMainFrame::ResetHistos()
 {
   if(isFilled)
   {
-    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    for(int i_Amp = 0; i_Amp < NumOfChannels; ++i_Amp )
     {
       fHpx[i_Amp]->Reset();
       c_Histo->cd(i_Amp+1);
@@ -377,7 +429,7 @@ void MyMainFrame::SaveDataTree(string outputfile)
 {
   File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
-  for(int i_Amp = 0; i_Amp < 8; ++i_Amp)
+  for(int i_Amp = 0; i_Amp < NumOfChannels; ++i_Amp)
   {
     if(fHpx[i_Amp]) fHpx[i_Amp]->Write();
   }
@@ -415,11 +467,11 @@ void MyMainFrame::ProcessTime()
   // Handle TextRun button.
   // Fill histograms on selected channel till user clicks "Stop Filling" button.
 
-  static int cnt[8];
+  static int cnt[NumOfChannels];
 
   if (!isFilled) 
   {
-    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    for(int i_Amp = 0; i_Amp < NumOfChannels; ++i_Amp )
     {
       string HistName = Form("hpx_%d",i_Amp);
       cout << "Declare Histograms: " << HistName.c_str() << endl;
@@ -449,7 +501,7 @@ void MyMainFrame::ProcessTime()
 
   while (fFillHistos) 
   {
-    for(int i_Amp = 0; i_Amp < 8; ++i_Amp )
+    for(int i_Amp = 0; i_Amp < NumOfChannels; ++i_Amp )
     {
       if(bChanEnaAmp[i_Amp]->IsOn())
       {
@@ -496,7 +548,99 @@ void MyMainFrame::ProcessTime()
   return;
 }
 
+int MyMainFrame::ReadBitStream(const char * fname, UChar_t* buf) // read CITIROC SC bitstream into the buffer, buf[MAXPACKLEN]
+{
+  FILE *file = fopen(fname, "r");
+  if(file<=0) return 0;
+  char line[128];
+  char bit;
+  int ptr, byteptr;
+  int bitlen=0;
+  char ascii[MAXPACKLEN];
+  while (fgets(line, sizeof(line), file)) {
+    bit=1; ptr=0; byteptr=0;
+    // printf("%d: %s",bitlen,line);
+
+    while(bit!=0x27 && bit!=0 && ptr<sizeof(line) && bitlen<MAXPACKLEN) // ASCII(0x27)= '
+    {
+      bit=line[ptr];
+      ptr++;
+      if(bit==0x20 || bit==0x27) continue; //ignore spaces and apostrophe
+      if(Verbose) printf("%c",bit);
+      ascii[bitlen]=bit;
+      bitlen++;
+    }
+    //  printf("\n");
+  }
+  printf("HCAL_GUI::ReadBitStream: %d bits read from file %s.\n",bitlen,fname);
+  fclose(file);
+  memset(buf,0,MAXPACKLEN); //reset buffer
+  // Now encode ASCII bitstream into binary
+  for(ptr=bitlen-1;ptr>=0;ptr--)
+  {
+    byteptr=(bitlen-ptr-1)/8;
+    if(ascii[ptr]=='1')  buf[byteptr] |= (1 << (7-ptr%8));
+    //   if((ptr%8)==0) printf("bitpos=%d buf[%d]=%02x\n",ptr,byteptr,buf[byteptr]);
+  }
+  return bitlen;
+}
+
+bool MyMainFrame::ConfigGetBit(UChar_t *buffer, UShort_t bitlen, UShort_t bit_index)
+{
+  UChar_t byte;
+  UChar_t mask;
+  byte=buffer[(bitlen-1-bit_index)/8];
+  mask= 1 << (7-bit_index%8);
+  byte=byte & mask;
+  if(byte!=0) return true; else return false;
+}
+
+UChar_t MyMainFrame::ConfigGetGain(int channel)
+{
+  UChar_t val=0;
+  for(int b=0;b<6;b++)
+  {
+    val=val << 1;
+    if(ConfigGetBit(bufSCR,1144,619+channel*15+b)) 
+    {
+      val=val+1;
+    }
+  }
+  return val;
+}
+
+UChar_t MyMainFrame::ConfigGetBias(int channel)
+{
+  UChar_t val=0;
+  for(int b=0;b<8;b++)
+  {
+    val=val << 1;
+    if(ConfigGetBit(bufSCR,1144,331+channel*9+b)) val=val+1;
+  }
+  return val;
+}
+
+void MyMainFrame::UpdateConfig()
+{
+  char bsname[32];
+  // cout << "Open file: CITIROC_PROBEbitstream.txt" << endl;
+  // cout << endl;
+  // this->ReadBitStream("CITIROC_PROBEbitstream.txt",bufPMR);
+  // if(!(this->ReadBitStream(bsname,bufSCR))) this->ReadBitStream("CITIROC_SC_DEFAULT.txt",bufSCR);
+  if(!(this->ReadBitStream(bsname,bufSCR))) 
+  {
+    cout << "Open file: CITIROC_SC_PROFILE1.txt" << endl;
+    this->ReadBitStream("CITIROC_SC_PROFILE1.txt",bufSCR);
+  }
+  // printf("%s \n",bufSCR);
+  for(int i=0; i<NumOfChannels;i++) cout << "gain of channle "  << i << " is " << (int)ConfigGetGain(i) << endl;
+  for(int i=0; i<NumOfChannels;i++) cout << "bias of channle " << i << " is " << (int)ConfigGetBias(i) << endl;
+  for(int i=0; i<NumOfChannels;i++) nGain[i]->SetNumber(ConfigGetGain(i));
+  for(int i=0; i<NumOfChannels;i++) nBias[i]->SetNumber(ConfigGetBias(i));
+}
+
 void HCAL_GUI() {
   // Popup the GUI...
-  new MyMainFrame(gClient->GetRoot(),800,800);
+  MyMainFrame *myGUI = new MyMainFrame(gClient->GetRoot(),800,800);
+  myGUI->UpdateConfig();
 }
