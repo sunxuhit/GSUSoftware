@@ -7,6 +7,14 @@
 UChar_t bufSCR[MAXPACKLEN];
 int Verbose=1;
 
+bool ConfigGetBit(UChar_t *buffer, UShort_t bitlen, UShort_t bit_index);
+UChar_t ConfigGetGain(int channel);
+UChar_t ConfigGetBias(int channel);
+void ConfigSetBit(UChar_t *buffer, UShort_t bitlen, UShort_t bit_index, Bool_t value);
+void ConfigSetGain(int chan, UChar_t val);
+void ConfigSetBias(int chan, UChar_t val);
+void printbits(unsigned char byte);
+
 void ReadBitStream(const char * fname = "CITIROC_SC_PROFILE1.txt") // read CITIROC SC bitstream into the buffer, bufSCR[MAXPACKLEN]
 {
   FILE *file = fopen(fname, "r");

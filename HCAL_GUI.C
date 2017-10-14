@@ -14,7 +14,7 @@
 #include "TGLabel.h"
 
 #define MAXPACKLEN 1500
-#define NumOfChannels 8;
+#define NumOfChannels 8
 
 class MyMainFrame {
   RQ_OBJECT("MyMainFrame")
@@ -35,7 +35,7 @@ class MyMainFrame {
     TGCompositeFrame  *fConfiguration;
 
     TGVButtonGroup    *bAmplifier;
-    TGCheckButton     *bChanEnaAmp[NumOfChannels+2];
+    TGCheckButton     *bChanEnaAmp[10];
 
     TGVButtonGroup    *bTrigger;
     TGCheckButton     *bChanEnaTrig[NumOfChannels];
@@ -51,7 +51,7 @@ class MyMainFrame {
     int Verbose=0;
 
     TGCompositeFrame *fAllHistos;
-    TH1F *fHpx[NumOfChannels] = NULL;
+    TH1F *fHpx[NumOfChannels];
     TCanvas *c_Histo;
     bool isFilled;
     bool fFillHistos;
@@ -283,6 +283,9 @@ void MyMainFrame::HandleButtons(Int_t id)
    }
 
    printf("DoButton: id = %d\n", id);
+   string Radio_RunStart;
+   string Radio_RunStop;
+   string outputfile;
 
    switch (id) 
    {
@@ -292,7 +295,7 @@ void MyMainFrame::HandleButtons(Int_t id)
        {
 	 fFillHistos = kTRUE;
 	 Time_Start = new TDatime();
-	 string Radio_RunStart = Form("Start Run at: %d:%d:%d",Time_Start->GetHour(),Time_Start->GetMinute(),Time_Start->GetSecond());
+	 Radio_RunStart = Form("Start Run at: %d:%d:%d",Time_Start->GetHour(),Time_Start->GetMinute(),Time_Start->GetSecond());
 	 cout << Radio_RunStart.c_str() << endl;
 	 FillHistos();
        }
@@ -300,7 +303,7 @@ void MyMainFrame::HandleButtons(Int_t id)
      case 416:  // Stop DAQ
        fFillHistos = kFALSE;
        Time_Stop = new TDatime();
-       string Radio_RunStop = Form("Stop Run at: %d:%d:%d",Time_Stop->GetHour(),Time_Stop->GetMinute(),Time_Stop->GetSecond());
+       Radio_RunStop = Form("Stop Run at: %d:%d:%d",Time_Stop->GetHour(),Time_Stop->GetMinute(),Time_Stop->GetSecond());
        cout << Radio_RunStop.c_str() << endl;
        HV_Off();
        break;
@@ -312,7 +315,7 @@ void MyMainFrame::HandleButtons(Int_t id)
        break;
      case 419: // Save Data TTree
        if(!Time_Stop) Time_Stop = new TDatime();
-       string outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+       outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
        cout << "Save data to " << outputfile.c_str() << endl;
        SaveDataTree(outputfile);
        break;
@@ -324,7 +327,7 @@ void MyMainFrame::HandleButtons(Int_t id)
        ResetHistos(); // reset histograms
 
        Time_Start = new TDatime(); // broadcast start time
-       string Radio_RunStart = Form("Start Test Run at: %d:%d:%d",Time_Start->GetHour(),Time_Start->GetMinute(),Time_Start->GetSecond());
+       Radio_RunStart = Form("Start Test Run at: %d:%d:%d",Time_Start->GetHour(),Time_Start->GetMinute(),Time_Start->GetSecond());
        cout << Radio_RunStart.c_str() << endl;
 
        StartTime = gSystem->Now(); // get start time in milliseconds 
@@ -332,13 +335,13 @@ void MyMainFrame::HandleButtons(Int_t id)
        ProcessTime(); // start taking data
 
        Time_Stop = new TDatime(); // broadcast stop time
-       string Radio_RunStop = Form("Stop Run at: %d:%d:%d",Time_Stop->GetHour(),Time_Stop->GetMinute(),Time_Stop->GetSecond());
+       Radio_RunStop = Form("Stop Run at: %d:%d:%d",Time_Stop->GetHour(),Time_Stop->GetMinute(),Time_Stop->GetSecond());
        cout << Radio_RunStop.c_str() << endl;
        StopTime = gSystem->Now(); // get start time in milliseconds 
        // cout << "StartTime = " << StartTime << ", StopTime = " << StopTime << endl;
        cout << "time duration = " << (StopTime-StartTime)/1000.0 << endl;
 
-       string outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+       outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
        cout << "Save data to " << outputfile.c_str() << endl;
        SaveDataTree(outputfile);
        break;
@@ -523,7 +526,8 @@ void MyMainFrame::ProcessTime()
     }
     gSystem->ProcessEvents();  // handle GUI events
 
-    long ContTime = gSystem->Now() - StartTime; // in second
+    long ContTime = gSystem->Now();
+    ContTime -= StartTime; // in second
     if( ContTime/DeltaTime > counter ) // update every DeltaTime
     {
       cout << "ContTime = " << ContTime/1000.0 << ", counter = " << counter << endl;
