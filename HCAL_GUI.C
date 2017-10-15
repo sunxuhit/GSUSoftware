@@ -35,7 +35,7 @@ class MyMainFrame {
     TGCompositeFrame  *fConfiguration;
 
     TGVButtonGroup    *bAmplifier;
-    TGCheckButton     *bChanEnaAmp[10];
+    TGCheckButton     *bChanEnaAmp[NumOfChannels+2];
 
     TGVButtonGroup    *bTrigger;
     TGCheckButton     *bChanEnaTrig[NumOfChannels];
