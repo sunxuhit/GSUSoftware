@@ -1,5 +1,8 @@
 // Mainframe macro generated from application: /home/home/root-6.02.02/bin/root.exe
 // By ROOT version 6.02/02 on 2015-05-17 23:03:49
+//
+// History: July 11, 2017, hexc
+// 
 
 #ifndef ROOT_TGDockableFrame
 #include "TGDockableFrame.h"
@@ -121,7 +124,6 @@
 #include <sys/timeb.h>
 
 #define maxpe 10 //max number of photoelectrons to use in the fit
-#define NumOfChannels 8
 int NEVDISP=200; //number of lines in the waterfall event display
 const Double_t initpar0[7]={7000,100,700,9.6,1.18,0.3,0.5};
 const Double_t initpar1[7]={3470,100,700,9.5,2.25,3e-3,3.7e-2};
@@ -159,32 +161,29 @@ TCanvas *c3=0;
 TCanvas *c4=0;
 TCanvas *c5=0;
 TCanvas *c6=0;
-TCanvas *c7=0;
 TGraph *grevrate=0;
 TGraph *gr=0;
 TGraph *gts0[256];
 TGraph *gts1[256];
-TGraph *gts0ref[256];
-TGraphErrors* grpeaks;
-TF1 *fit;
 TH1F *hcprof=0;
 TH2F *hevdisp=0;
 void FillHistos(int truncat);
-int evs=0; //overall events per DAQ
+  int evs=0; //overall events per DAQ
  // int evs_notfirst=0; //overall events per DAQ without very first request
-int evsperrequest=0;
+  int evsperrequest=0;
 FEBDTP* t;
 Int_t chan=0; //channel to display on separate canvas c1
 Int_t BoardToMon=0; //board to display on separate canvas c1
 TTree * tr;
 int RunOn=0;
 
+UChar_t mac5=0x00;   // moved this line here by hexc 7/11/2017
+
 time_t tm0,tm1;
 
 uint32_t CHAN_MASK=0xFFFFFFFF; // by default all channels are recorded
 
 void FEBGUI();
-void GSUGUI();
 void SetThresholdDAC1(UShort_t dac1);
 UShort_t GetThresholdDAC1();
 void SetThresholdDAC2(UShort_t dac2);
@@ -192,7 +191,6 @@ int Init(const char* iface);
 float GetTriggerRate();
 void UpdateConfig();
 void UpdateHisto();
-void UpdateADCHisto();
 void UpdateBoardMonitor();
 void DAQ(int nev);
 void RescanNet();
@@ -200,41 +198,33 @@ UChar_t ConfigGetGain(int chan);
 UChar_t ConfigGetBias(int chan);
 void ConfigSetGain(int chan, UChar_t val);
 void ConfigSetBias(int chan, UChar_t val);
-Float_t FitPedestal(TH1F *hp);
-Float_t FitGain(TH1F *hs);
-   Double_t x[50], ex[50];
-   Double_t y[50], ey[50];
-
-   Double_t gx[50], gex[50];
-   Double_t gy[50], gey[50];
-
-
+void ConfigSetFIL(uint32_t mask1, uint32_t mask2, uint8_t majority); 
  
 UInt_t GrayToBin(UInt_t n)
 {
-  UInt_t res=0;
-  int a[32],b[32],i=0,c=0;
+UInt_t res=0;
+int a[32],b[32],i=0,c=0;
 
-  for(i=0; i<32; i++){
-    if((n & 0x80000000)>0) a[i]=1;
-    else a[i]=0;
-    n=n<<1;
-    //printf("%1d",a[i]);
-  }
+for(i=0; i<32; i++){
+if((n & 0x80000000)>0) a[i]=1;
+else a[i]=0;
+n=n<<1;
+//printf("%1d",a[i]);
+}
 
-  b[0]=a[0];
-  //printf("  %1d",b[0]);
-  for(i=1; i<32; i++){
-    if(a[i]>0) if(b[i-1]==0) b[i]=1; else b[i]=0;
-    else b[i]=b[i-1];
-    //printf("%1d",b[i]);
-  }
+b[0]=a[0];
+//printf("  %1d",b[0]);
+for(i=1; i<32; i++){
+if(a[i]>0) if(b[i-1]==0) b[i]=1; else b[i]=0;
+else b[i]=b[i-1];
+//printf("%1d",b[i]);
+}
 
-  for(i=0; i<32; i++){
-    res=(res<<1);
-    res=(res | b[i]); 
-  }
-  //printf("\n");
+for(i=0; i<32; i++){
+res=(res<<1);
+res=(res | b[i]); 
+}
+//printf("\n");
 
   return res;
 }
@@ -251,17 +241,17 @@ Double_t mppc0( Double_t *xx, Double_t *par)
   Double_t exess=par[5]; //exess poisson widening factor
   Double_t xtalk=par[6]; //x-talk factor
   Double_t x=xx[0]; //argument  in ADC counts
-
+  
   for(int i=0; i<=maxpe; i++)
   {
     peaks[i]=zero+gain*i;
     peaksint[i]=TMath::Poisson(i,avnpe);
     if(i>=2) peaksint[i]=peaksint[i]+peaksint[i-1]*xtalk;
   }
-  for(int i=0; i<=maxpe; i++)
+   for(int i=0; i<=maxpe; i++)
   {
     retval+=peaksint[i]*(TMath::Gaus(x,peaks[i],sqrt(noise*noise+i*exess), kTRUE));
-    //  retval+=TMath::Gaus(x,peaks[i],noise, kTRUE);
+  //  retval+=TMath::Gaus(x,peaks[i],noise, kTRUE);
   } 
   retval=retval*N;
   return retval;
@@ -278,18 +268,18 @@ Double_t mppc1( Double_t *xx, Double_t *par) // from http://zeus.phys.uconn.edu/
   Double_t exess=par[5]/gain; //normalized exess poisson widening factor
   Double_t mu=par[6]; //x-talk factor
   Double_t q=(xx[0]-zero)/gain; //argument  in ADC counts normalized and zeroized
-
+  
   for(int p=0; p<=maxpe; p++) for(int s=0; s<=maxpe; s++)
   {
     retval+= TMath::Poisson(p,avnpe) * TMath::Poisson(s,avnpe*mu) * TMath::Gaus(q,p+s,sqrt(noise*noise+exess*exess*(p+q)), kTRUE);
   }
-  retval=retval*N;
+    retval=retval*N;
   return retval;
 }
 
 
 
-void FEBDAQMULT(const char *iface="eth1")
+void FEBDAQMULT_GSU(const char *iface="eth1")
 {
   if(Init(iface)==0) return;
   FEBGUI();
@@ -330,82 +320,87 @@ void SetDstMacByIndex(int i)
 
 void UpdateConfig()
 {
-  char bsname[32];
-  //t->ReadBitStream("CITIROC_SCbitstream_TESTS.txt",bufSCR);
-  t->ReadBitStream("CITIROC_PROBEbitstream.txt",bufPMR);
-  for(int feb=0; feb<t->nclients; feb++)
-  {
-    SetDstMacByIndex(feb);
-    //t->dstmac[5]=0xff; //Broadcast
-    sprintf(bsname,"CITIROC_SC_SN%03d.txt",t->dstmac[5]);
+char bsname[32];
+ uint8_t bufFIL[256]; 
 
-    //if(!(t->ReadBitStream(bsname,bufSCR))) t->ReadBitStream("CITIROC_SC_DEFAULT.txt",bufSCR);
-    if(!(t->ReadBitStream(bsname,bufSCR))) t->ReadBitStream("CITIROC_SC_PROFILE1.txt",bufSCR);
-    //if(!(t->ReadBitStream(bsname,bufSCR))) t->ReadBitStream("CITIROC_SC__FEB050_FNALSCINTI.txt",bufSCR);
+//t->ReadBitStream("CITIROC_SCbitstream_TESTS.txt",bufSCR);
+t->ReadBitStream("CITIROC_PROBEbitstream.txt",bufPMR);
+for(int feb=0; feb<t->nclients; feb++)
+{
+SetDstMacByIndex(feb);
+//t->dstmac[5]=0xff; //Broadcast
+sprintf(bsname,"CITIROC_SC_SN%03d.txt",t->dstmac[5]);
+//if(!(t->ReadBitStream(bsname,bufSCR))) t->ReadBitStream("CITIROC_SC_DEFAULT.txt",bufSCR);
+if(!(t->ReadBitStream(bsname,bufSCR))) t->ReadBitStream("CITIROC_SC_PROFILE1.txt",bufSCR);
 
-    t->SendCMD(t->dstmac,FEB_SET_RECV,fNumberEntry75->GetNumber(),t->srcmac);
-    t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-    t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
 
-    if(feb==BoardToMon)  {
-      for(int i=265; i<265+32;i++)
-	if(ConfigGetBit(bufSCR,1144,i)) fChanEnaTrig[i-265]->SetOn(); else fChanEnaTrig[i-265]->SetOn(kFALSE);
-      if(ConfigGetBit(bufSCR,1144,1139)) fChanEnaTrig[32]->SetOn(); else fChanEnaTrig[32]->SetOn(kFALSE);
-      for(int i=0; i<32;i++)
-	if(ConfigGetBit(bufSCR,1144,633+i*15)) fChanEnaAmp[i]->SetOn(kFALSE); else fChanEnaAmp[i]->SetOn();
-      fChanEnaAmp[33]->SetOn(kFALSE);fChanEnaAmp[32]->SetOn(kFALSE);
-      for(int i=0; i<32;i++)
-	if(ConfigGetBit(bufPMR,224,96+i)) fChanProbe[i]->SetOn(); else fChanProbe[i]->SetOn(kFALSE);
-      fNumberEntry755->SetNumber(GetThresholdDAC1());
-      for(int i=0; i<32;i++) fChanGain[i]->SetNumber(ConfigGetGain(i));
-      for(int i=0; i<32;i++) fChanBias[i]->SetNumber(ConfigGetBias(i));
+  *((uint32_t*)(&(bufFIL[0])))=*((uint32_t*)(&(bufSCR[265]))); //copy trigger enable channels from SCR to FIL tregister
 
-    }
-  }
-  //fNumberEntry755->SetNumber();
+
+t->SendCMD(t->dstmac,FEB_SET_RECV,fNumberEntry75->GetNumber(),t->srcmac);
+t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
+t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
+t->SendCMD(t->dstmac,FEB_WR_FIL,0x0000,bufFIL);
+
+if(feb==BoardToMon)  {
+  for(int i=265; i<265+32;i++)
+  if(ConfigGetBit(bufSCR,1144,i)) fChanEnaTrig[i-265]->SetOn(); else fChanEnaTrig[i-265]->SetOn(kFALSE);
+  if(ConfigGetBit(bufSCR,1144,1139)) fChanEnaTrig[32]->SetOn(); else fChanEnaTrig[32]->SetOn(kFALSE);
+  for(int i=0; i<32;i++)
+  if(ConfigGetBit(bufSCR,1144,633+i*15)) fChanEnaAmp[i]->SetOn(kFALSE); else fChanEnaAmp[i]->SetOn();
+  fChanEnaAmp[33]->SetOn(kFALSE);fChanEnaAmp[32]->SetOn(kFALSE);
+  for(int i=0; i<32;i++)
+  if(ConfigGetBit(bufPMR,224,96+i)) fChanProbe[i]->SetOn(); else fChanProbe[i]->SetOn(kFALSE);
+  fNumberEntry755->SetNumber(GetThresholdDAC1());
+  for(int i=0; i<32;i++) fChanGain[i]->SetNumber(ConfigGetGain(i));
+  for(int i=0; i<32;i++) fChanBias[i]->SetNumber(ConfigGetBias(i));
+
+      }
+}
+//fNumberEntry755->SetNumber();
 }
 
 UChar_t ConfigGetGain(int chan)
 {
-  UChar_t val=0;
-  for(int b=0;b<6;b++)
-  {
-    val=val << 1;
-    if(ConfigGetBit(bufSCR,1144,619+chan*15+b)) val=val+1;
-  } 
-  return val;
+ UChar_t val=0;
+ for(int b=0;b<6;b++)
+ {
+   val=val << 1;
+   if(ConfigGetBit(bufSCR,1144,619+chan*15+b)) val=val+1;
+ } 
+ return val;
 }
 
 UChar_t ConfigGetBias(int chan)
 {
-  UChar_t val=0;
-  for(int b=0;b<8;b++)
-  {
-    val=val << 1;
-    if(ConfigGetBit(bufSCR,1144,331+chan*9+b)) val=val+1;
-  } 
-  return val;
+ UChar_t val=0;
+ for(int b=0;b<8;b++)
+ {
+   val=val << 1;
+   if(ConfigGetBit(bufSCR,1144,331+chan*9+b)) val=val+1;
+ } 
+ return val;
 }
 
 void ConfigSetGain(int chan, UChar_t val)
 {
   UChar_t mask=1<<5;
-  for(int b=0;b<6;b++)
-  {
-    if((val & mask)>0) ConfigSetBit(bufSCR,1144,619+chan*15+b,kTRUE); else ConfigSetBit(bufSCR,1144,619+chan*15+b,kFALSE);
-    mask=mask>>1;
-  } 
-
+ for(int b=0;b<6;b++)
+ {
+   if((val & mask)>0) ConfigSetBit(bufSCR,1144,619+chan*15+b,kTRUE); else ConfigSetBit(bufSCR,1144,619+chan*15+b,kFALSE);
+   mask=mask>>1;
+ } 
+  
 }
 
 void ConfigSetBias(int chan, UChar_t val)
 {
   UChar_t mask=1<<7;
-  for(int b=0;b<8;b++)
-  {
-    if((val & mask)>0) ConfigSetBit(bufSCR,1144,331+chan*9+b,kTRUE); else ConfigSetBit(bufSCR,1144,331+chan*9+b,kFALSE);
-    mask=mask>>1;
-  } 
+ for(int b=0;b<8;b++)
+ {
+   if((val & mask)>0) ConfigSetBit(bufSCR,1144,331+chan*9+b,kTRUE); else ConfigSetBit(bufSCR,1144,331+chan*9+b,kFALSE);
+   mask=mask>>1;
+ } 
 
 }
 
@@ -413,72 +408,81 @@ void ConfigSetBias(int chan, UChar_t val)
 
 void PrintConfig(UChar_t *buffer, UShort_t bitlen)
 {
-  UChar_t byte;
+    UChar_t byte;
   UChar_t mask;
   for(int i=0; i<bitlen;i++)
-  {
-    byte=buffer[(bitlen-1-i)/8];
-    mask= 1 << (7-i%8);
-    byte=byte & mask;
-    if(byte==0) printf("0"); else printf("1");
-  }
-  printf("\n"); 
+ {
+  byte=buffer[(bitlen-1-i)/8];
+  mask= 1 << (7-i%8);
+  byte=byte & mask;
+  if(byte==0) printf("0"); else printf("1");
+ }
+ printf("\n"); 
 } 
 
 void SendConfig()
 {
+  uint32_t trigmask=0;
+ uint8_t bufFIL[256]; 
+
   for(int i=265; i<265+32;i++)
-    if(fChanEnaTrig[i-265]->IsOn()) ConfigSetBit(bufSCR,1144,i,1); else  ConfigSetBit(bufSCR,1144,i,0);
-  if(fChanEnaTrig[32]->IsOn()) ConfigSetBit(bufSCR,1144,1139,1); else  ConfigSetBit(bufSCR,1144,1139,0);
+  if(fChanEnaTrig[i-265]->IsOn()) ConfigSetBit(bufSCR,1144,i,1); else  ConfigSetBit(bufSCR,1144,i,0);
+
+  if(fChanEnaTrig[32]->IsOn()) ConfigSetBit(bufSCR,1144,1139,1); else  ConfigSetBit(bufSCR,1144,1139,0); //OR32 enable
 
   for(int i=0; i<32;i++)
-    if(fChanEnaAmp[i]->IsOn()) ConfigSetBit(bufSCR,1144,633+i*15,0); else  ConfigSetBit(bufSCR,1144,633+i*15,1);
+  if(fChanEnaAmp[i]->IsOn()) ConfigSetBit(bufSCR,1144,633+i*15,0); else  ConfigSetBit(bufSCR,1144,633+i*15,1);
 
   for(int i=0; i<32;i++)
-    if(fChanProbe[i]->IsOn()) ConfigSetBit(bufPMR,224,96+i,1); else  ConfigSetBit(bufPMR,224,96+i,0);
+  if(fChanProbe[i]->IsOn()) ConfigSetBit(bufPMR,224,96+i,1); else  ConfigSetBit(bufPMR,224,96+i,0);
 
   for(int i=0; i<32;i++) ConfigSetBias(i, fChanBias[i]->GetNumber());
   for(int i=0; i<32;i++) ConfigSetGain(i, fChanGain[i]->GetNumber());
+  
+  for(int i=0; i<32;i++)
+  if(fChanEnaTrig[i]->IsOn()) trigmask = trigmask | (0x1 << i);
+  *((uint32_t*)(&(bufFIL[0])))=trigmask;
 
-  //for(int feb=0; feb<t->nclients; feb++)
-  // {
-  //  SetDstMacByIndex(feb);  
-  t->dstmac[5]=0xff; //Broadcast
+//for(int feb=0; feb<t->nclients; feb++)
+// {
+//  SetDstMacByIndex(feb);  
+t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
   t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
-  // }
+  t->SendCMD(t->dstmac,FEB_WR_FIL,0x0000,bufFIL);
+// }
 }
 
 void SendAllChecked()
 {
   for(int i=0; i<32;i++)
   {
-    fChanEnaAmp[i]->SetOn(); 
-    ConfigSetBit(bufSCR,1144,633+i*15,0); 
+     fChanEnaAmp[i]->SetOn(); 
+     ConfigSetBit(bufSCR,1144,633+i*15,0); 
   }
 
   SetDstMacByIndex(BoardToMon);  
-  //t->dstmac[5]=0xff; //Broadcast
+//t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-  //  t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
+//  t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
+// }
   fChanEnaAmp[33]->SetOn(kFALSE);fChanEnaAmp[32]->SetOn(kFALSE);
 }
 void SendAllUnChecked()
 {
   for(int i=0; i<32;i++)
   {
-    fChanEnaAmp[i]->SetOn(kFALSE); 
-    ConfigSetBit(bufSCR,1144,633+i*15,1); 
+     fChanEnaAmp[i]->SetOn(kFALSE); 
+     ConfigSetBit(bufSCR,1144,633+i*15,1); 
   }
 
   SetDstMacByIndex(BoardToMon);  
-  //t->dstmac[5]=0xff; //Broadcast
+//t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-  //  t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
-  // }
+//  t->SendCMD(t->dstmac,FEB_WR_PMR,0x0000,bufPMR);
+// }
   fChanEnaAmp[33]->SetOn(kFALSE);fChanEnaAmp[32]->SetOn(kFALSE);
 }
-
 
 UShort_t chg[32];
 UInt_t ts0,ts1;
@@ -489,47 +493,46 @@ Int_t ts0_ref_IND[256]; //Number of averaged values for PPS ts0, used for VCXO f
 Bool_t NOts0=false,NOts1=false;
 UInt_t ts0_ref_mon, ts1_ref_mon;
 Bool_t NOts0_mon=false,NOts1_mon=false;
-UChar_t mac5=0x00;
 
 void RescanNet()
 {
-  t->nclients=0;
-  if(t->ScanClients()==0) {printf("No clients connected, exiting\n"); return;}; 
-  t->PrintMacTable();
-  t->VCXO=500;
-  for(int feb=0; feb<t->nclients; feb++)  { ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; }
-  UpdateConfig();
-  fNumberEntry8869->SetLimitValues(0,t->nclients-1);
-  for(int feb=0; feb<t->nclients; feb++)  VCXO_Values[feb]=VCXO_Value;
-  UpdateBoardMonitor(); 
+ t->nclients=0;
+ if(t->ScanClients()==0) {printf("No clients connected, exiting\n"); return;}; 
+ t->PrintMacTable();
+ t->VCXO=500;
+ for(int feb=0; feb<t->nclients; feb++)  { ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; }
+ UpdateConfig();
+ fNumberEntry8869->SetLimitValues(0,t->nclients-1);
+ for(int feb=0; feb<t->nclients; feb++)  VCXO_Values[feb]=VCXO_Value;
+ UpdateBoardMonitor(); 
+ 
 }
 
 
 int Init(const char *iface="eth1")
 {
   t=new FEBDTP(iface);
-  if(t->ScanClients()==0) {printf("No clients connected, exiting\n"); return 0;};
-  t->PrintMacTable(); 
+ if(t->ScanClients()==0) {printf("No clients connected, exiting\n"); return 0;};
+ t->PrintMacTable(); 
+ 
+ t->VCXO=500;
+ for(int feb=0; feb<t->nclients; feb++)  { ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; }
 
-  t->VCXO=500;
-  for(int feb=0; feb<t->nclients; feb++)  { ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; }
-
-  t->setPacketHandler(&FillHistos);
-  char str1[32];
+ t->setPacketHandler(&FillHistos);
+   char str1[32];
   char str2[32];
   SetDstMacByIndex(0);
   evs=0;
   for(int i=0;i<32;i++) {
-    sprintf(str1,"h%d",i);
-    sprintf(str2,"ADC # %d",i);
-    hst[i]=new TH1F(str1,str2,820,0,4100);
-    hst[i]->GetXaxis()->SetTitle("ADC value");
-    hst[i]->GetYaxis()->SetTitle("Events");
+      sprintf(str1,"h%d",i);
+      sprintf(str2,"ADC # %d",i);
+      hst[i]=new TH1F(str1,str2,820,0,4100);
+      hst[i]->GetXaxis()->SetTitle("ADC value");
+      hst[i]->GetYaxis()->SetTitle("Events");
 
-  }
-  for(int i=0;i<256;i++) gts0ref[i]=new TGraph();
-  for(int i=0;i<256;i++) gts1[i]=new TGraph();
+    }
   for(int i=0;i<256;i++) gts0[i]=new TGraph();
+  for(int i=0;i<256;i++) gts1[i]=new TGraph();
   hcprof=new TH1F("hcprof","Channel profile",32,0,32);
   hcprof->GetXaxis()->SetTitle("Channel number");
   hcprof->GetYaxis()->SetTitle("Integrated amplitude, ADC");
@@ -553,10 +556,10 @@ int Init(const char *iface="eth1")
   tr->Branch("ts1",&ts1,"ts1/i");
   tr->Branch("ts0_ref",&ts0_ref,"ts0_ref/i");
   tr->Branch("ts1_ref",&ts1_ref,"ts1_ref/i");
-
-  BenchMark=new TBenchmark();
-  BenchMark->Start("Poll");
-  return 1;
+ 
+   BenchMark=new TBenchmark();
+   BenchMark->Start("Poll");
+return 1;
 }
 
 UInt_t overwritten=0;
@@ -567,146 +570,132 @@ void FillHistos(int truncat)  // hook called by libFEBDTP when event is received
 {
   int jj;
   int kk;
-  //UInt_t T0,T1;
-  UShort_t adc;
-  int evspack=0;
-  UInt_t tt0,tt1;
-  UChar_t ls2b0,ls2b1; //least sig 2 bits
+//UInt_t T0,T1;
+UShort_t adc;
+int evspack=0;
+UInt_t tt0,tt1;
+UChar_t ls2b0,ls2b1; //least sig 2 bits
 
-  jj=0;
-  while(jj<truncat-18)
-  {
-    //printf(" Remaining events: %d\n",(t->gpkt).REG);
-    //printf("Flags: 0x%08x ",*(UInt_t*)(&(t->gpkt).Data[jj]));
-    overwritten=*(UShort_t*)(&(t->gpkt).Data[jj]); 
-    jj=jj+2;
-    lostinfpga=*(UShort_t*)(&(t->gpkt).Data[jj]); 
-    jj=jj+2;
-    ts0=*(UInt_t*)(&(t->gpkt).Data[jj]); jj=jj+4; 
-    ts1=*(UInt_t*)(&(t->gpkt).Data[jj]); jj=jj+4; 
-    //	printf("T0=%u ns, T1=%u ns \n",ts0,ts1);
-    printf("Raw data: ts0=0x%08x , ts1=0x%08x ; ",ts0,ts1);
-    ls2b0=ts0 & 0x00000003;
-    ls2b1=ts1 & 0x00000003;
-    tt0=(ts0 & 0x3fffffff) >>2;
-    tt1=(ts1 & 0x3fffffff) >>2;
-    tt0=(GrayToBin(tt0) << 2) | ls2b0;
-    tt1=(GrayToBin(tt1) << 2) | ls2b1;
-    tt0=tt0+5;//IK: correction based on phase drift w.r.t GPS
-    tt1=tt1+5; //IK: correction based on phase drift w.r.t GPS
-    NOts0=((ts0 & 0x40000000)>0); // check overflow bit
-    NOts1=((ts1 & 0x40000000)>0);
-    if((ts0 & 0x80000000)>0) {printf("T0-ref bit "); ts0=0x0; ts0_ref=tt0; ts0_ref_MEM[t->dstmac[5]]=tt0; 
-      ts0_ref_AVE[t->dstmac[5]]=ts0_ref_AVE[t->dstmac[5]]+ts0_ref_MEM[t->dstmac[5]]; (ts0_ref_IND[t->dstmac[5]])++;} 
-    else { ts0=tt0; ts0_ref=ts0_ref_MEM[t->dstmac[5]]; }
-    if((ts1 & 0x80000000)>0) {printf("T1-ref bit "); ts1=0x0; ts1_ref=tt1; ts1_ref_MEM[t->dstmac[5]]=tt1;} else { ts1=tt1; ts1_ref=ts1_ref_MEM[t->dstmac[5]]; }
+        jj=0;
+        while(jj<truncat-18)
+         {
+        //printf(" Remaining events: %d\n",(t->gpkt).REG);
+        //printf("Flags: 0x%08x ",*(UInt_t*)(&(t->gpkt).Data[jj]));
+        overwritten=*(UShort_t*)(&(t->gpkt).Data[jj]); 
+	jj=jj+2;
+        lostinfpga=*(UShort_t*)(&(t->gpkt).Data[jj]); 
+	jj=jj+2;
+        ts0=*(UInt_t*)(&(t->gpkt).Data[jj]); jj=jj+4; 
+        ts1=*(UInt_t*)(&(t->gpkt).Data[jj]); jj=jj+4; 
+//	printf("T0=%u ns, T1=%u ns \n",ts0,ts1);
+        ls2b0=ts0 & 0x00000003;
+        ls2b1=ts1 & 0x00000003;
+        tt0=(ts0 & 0x3fffffff) >>2;
+        tt1=(ts1 & 0x3fffffff) >>2;
+        tt0=(GrayToBin(tt0) << 2) | ls2b0;
+        tt1=(GrayToBin(tt1) << 2) | ls2b1;
+        tt0=tt0+5;//IK: correction based on phase drift w.r.t GPS
+        tt1=tt1+5; //IK: correction based on phase drift w.r.t GPS
+        NOts0=((ts0 & 0x40000000)>0); // check overflow bit
+        NOts1=((ts1 & 0x40000000)>0);
+        if((ts0 & 0x80000000)>0) {ts0=0x0; ts0_ref=tt0; ts0_ref_MEM[t->dstmac[5]]=tt0; 
+                                  ts0_ref_AVE[t->dstmac[5]]=ts0_ref_AVE[t->dstmac[5]]+ts0_ref_MEM[t->dstmac[5]]; (ts0_ref_IND[t->dstmac[5]])++;} 
+        else { ts0=tt0; ts0_ref=ts0_ref_MEM[t->dstmac[5]]; }
+        if((ts1 & 0x80000000)>0) {ts1=0x0; ts1_ref=tt1; ts1_ref_MEM[t->dstmac[5]]=tt1;} else { ts1=tt1; ts1_ref=ts1_ref_MEM[t->dstmac[5]]; }
 
-    //	if(t->Verbose)
-    printf("T0=%u ns, T1=%u ns T0_ref=%u ns  T1_ref=%u ns \n",ts0,ts1,ts0_ref,ts1_ref);
-    //	printf(" ADC[32]:\n"); 
+	if(t->Verbose) printf("T0=%u ns, T1=%u ns T0_ref=%u ns  T1_ref=%u ns \n",ts0,ts1,ts0_ref,ts1_ref);
+//	printf(" ADC[32]:\n"); 
 
-    for(kk=0; kk<32; kk++) if (CHAN_MASK & (1<<kk))
-    {
-      adc=*(UShort_t*)(&(t->gpkt).Data[jj]); jj++; jj++;  
-      //		printf("%04u ",adc);
-      if(t->dstmac[5] == t->macs[BoardToMon][5])
-      { 
-	hst[kk]->Fill(adc);
-	hcprof->Fill(kk,adc);
-	if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==6) {   
-	  hevdisp->SetBinContent(kk+1,NEVDISP,adc);
-	}
-      }
-      chg[kk]=adc;
-    } //if(jj>=(truncat-18)) return;
-    else {chg[kk]=0; jj+=2;}
+        for(kk=0; kk<32; kk++) if (CHAN_MASK & (1<<kk))
+		{
+		adc=*(UShort_t*)(&(t->gpkt).Data[jj]); jj++; jj++;  
+//		printf("%04u ",adc);
+	        if(t->dstmac[5] == t->macs[BoardToMon][5])
+			{ 
+				hst[kk]->Fill(adc);
+				hcprof->Fill(kk,adc);
+                                if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==6) {   
+                                hevdisp->SetBinContent(kk,NEVDISP,adc);
+				}
+			}
+                chg[kk]=adc;
+		} //if(jj>=(truncat-18)) return;}
+                else {chg[kk]=0; jj+=2;}
 
-    if(t->dstmac[5] == t->macs[BoardToMon][5]) 
-      if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==6) {   
-	for(int evi=1; evi<=NEVDISP;evi++) for(kk=0; kk<32; kk++)
-	{
-	  hevdisp->SetBinContent(kk+1,evi-1,hevdisp->GetBinContent(kk+1,evi));
-	}
-      }
-
-    //       printf("\n");
-    mac5=t->dstmac[5];
-    // printf("Filling tree with mac5=0x%02x\n",mac5);
-    gts0ref[mac5]->SetPoint(gts0ref[mac5]->GetN(),gts0ref[mac5]->GetN(),ts0_ref-1e9);
-    if(ts1!=0) gts1[mac5]->SetPoint(gts1[mac5]->GetN(),gts1[mac5]->GetN(),ts1);
-    if(ts0!=0) gts0[mac5]->SetPoint(gts0[mac5]->GetN(),gts0[mac5]->GetN(),ts0);
-    tr->Fill();
-    if(t->dstmac[5] == t->macs[BoardToMon][5])
-    {
-      evs++;
-      evspack++; 
-      evsperrequest++; 
-      total_lost+=lostinfpga; 
-      ts0_ref_mon=ts0_ref;  
-      ts1_ref_mon=ts1_ref;
-      NOts0_mon=NOts0;  
-      NOts1_mon=NOts1;  
-    }
-  }
-  //        printf("Packet: events %d\n", evspack);
-
-}
-
-void UpdateADCHisto()
+                                if(t->dstmac[5] == t->macs[BoardToMon][5]) 
+ 				if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==6) {   
+				 for(int evi=1; evi<=NEVDISP;evi++) for(kk=0; kk<32; kk++)
+				  {
+                            		hevdisp->SetBinContent(kk,evi-1,hevdisp->GetBinContent(kk,evi));
+				  }
+				}
+  
+ //       printf("\n");
+        mac5=t->dstmac[5];
+      // printf("Filling tree with mac5=0x%02x\n",mac5);
+       gts0[mac5]->SetPoint(gts0[mac5]->GetN(),gts0[mac5]->GetN(),ts0_ref-1e9);
+       if(ts1!=0) gts1[mac5]->SetPoint(gts1[mac5]->GetN(),gts1[mac5]->GetN(),ts1);
+        tr->Fill();
+if(t->dstmac[5] == t->macs[BoardToMon][5])
 {
-  chan=fNumberEntry886->GetNumber();
-  c1->cd(); hst[chan]->Draw();
-  // FitGain(hst[chan]);
-  c1->Update();
+        evs++;
+        evspack++; 
+        evsperrequest++; 
+        total_lost+=lostinfpga; 
+        ts0_ref_mon=ts0_ref;  
+        ts1_ref_mon=ts1_ref;
+        NOts0_mon=NOts0;  
+        NOts1_mon=NOts1;  
 }
+        }
+  //        printf("Packet: events %d\n", evspack);
+	  
+}
+
 void UpdateHisto()
 {
-  //printf("UpdateHisto() called\n");
-  chan=fNumberEntry886->GetNumber();
-  for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
-  c->Update();
+    chan=fNumberEntry886->GetNumber();
+    for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+    c->Update();
+    c1->cd(); hst[chan]->Draw();
+    c1->Update();
+    c3->cd(1);
+    gts0[t->macs[0][5]]->Draw("AL");
+    gts0[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
+    gts0[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
+    gts0[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS0 period deviation from 1s, ns");
+ for(int feb=0; feb<t->nclients; feb++)  { gts0[t->macs[feb][5]]->Draw("sameL"); }    
+    c3->cd(2);
+    gts1[t->macs[0][5]]->Draw("AL");
+     gts1[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
+    gts1[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS1, ns");
+   //gts0[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
+ for(int feb=0; feb<t->nclients; feb++)  { gts1[t->macs[feb][5]]->Draw("sameL"); }    
+    c3->Update();
+    c4->cd();
+    hcprof->Draw("hist");
+    c4->Update();
+    c5->cd();
+    grevrate->Draw("AL");
+    grevrate->GetHistogram()->GetXaxis()->SetTitle("Poll Nr.");
+    grevrate->GetHistogram()->GetYaxis()->SetTitle("Event rate, kHz");
+    c5->Update();
+    c6->cd();
+    hevdisp->Draw("colz");
+    c6->Update();
 
-  c1->cd(); hst[chan]->Draw();
-  // FitGain(hst[chan]);
-  c1->Update();
-  c3->cd(1);
-  gts0ref[t->macs[0][5]]->Draw("AL");
-  gts0ref[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
-  gts0ref[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
-  gts0ref[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS0 period deviation from 1s, ns");
-  for(int feb=0; feb<t->nclients; feb++)  { gts0ref[t->macs[feb][5]]->Draw("sameL"); }    
-  c3->cd(2);
-  gts1[t->macs[0][5]]->SetLineColor(kRed);
-  gts1[t->macs[0][5]]->Draw("AL");
-  gts1[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
-  gts1[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS0, TS1 (red), ns");
-
-  //gts0ref[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
-  for(int feb=0; feb<t->nclients; feb++)  { gts1[t->macs[feb][5]]->SetLineColor(kRed); gts1[t->macs[feb][5]]->Draw("sameL"); gts0[t->macs[feb][5]]->Draw("sameL"); }    
-  c3->Update();
-  c4->cd();
-  hcprof->Draw("hist");
-  c4->Update();
-  c5->cd();
-  grevrate->Draw("AL");
-  grevrate->GetHistogram()->GetXaxis()->SetTitle("Poll Nr.");
-  grevrate->GetHistogram()->GetYaxis()->SetTitle("Event rate, kHz");
-  c5->Update();
-  c6->cd();
-  hevdisp->Draw("colz");
-  c6->Update();
 }
 
 void StopDAQ()
 {
-  t->dstmac[5]=0xff; //Broadcast
+t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_GEN_INIT,0,buf);  
 }
 
 
 void StartDAQ(int nev=0)
 {
-  t->dstmac[5]=0xff; //Broadcast
+t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_GEN_INIT,1,buf); //reset buffer
   t->SendCMD(t->dstmac,FEB_GEN_INIT,2,buf); //set DAQ_Enable flag on FEB
   DAQ(nev);
@@ -723,328 +712,312 @@ void DAQ(int nev=0)
   int nevv=nev;
   double avts0;
   int deltaVCXO;
-  // evs_notfirst=0;
+ // evs_notfirst=0;
   int notok=0;
   int ok=0;
-  //  bool first_request=true;
+//  bool first_request=true;
   total_lost=0;
   RunOn=1;
   float PollPeriod;
   float rate;
-  //  UpdateConfig();
-  // t->SendCMD(t->dstmac,FEB_GEN_HVON,0,buf);
-  // printf("nevv=%d, evs=%d\n",nevv,evs);
+//  UpdateConfig();
+ // t->SendCMD(t->dstmac,FEB_GEN_HVON,0,buf);
+ // printf("nevv=%d, evs=%d\n",nevv,evs);
   tm0=time(NULL);
   tm1=time(NULL);
   while(RunOn==1 && (nevv==0 || evs<nevv) && (fNumberEntryTME->GetNumber()==0 || tm1-tm0 < fNumberEntryTME->GetNumber() ))
   {
-
-    // printf("nevv=%d, evs=%d\n",nevv,evs);
-    //  BenchMark->Show("Poll");
-    PollPeriod=BenchMark->GetRealTime("Poll");
-    BenchMark->Reset();
-    BenchMark->Start("Poll");
-    //Perform VCXO correction
-    for(int feb=0; feb<t->nclients; feb++)
-    { 
-      if(ts0_ref_IND[t->macs[feb][5]]>=20) 
-      { //correct one FEB VCXO
-	avts0=ts0_ref_AVE[t->macs[feb][5]] / ts0_ref_IND[t->macs[feb][5]];
-	deltaVCXO=-(avts0-1e9)/5.2; //derive correction increment, approx 5.2 ns per DAC LSB
-	//   printf("Average period %f\n",avts0);
-	VCXO_Values[feb]=VCXO_Values[feb]+deltaVCXO;
-	ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; 
-	if(fUpdateVCXO->IsOn()) {
-	  printf("------------------ For board %d : Average period %f, Set VCXO  (0x%02x) to %d (+%d)\n",feb,avts0, t->macs[feb][5], VCXO_Values[feb],deltaVCXO);
-	  t->VCXO=VCXO_Values[feb];
-	  t->SendCMD(t->macs[feb],FEB_SET_RECV,VCXO_Values[feb],t->srcmac);
-	}
-      }
-
+   
+ // printf("nevv=%d, evs=%d\n",nevv,evs);
+   BenchMark->Show("Poll");
+   PollPeriod=BenchMark->GetRealTime("Poll");
+   BenchMark->Reset();
+   BenchMark->Start("Poll");
+//Perform VCXO correction
+for(int feb=0; feb<t->nclients; feb++)
+{ 
+  if(ts0_ref_IND[t->macs[feb][5]]>=20) 
+  { //correct one FEB VCXO
+    avts0=ts0_ref_AVE[t->macs[feb][5]] / ts0_ref_IND[t->macs[feb][5]];
+    deltaVCXO=-(avts0-1e9)/5.2; //derive correction increment, approx 5.2 ns per DAC LSB
+ //   printf("Average period %f\n",avts0);
+    VCXO_Values[feb]=VCXO_Values[feb]+deltaVCXO;
+    ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; 
+    if(fUpdateVCXO->IsOn()) {
+    printf("------------------ For board %d : Average period %f, Set VCXO  (0x%02x) to %d (+%d)\n",feb,avts0, t->macs[feb][5], VCXO_Values[feb],deltaVCXO);
+    t->VCXO=VCXO_Values[feb];
+    t->SendCMD(t->macs[feb],FEB_SET_RECV,VCXO_Values[feb],t->srcmac);
     }
+  }
+  
+}
     chan=fNumberEntry886->GetNumber();
     rate=GetTriggerRate()/1e3;
     sprintf(str1,"Trigger %2.3f kHz",rate);
-    grevrate->SetPoint(grevrate->GetN(),grevrate->GetN(),rate); 
+              grevrate->SetPoint(grevrate->GetN(),grevrate->GetN(),rate); 
 
-    if(rate<3.6) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xbbffbb);
-    else if (rate<5.0) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xffbbbb);
-    else if (rate<7.0) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xff9999);
-    else if (rate<10.0) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xff7777);
-    else fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xff3333);
-
-    //    fLabel->SetText(str1);
+          if(rate<3.6) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xbbffbb);
+          else if (rate<5.0) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xffbbbb);
+          else if (rate<7.0) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xff9999);
+          else if (rate<10.0) fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xff7777);
+          else fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xff3333);
+    
+//    fLabel->SetText(str1);
     fStatusBar739->SetText(str1,0);
-    for(int feb=0; feb<t->nclients; feb++)
-    {
-      SetDstMacByIndex(feb);
-      mac5=t->dstmac[5];
-      ok=t->SendCMD(t->dstmac,FEB_RD_CDR,0,buf);
-    }
+for(int feb=0; feb<t->nclients; feb++)
+{
+SetDstMacByIndex(feb);
+    mac5=t->dstmac[5];
+    ok=t->SendCMD(t->dstmac,FEB_RD_CDR,0,buf);
+}
 
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==1) {   
-      for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
-      c->Update();
+     for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+     c->Update();
     }
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==2) {   
-      c1->cd(); hst[chan]->Draw(); // FitGain(hst[chan]);
-      c1->Update();
+     c1->cd(); hst[chan]->Draw();
+     c1->Update();
     }
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==3) {   
-      c3->cd(1);
-      gts0ref[t->macs[0][5]]->Draw("AL");
-      gts0ref[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
-      gts0ref[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS0 period deviation from 1s, ns");
+     c3->cd(1);
+     gts0[t->macs[0][5]]->Draw("AL");
+     gts0[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
+     gts0[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS0 period deviation from 1s, ns");
 
-      gts0ref[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
-      for(int feb=0; feb<t->nclients; feb++)  { gts0ref[t->macs[feb][5]]->Draw("sameL"); }    
-      c3->cd(2);
-      gts1[t->macs[0][5]]->SetLineColor(kRed);
-      gts1[t->macs[0][5]]->Draw("AL");
-      gts1[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
-      gts1[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS0, TS1 (red), ns");
+     gts0[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
+     for(int feb=0; feb<t->nclients; feb++)  { gts0[t->macs[feb][5]]->Draw("sameL"); }    
+     c3->cd(2);
+     gts1[t->macs[0][5]]->Draw("AL");
+     gts1[t->macs[0][5]]->GetHistogram()->GetXaxis()->SetTitle("Event number");
+     gts1[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetTitle("TS1, ns");
 
-
-      //gts0ref[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
-      for(int feb=0; feb<t->nclients; feb++)  { gts1[t->macs[feb][5]]->SetLineColor(kRed);  gts1[t->macs[feb][5]]->Draw("sameL"); gts0[t->macs[feb][5]]->Draw("sameL"); }    
-      c3->Update();
+     //gts0[t->macs[0][5]]->GetHistogram()->GetYaxis()->SetRangeUser(-100,100);
+     for(int feb=0; feb<t->nclients; feb++)  { gts1[t->macs[feb][5]]->Draw("sameL"); }    
+     c3->Update();
     }
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==4) {   
-      c4->cd();
-      hcprof->Draw("hist");
-      c4->Update();
+     c4->cd();
+     hcprof->Draw("hist");
+     c4->Update();
     }
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==5) {   
-      c5->cd();
-      grevrate->Draw("AL");
-      grevrate->GetHistogram()->GetXaxis()->SetTitle("Poll Nr.");
-      grevrate->GetHistogram()->GetYaxis()->SetTitle("Event rate, kHz");
-      c5->Update();
+     c5->cd();
+     grevrate->Draw("AL");
+    grevrate->GetHistogram()->GetXaxis()->SetTitle("Poll Nr.");
+    grevrate->GetHistogram()->GetYaxis()->SetTitle("Event rate, kHz");
+    c5->Update();
     }
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==6) {   
-      c6->cd();
-      hevdisp->Draw("colz");
-      c6->Update();
+     c6->cd();
+     hevdisp->Draw("colz");
+     c6->Update();
     }
-
+    
 
 
     gSystem->ProcessEvents();
-    //  printf("Per request: %d events acquired, overwritten (flags field of last event) %d\n",evsperrequest,overwritten);
-    if(nevv>0) printf("%d events to go...\n",nevv-evs);
-    sprintf(str1,"Poll: %d events acquired in %2.2f sec.",evsperrequest,PollPeriod);
-    if(evsperrequest>0) fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xbbffbb);
-    else fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xffaaaa);
+          printf("Per request: %d events acquired, overwritten (flags field of last event) %d\n",evsperrequest,overwritten);
+          if(nevv>0) printf("%d events to go...\n",nevv-evs);
+          sprintf(str1,"Poll: %d events acquired in %2.2f sec.",evsperrequest,PollPeriod);
+         if(evsperrequest>0) fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xbbffbb);
+         else fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xffaaaa);
 
-    fStatusBar739->SetText(str1,1);
-    sprintf(str1,"Evs lost FPGA:%d CPU:%d ",lostinfpga,overwritten);
-    if(overwritten==0) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xbbffbb);
-    else if (overwritten<10) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xffbbbb);
-    else if (overwritten<100) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xff9999);
-    else if (overwritten<1000) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xff7777);
-    else fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xff3333);
-    fStatusBar739->SetText(str1,2);
-    if(NOts0_mon) { sprintf(str1,"PPS missing!"); fStatusBar739->GetBarPart(3)->SetBackgroundColor(0xffaaaa);} 
-    else { sprintf(str1,"PPS period %d ns",ts0_ref_mon); fStatusBar739->GetBarPart(3)->SetBackgroundColor(0xbbffbb);} 
-    fStatusBar739->SetText(str1,3);
-    if(NOts1_mon) { sprintf(str1,"SPILL trig missing!"); fStatusBar739->GetBarPart(4)->SetBackgroundColor(0xffaaaa);} 
-    else { sprintf(str1,"SPILL trig period %d ns",ts1_ref_mon);fStatusBar739->GetBarPart(4)->SetBackgroundColor(0xbbffbb);} 
-    fStatusBar739->SetText(str1,4);
-    sprintf(str1, "Overal: %d acquired, %d (%2.1f\%%) lost",evs,total_lost, (100.*total_lost/(evs+total_lost)));
-    fStatusBar739->SetText(str1,5);
+          fStatusBar739->SetText(str1,1);
+          sprintf(str1,"Evs lost FPGA:%d CPU:%d ",lostinfpga,overwritten);
+          if(overwritten==0) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xbbffbb);
+          else if (overwritten<10) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xffbbbb);
+          else if (overwritten<100) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xff9999);
+          else if (overwritten<1000) fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xff7777);
+          else fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xff3333);
+          fStatusBar739->SetText(str1,2);
+         if(NOts0_mon) { sprintf(str1,"PPS missing!"); fStatusBar739->GetBarPart(3)->SetBackgroundColor(0xffaaaa);} 
+         else { sprintf(str1,"PPS period %d ns",ts0_ref_mon); fStatusBar739->GetBarPart(3)->SetBackgroundColor(0xbbffbb);} 
+          fStatusBar739->SetText(str1,3);
+         if(NOts1_mon) { sprintf(str1,"SPILL trig missing!"); fStatusBar739->GetBarPart(4)->SetBackgroundColor(0xffaaaa);} 
+         else { sprintf(str1,"SPILL trig period %d ns",ts1_ref_mon);fStatusBar739->GetBarPart(4)->SetBackgroundColor(0xbbffbb);} 
+          fStatusBar739->SetText(str1,4);
+            sprintf(str1, "Overal: %d acquired, %d (%2.1f\%%) lost",evs,total_lost, (100.*total_lost/(evs+total_lost)));
+          fStatusBar739->SetText(str1,5);
 
-    //         if(first_request ) {first_request=false; total_lost=0;}
-    total_lost+=overwritten; //evs_notfirst+=evsperrequest; //skip lost events from the very first request
-    //     if(evsperrequest==0) first_request== true;
-    //      printf("Debug: total_lost=%d \n",total_lost);
-    overwritten=0;
-    evsperrequest=0;
-    tm1=time(NULL);
+  //         if(first_request ) {first_request=false; total_lost=0;}
+          total_lost+=overwritten; //evs_notfirst+=evsperrequest; }//skip lost events from the very first request
+     //     if(evsperrequest==0) first_request== true;
+ //      printf("Debug: total_lost=%d \n",total_lost);
+          overwritten=0;
+          evsperrequest=0;
+     tm1=time(NULL);
 
   }
-  fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xffffff); 
-  fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xffffff); 
-  fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xffffff); 
-  fStatusBar739->GetBarPart(3)->SetBackgroundColor(0xffffff); 
-  fStatusBar739->GetBarPart(4)->SetBackgroundColor(0xffffff); 
-  fStatusBar739->GetBarPart(5)->SetBackgroundColor(0xffffff); 
-
-  // t->SendCMD(t->dstmac,FEB_GEN_HVOF,0,buf);
+          fStatusBar739->GetBarPart(0)->SetBackgroundColor(0xffffff); 
+          fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xffffff); 
+          fStatusBar739->GetBarPart(2)->SetBackgroundColor(0xffffff); 
+          fStatusBar739->GetBarPart(3)->SetBackgroundColor(0xffffff); 
+          fStatusBar739->GetBarPart(4)->SetBackgroundColor(0xffffff); 
+          fStatusBar739->GetBarPart(5)->SetBackgroundColor(0xffffff); 
+   
+ // t->SendCMD(t->dstmac,FEB_GEN_HVOF,0,buf);
   printf("Overal per DAQ call: %d events acquired, %d (%2.1f\%%) lost (skipping first request).\n",evs,total_lost, (100.*total_lost/(evs+total_lost)));
-  sprintf(str1, "Overal: %d acquired, %d (%2.1f\%%) lost",evs,total_lost, (100.*total_lost/(evs+total_lost)));
-  fStatusBar739->SetText(str1,5);
-  for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
-  c->Update();
+           sprintf(str1, "Overal: %d acquired, %d (%2.1f\%%) lost",evs,total_lost, (100.*total_lost/(evs+total_lost)));
+          fStatusBar739->SetText(str1,5);
+    for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+    c->Update();
+
+
 }
 
 void Reset()
 {
-  for(int y=0;y<8;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
-  c1->cd(); hst[chan]->Draw();
-  c1->Update();
-  for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
-  c->Update();
-  tr->Reset();
-  evs=0;
-  total_lost=0;
-  for(int feb=0; feb<t->nclients; feb++)  { gts0ref[t->macs[feb][5]]->Set(0); }
-  for(int feb=0; feb<t->nclients; feb++)  { gts1[t->macs[feb][5]]->Set(0); gts0[t->macs[feb][5]]->Set(0); }
-  c3->cd(1);
-  //    hcprof->Draw("hist");
-  c3->Update();
-
-  hcprof->Reset(); 
-  c4->cd();
-  hcprof->Draw("hist");
-  c4->Update();
-  grevrate->Set(0); 
-  c5->cd();
-  grevrate->Draw("AL");
-  grevrate->GetHistogram()->GetXaxis()->SetTitle("Poll Nr.");
-  grevrate->GetHistogram()->GetYaxis()->SetTitle("Event rate, kHz");
-  c5->Update();
-  hevdisp->Reset(); 
-  c6->cd();
-  hevdisp->Draw("colz");
-  c6->Update();
+     for(int y=0;y<8;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
+     c1->cd(); hst[chan]->Draw();
+    c1->Update();
+    for(int y=0;y<8;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+    c->Update();
+    tr->Reset();
+    evs=0;
+    total_lost=0;
+ for(int feb=0; feb<t->nclients; feb++)  { gts0[t->macs[feb][5]]->Set(0); }
+ for(int feb=0; feb<t->nclients; feb++)  { gts1[t->macs[feb][5]]->Set(0); }
+      c3->cd(1);
+//    hcprof->Draw("hist");
+    c3->Update();
+ 
+    hcprof->Reset(); 
+      c4->cd();
+    hcprof->Draw("hist");
+    c4->Update();
+    grevrate->Set(0); 
+      c5->cd();
+    grevrate->Draw("AL");
+    grevrate->GetHistogram()->GetXaxis()->SetTitle("Poll Nr.");
+    grevrate->GetHistogram()->GetYaxis()->SetTitle("Event rate, kHz");
+    c5->Update();
+    hevdisp->Reset(); 
+      c6->cd();
+    hevdisp->Draw("colz");
+    c6->Update();
 
   //  evs_notfirst=0;
 }
 
 void All()
 {
-  for(int y=0;y<8;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Draw("same");}
+       for(int y=0;y<8;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Draw("same");}
 }
 
 void HVON()
 {
-  //for(int feb=0; feb<t->nclients; feb++)
-  //{
-  //SetDstMacByIndex(feb);
-  t->dstmac[5]=0xff; //Broadcast
-  t->SendCMD(t->dstmac,FEB_GEN_HVON,0x0000,buf);
-  //}
+//for(int feb=0; feb<t->nclients; feb++)
+//{
+//SetDstMacByIndex(feb);
+t->dstmac[5]=0xff; //Broadcast
+t->SendCMD(t->dstmac,FEB_GEN_HVON,0x0000,buf);
+//}
 }
 
 void HVOF()
 {
-  //for(int feb=0; feb<t->nclients; feb++)
-  //{
-  //SetDstMacByIndex(feb);
-  t->dstmac[5]=0xff; //Broadcast
-  t->SendCMD(t->dstmac,FEB_GEN_HVOF,0x0000,buf);
-  //}
+//for(int feb=0; feb<t->nclients; feb++)
+//{
+//SetDstMacByIndex(feb);
+t->dstmac[5]=0xff; //Broadcast
+ t->SendCMD(t->dstmac,FEB_GEN_HVOF,0x0000,buf);
+//}
 }
 
 float GetTriggerRate()
 {
-  float retval;
-  t->SendCMD(t->macs[BoardToMon],FEB_GET_RATE,0,buf);
-  retval=*((float*)(t->gpkt.Data));
-  return retval;
+ float retval;
+ t->SendCMD(t->macs[BoardToMon],FEB_GET_RATE,0,buf);
+ retval=*((float*)(t->gpkt.Data));
+ return retval;
 }
 void ThresholdScan(UShort_t start, UShort_t stop)
 {
-  UShort_t thr;
-  Int_t i=0;
-  Int_t retakes=0;
-  Float_t rate=0; 
-  if(gr==0) gr=new TGraph();
+UShort_t thr;
+Int_t i=0; 
+if(gr==0) gr=new TGraph();
   SetDstMacByIndex(BoardToMon);
-  for( thr=start; thr<=stop; thr++)
-  {
-    SetThresholdDAC1(thr);
-    SetThresholdDAC2(thr);
-    gSystem->Sleep(2000); //to let FEB update rate
-    rate=GetTriggerRate();
-    printf("Rate %f at threshold %d\n",rate,thr); 
-    while((rate<=1 || rate>50000) && retakes<10) {rate=GetTriggerRate(); retakes++; printf("Rate out of range (1,50000), retry attempt %d..\n",retakes);}
-    retakes=0;
-    if(rate<=1 || rate>50000) {printf("Rate out of range (1,50000), skipping point.\n");}
-    else { gr->SetPoint(i,thr,rate); i++;}
-    c1->cd(); gr->Draw("AL"); 
-    gr->GetHistogram()->GetXaxis()->SetTitle("Threshold, DAC units");
-    gr->GetHistogram()->GetYaxis()->SetTitle("Event rate, Hz");
-    gr->GetHistogram()->SetTitle("Event rate vs threshold");
-    c1->Update(); 
-  }
+for( thr=start; thr<=stop; thr++)
+ {
+  SetThresholdDAC1(thr);
+  SetThresholdDAC2(thr);
+  gSystem->Sleep(2000); //to let FEB update rate
+  gr->SetPoint(i,thr,GetTriggerRate());
+  i++;
+  c1->cd(); gr->Draw("AL");
+  c1->Update(); 
+ }
 }
 
 void SetThresholdDAC1(UShort_t dac1)
 {
-  int offset=1107;
-  for(int i=0; i<10;i++)
-  { 
-    if( (dac1 & 1)>0) ConfigSetBit(bufSCR,1144,offset+9-i,kTRUE);
-    else ConfigSetBit(bufSCR,1144,offset+9-i,kFALSE);
-    dac1= dac1 >> 1;
-  }
-  //UShort_t* pdac=(UShort_t*)(&bufSCR[3]);
-  // printf("%4x",((*pdac)>>3)&0x3ff)
-  //*pdac=*pdac & 0xE007; //clean bits of ADC1
-  //*pdac=*pdac | ((dac1 << 3) & 0x1FF8);
-  printf("Setting threshold for mac5=%d\n",t->dstmac[5]);
-  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
+int offset=1107;
+for(int i=0; i<10;i++)
+{ 
+  if( (dac1 & 1)>0) ConfigSetBit(bufSCR,1144,offset+9-i,kTRUE);
+  else ConfigSetBit(bufSCR,1144,offset+9-i,kFALSE);
+  dac1= dac1 >> 1;
+}
+//UShort_t* pdac=(UShort_t*)(&bufSCR[3]);
+// printf("%4x",((*pdac)>>3)&0x3ff)
+//*pdac=*pdac & 0xE007; //clean bits of ADC1
+//*pdac=*pdac | ((dac1 << 3) & 0x1FF8);
+t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
 }
 
 UShort_t GetThresholdDAC1()
 {
-  int offset=1107;
-  UShort_t dac1=0;
-  for(int i=0; i<10;i++)
-  { 
-    dac1= dac1 >> 1;
-    if(ConfigGetBit(bufSCR,1144,offset+9-i)) dac1=dac1 | 0x0200;
-  }
-  return dac1;
+int offset=1107;
+UShort_t dac1=0;
+for(int i=0; i<10;i++)
+{ 
+  dac1= dac1 >> 1;
+  if(ConfigGetBit(bufSCR,1144,offset+9-i)) dac1=dac1 | 0x0200;
+}
+return dac1;
 }
 
 void SetThresholdDAC2(UShort_t dac1)
 {
-  int offset=1117;
-  for(int i=0; i<10;i++)
-  { 
-    if( (dac1 & 1)>0) ConfigSetBit(bufSCR,1144,offset+9-i,kTRUE);
-    else ConfigSetBit(bufSCR,1144,offset+9-i,kFALSE);
-    dac1= dac1 >> 1;
-  }
-  //UShort_t* pdac=(UShort_t*)(&bufSCR[3]);
-  // printf("%4x",((*pdac)>>3)&0x3ff)
-  //*pdac=*pdac & 0xE007; //clean bits of ADC1
-  //*pdac=*pdac | ((dac1 << 3) & 0x1FF8);
-  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
+int offset=1117;
+for(int i=0; i<10;i++)
+{ 
+  if( (dac1 & 1)>0) ConfigSetBit(bufSCR,1144,offset+9-i,kTRUE);
+  else ConfigSetBit(bufSCR,1144,offset+9-i,kFALSE);
+  dac1= dac1 >> 1;
+}
+//UShort_t* pdac=(UShort_t*)(&bufSCR[3]);
+// printf("%4x",((*pdac)>>3)&0x3ff)
+//*pdac=*pdac & 0xE007; //clean bits of ADC1
+//*pdac=*pdac | ((dac1 << 3) & 0x1FF8);
+t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
 }
 
 
 
-void GUI_UpdateThresholdAll()
-{
-  UShort_t dac1;
-  dac1=fNumberEntry755->GetNumber();
-  BoardToMon=fNumberEntry8869->GetNumber();  
-  t->dstmac[5]=0xff; 
-  SetThresholdDAC1(dac1);
-  SetThresholdDAC2(dac1);
-}
-void GUI_UpdateThreshold()
-{
-  UShort_t dac1;
-  dac1=fNumberEntry755->GetNumber();
-  t->dstmac[5]=t->macs[BoardToMon][5];
-  SetThresholdDAC1(dac1);
-  SetThresholdDAC2(dac1);
-}
-    
-void GUI_UpdateVCXO()
-{
-  t->VCXO=fNumberEntry75->GetNumber();
-  t->SendCMD(t->macs[BoardToMon],FEB_SET_RECV,fNumberEntry75->GetNumber(),t->srcmac);    
-}
+   void GUI_UpdateThreshold()
+    {
+     UShort_t dac1;
+     dac1=fNumberEntry755->GetNumber();
+//	for(int feb=0; feb<t->nclients; feb++)
+//	{
+//	SetDstMacByIndex(feb);
+t->dstmac[5]=0xff; //Broadcast
+      	SetThresholdDAC1(dac1);
+      	SetThresholdDAC2(dac1);
+//        }
+    }
+   void GUI_UpdateVCXO()
+    {
+     t->VCXO=fNumberEntry75->GetNumber();
+     t->SendCMD(t->macs[BoardToMon],FEB_SET_RECV,fNumberEntry75->GetNumber(),t->srcmac);    
+    }
 
-void UpdateVCXOAllFEBs()
-{
-  for(int feb=0; feb<t->nclients; feb++)   t->SendCMD(t->macs[feb],FEB_SET_RECV,VCXO_Values[feb],t->srcmac);    
-}
+  void UpdateVCXOAllFEBs()
+    {
+     for(int feb=0; feb<t->nclients; feb++)   t->SendCMD(t->macs[feb],FEB_SET_RECV,VCXO_Values[feb],t->srcmac);    
+    }
   
 void UpdateBoardMonitor()
 {
@@ -1054,18 +1027,12 @@ void UpdateBoardMonitor()
   printf("Monitoring FEB mac5 0x%2x %d\n",t->macs[BoardToMon][5],t->macs[BoardToMon][5]);
   fLabel7->SetText(sttr); 
   //ResetHistos();
-  for(int y=0;y<8;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
-
-}
-
-void MakeFitPeaks()
-{
-  FitGain(hst[chan]);
+       for(int y=0;y<8;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
+ 
 }
 
 void FEBGUI()
 {
-
   // main frame
   TGMainFrame *fMainFrame1314 = new TGMainFrame(gClient->GetRoot(),10,10,kMainFrame | kVerticalFrame);
   fMainFrame1314->SetName("fMainFrame1314");
@@ -1157,32 +1124,16 @@ void FEBGUI()
   fGroupFrame679->AddFrame(fTextButton881, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
   fTextButton881->SetCommand("MakeProfileTest()");
 
-  TGTextButton *fTextButton8819 = new TGTextButton(fGroupFrame679,"Fit peaks");
-  fTextButton8819->SetTextJustify(36);
-  fTextButton8819->SetMargins(0,0,0,0);
-  fTextButton8819->SetWrapLength(-1);
-  fTextButton8819->Resize(123,22);
-  fGroupFrame679->AddFrame(fTextButton8819, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-  fTextButton8819->SetCommand("MakeFitPeaks()");
-
 
   fNumberEntry755 = new TGNumberEntry(fGroupFrame679, (Double_t) 250,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1023);
   fGroupFrame679->AddFrame(fNumberEntry755, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,62,2));
-  TGTextButton *fTextButton931 = new TGTextButton(fGroupFrame679,"Set Threshold all");
+  TGTextButton *fTextButton931 = new TGTextButton(fGroupFrame679,"Set Threshold DAC1");
   fTextButton931->SetTextJustify(36);
   fTextButton931->SetMargins(0,0,0,0);
   fTextButton931->SetWrapLength(-1);
   fTextButton931->Resize(123,22);
-  fTextButton931->SetCommand("GUI_UpdateThresholdAll()");
+  fTextButton931->SetCommand("GUI_UpdateThreshold()");
   fGroupFrame679->AddFrame(fTextButton931, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
-
-  TGTextButton *fTextButton9319 = new TGTextButton(fGroupFrame679,"Set Threshold Moned");
-  fTextButton9319->SetTextJustify(36);
-  fTextButton9319->SetMargins(0,0,0,0);
-  fTextButton9319->SetWrapLength(-1);
-  fTextButton9319->Resize(123,22);
-  fTextButton9319->SetCommand("GUI_UpdateThreshold()");
-  fGroupFrame679->AddFrame(fTextButton9319, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
 
 
   fGroupFrame679->SetLayoutManager(new TGVerticalLayout(fGroupFrame679));
@@ -1196,7 +1147,7 @@ void FEBGUI()
   fGroupFrame679->AddFrame(fLabel764, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX,2,2,30,2));
   fNumberEntry886 = new TGNumberEntry(fGroupFrame679, (Double_t) 4,3,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,31);
   fGroupFrame679->AddFrame(fNumberEntry886, new TGLayoutHints(kLHintsExpandX | kLHintsCenterX ));
-  fNumberEntry886->Connect("ValueSet(Long_t)", 0, 0,  "UpdateADCHisto()");
+  fNumberEntry886->SetCommand("UpdateHisto()");
 
 
 
@@ -1457,18 +1408,6 @@ void FEBGUI()
   fRootEmbeddedCanvas73622->AdoptCanvas(c6);
   fCompositeFrame73522->AddFrame(fRootEmbeddedCanvas73622, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX | kLHintsExpandY,2,2,2,2));
 
-  // container of "PeakFit"
-  TGCompositeFrame *fCompositeFrame735221;
-  fCompositeFrame735221 = fTab683->AddTab("Peaks fit");
-  fCompositeFrame735221->SetLayoutManager(new TGVerticalLayout(fCompositeFrame735221));
-
-  // embedded canvas
-  TRootEmbeddedCanvas *fRootEmbeddedCanvas736221 = new TRootEmbeddedCanvas(0,fCompositeFrame735221,1179,732+100);
-  Int_t wfRootEmbeddedCanvas736221 = fRootEmbeddedCanvas736221->GetCanvasWindowId();
-  c7 = new TCanvas("c7", 10, 10, wfRootEmbeddedCanvas736221);
-  fRootEmbeddedCanvas73622->AdoptCanvas(c7);
-  fCompositeFrame735221->AddFrame(fRootEmbeddedCanvas736221, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX | kLHintsExpandY,2,2,2,2));
-
 
   fTab683->SetTab(2);
 
@@ -1497,8 +1436,8 @@ void FEBGUI()
 
 uint8_t getCRC(uint8_t message[], uint32_t length)
 {
-  uint32_t i, j;
-  uint8_t crc = 0;
+	uint32_t i, j;
+	uint8_t crc = 0;
 
   for (i = 0; i < length; i++)
   {
@@ -1506,7 +1445,7 @@ uint8_t getCRC(uint8_t message[], uint32_t length)
     for (j = 0; j < 8; j++)
     {
       if (crc & 1)
-	crc ^=  0x91; //CRC7_POLY
+        crc ^=  0x91; //CRC7_POLY
       crc >>= 1;
     }
   }
@@ -1519,17 +1458,17 @@ uint8_t crc7;
 
 void ReceiveFW(int truncat)  // hook called by libFEBDTP when event is received
 {
-  for(int j=0;j<1024; j++) {
+   for(int j=0;j<1024; j++) {
     if(t->Verbose) { printf("%02x ",t->gpkt.Data[j]);     if(j%16==15) printf("\n"); }
     fwbuf[FW_ptr+j]=t->gpkt.Data[j];
-  }
-  FW_ptr+=1024;
+   }
+   FW_ptr+=1024;
 }
 
 bool DumpFW(uint32_t startaddr=0, uint16_t blocks=1)
 {
   bool retval=1;
-  // memset(fwbuf,1024*1024,00);
+ // memset(fwbuf,1024*1024,00);
   buf[0]=startaddr & 0x000000ff; 
   buf[1]=(startaddr & 0x0000ff00)>>8; 
   buf[2]=(startaddr & 0x00ff0000)>>16; 
@@ -1543,8 +1482,8 @@ bool DumpFW(uint32_t startaddr=0, uint16_t blocks=1)
   printf("DumpFW: Received %d bytes at 0x%08x in Flash ( 0x%08x in CPU address space)",blocks*1024,startaddr,startaddr+0x14000000);
   if(crc7==t->gpkt.REG)  printf("CRC check OK (%02x).\n",crc7);
   else  { printf("CRC check NOT OK!! received CRC=%02x, locally calculated on Host=%02x!\n",crc7,t->gpkt.REG); retval=0;}
-  if(retval==0) printf("Error in DumpFW!!\n");
-  return retval;
+   if(retval==0) printf("Error in DumpFW!!\n");
+ return retval;
 }
 
 bool ProgramFW(uint32_t startaddr=0, uint16_t blocks=1) 
@@ -1567,9 +1506,9 @@ bool ProgramFW(uint32_t startaddr=0, uint16_t blocks=1)
 
 bool GetAndSaveFW(char *fname=NULL)
 {
-
+   
   bool retval=1;
-  memset(fwbuf,1024*1024,00);
+   memset(fwbuf,1024*1024,00);
   for(int i=0;i<16;i++) DumpFW(i*64*1024,64);
   if(fname==NULL) return 0;
   FILE *fp=fopen(fname,"w"); 
@@ -1586,17 +1525,17 @@ bool UpdateFW(char *fname=NULL)
   bool retval=1;
   memset(fwbuf,1024*1024,00);
   printf("Opening FW file %s..\n",fname);
-  FILE *fp=fopen(fname,"r");
-  if(!fp) return 0;
+   FILE *fp=fopen(fname,"r");
+   if(!fp) return 0;
   fread(fwbuf,1024,1024,fp);
   fclose(fp);
-  printf("Programming first 64 kB into FLASH addr 0x20000..\n");
+ printf("Programming first 64 kB into FLASH addr 0x20000..\n");
   retval=ProgramFW(0x20000,64); //put FW into safe area
   if(retval==0) return 0;
-  printf("Copying 64 kB FLASH from 0x20000 to 0x0..\n");
+ printf("Copying 64 kB FLASH from 0x20000 to 0x0..\n");
   buf[0]=0;buf[1]=0;buf[2]=0x02;buf[3]=64;buf[4]=0; //prepare for copying 64 kB from 0x20000 to 0x0
   t->SendCMD(t->dstmac,FEB_WR_FW,0x0101,buf); //perform copy
-  printf("Pause 1s to let FEB perform reset..\n");
+ printf("Pause 1s to let FEB perform reset..\n");
   gSystem->Sleep(1000);
   RescanNet();
   return retval;
@@ -1608,45 +1547,45 @@ bool UpdateFPGA(char *fname=NULL)
   bool retval=1;
   uint8_t CRC=0;
   uint8_t CRC1=0;
-  uint32_t startaddr=0x80000; //put FW into second half of the FLASH
-  int page64;
+uint32_t startaddr=0x80000; //put FW into second half of the FLASH
+int page64;
   memset(fwbuf,1024*1024,0xFF);
   printf("Opening FW file %s..\n",fname);
-  FILE *fp=fopen(fname,"r");
-  if(!fp) return 0;
+   FILE *fp=fopen(fname,"r");
+   if(!fp) return 0;
   fread(fwbuf,1024,1024,fp);
   fclose(fp);
-  printf("Programming 512 kB into FLASH addr 0x80000..\n");
-  // ProgramFW(0x80000,512); //put FW into second half of the FLASH
-  for(int page64=0; page64<8; page64++)
-  {
-    printf("Programming 64 kB into FLASH addr 0x%08x\n",startaddr);
-    gSystem->Sleep(500); 
-    buf[0]=startaddr & 0x000000ff; 
-    buf[1]=(startaddr & 0x0000ff00)>>8; 
-    buf[2]=(startaddr & 0x00ff0000)>>16; 
-    buf[3]=64;
-    buf[4]=00; 
-    t->dstmac[5] = t->macs[BoardToMon][5];
-    t->SendCMD(t->dstmac,FEB_WR_FW,00,buf); //initiate flash programming
-    for( int i=0;i<64;i++) {
-      if( t->SendCMD(t->dstmac,FEB_DATA_FW,getCRC(fwbuf+(i+64*page64)*1024,1024),fwbuf+(i+64*page64)*1024) ==0) {
-	retval=0;
-	// printf("Error in programming 1kB block at %08x !\n",fwbuf+(i+64*page64)*1024);
+ printf("Programming 512 kB into FLASH addr 0x80000..\n");
+// ProgramFW(0x80000,512); //put FW into second half of the FLASH
+for(int page64=0; page64<8; page64++)
+{
+  printf("Programming 64 kB into FLASH addr 0x%08x\n",startaddr);
+  gSystem->Sleep(500); 
+  buf[0]=startaddr & 0x000000ff; 
+  buf[1]=(startaddr & 0x0000ff00)>>8; 
+  buf[2]=(startaddr & 0x00ff0000)>>16; 
+  buf[3]=64;
+  buf[4]=00; 
+  t->dstmac[5] = t->macs[BoardToMon][5];
+  t->SendCMD(t->dstmac,FEB_WR_FW,00,buf); //initiate flash programming
+  for( int i=0;i<64;i++) {
+   if( t->SendCMD(t->dstmac,FEB_DATA_FW,getCRC(fwbuf+(i+64*page64)*1024,1024),fwbuf+(i+64*page64)*1024) ==0) {
+      retval=0;
+     // printf("Error in programming 1kB block at %08x !\n",fwbuf+(i+64*page64)*1024);
       }
-      gSystem->Sleep(10); 
-    }
-    if( retval==0)       printf("Error in programming 64kB block at %08x !\n",startaddr);
-    startaddr=startaddr+64*1024;
+  gSystem->Sleep(10); 
   }
+  if( retval==0)       printf("Error in programming 64kB block at %08x !\n",startaddr);
+  startaddr=startaddr+64*1024;
+}
   if(retval==0) printf("Error in programmin part of UpdateFPGA!!\n");
-  CRC=getCRC(fwbuf,512*1024);
-  memset(fwbuf,1024*1024,00);
-  printf("Verifying 512 kB block at 0x80000.. Source CRC=0x%02x\n",CRC);
-  for(int page64=0; page64<8; page64++)    DumpFW(0x80000+page64*64*1024, 64);
-  CRC1=getCRC(fwbuf,512*1024);   
-  printf("Programmed block CRC=0x%02x..",CRC1);
-  if(CRC==CRC1) printf(" OK.\n"); else {printf("ERROR !\n"); retval=0;}
+   CRC=getCRC(fwbuf,512*1024);
+   memset(fwbuf,1024*1024,00);
+printf("Verifying 512 kB block at 0x80000.. Source CRC=0x%02x\n",CRC);
+for(int page64=0; page64<8; page64++)    DumpFW(0x80000+page64*64*1024, 64);
+   CRC1=getCRC(fwbuf,512*1024);   
+printf("Programmed block CRC=0x%02x..",CRC1);
+if(CRC==CRC1) printf(" OK.\n"); else {printf("ERROR !\n"); retval=0;}
   return retval;
 
 }
@@ -1658,22 +1597,22 @@ void AcquireGainCalibrationData(int nevc=10000)
   CHAN_MASK= (3 << (2*15));
   for(int sci=0; sci<16; sci++)
   {
-    for(i=0; i<32;i++) //reset all chan to OFF
-    {
-      fChanEnaAmp[i]->SetOn(kFALSE); 
-      ConfigSetBit(bufSCR,1144,633+i*15,1); 
-    }
+  for(i=0; i<32;i++) //reset all chan to OFF
+     {
+     fChanEnaAmp[i]->SetOn(kFALSE); 
+     ConfigSetBit(bufSCR,1144,633+i*15,1); 
+     }
     i=sci*2;
     fChanEnaAmp[i]->SetOn(); 
     ConfigSetBit(bufSCR,1144,633+i*15,0);    
     i++;
     fChanEnaAmp[i]->SetOn(); 
     ConfigSetBit(bufSCR,1144,633+i*15,0);    
-    t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-    // StartDAQ(nevc/100); ///for pedestal
+  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
+ // StartDAQ(nevc/100); ///for pedestal
     CHAN_MASK= (3 << (2*sci));
     printf("CHAN_MASK=%08x\n",CHAN_MASK);
-    StartDAQ(nevc);
+  StartDAQ(nevc);
 
   }
   CHAN_MASK=cmaskbefore; //restore
@@ -1686,22 +1625,22 @@ void AcquirePedestalCalibrationData(int nevc=10000)
   CHAN_MASK= (3 << (2*15));
   for(int sci=0; sci<16; sci++)
   {
-    for(i=0; i<32;i++) //reset all chan to OFF
-    {
-      fChanEnaAmp[i]->SetOn(kFALSE); 
-      ConfigSetBit(bufSCR,1144,633+i*15,1); 
-    }
+  for(i=0; i<32;i++) //reset all chan to OFF
+     {
+     fChanEnaAmp[i]->SetOn(kFALSE); 
+     ConfigSetBit(bufSCR,1144,633+i*15,1); 
+     }
     i=sci*2;
     fChanEnaAmp[i]->SetOn(); 
     ConfigSetBit(bufSCR,1144,633+i*15,0);    
     i++;
     fChanEnaAmp[i]->SetOn(); 
     ConfigSetBit(bufSCR,1144,633+i*15,0);    
-    t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-    StartDAQ(nevc); ///for pedestal
+  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
+  StartDAQ(nevc); ///for pedestal
     CHAN_MASK= (3 << (2*sci));
-    //  printf("CHAN_MASK=%08x\n",CHAN_MASK);
-    // StartDAQ(nevc);
+  //  printf("CHAN_MASK=%08x\n",CHAN_MASK);
+ // StartDAQ(nevc);
 
   }
   CHAN_MASK=cmaskbefore; //restore
@@ -1722,390 +1661,32 @@ void Calibrate(int nevcc=10000)
 
 void MakeProfileTest()
 {
-  printf("Rescanning the net..\n");
-  RescanNet();
-  Reset();
-  //printf("Set SiPM bias to 0V..\n");
-  //HVOF();
-  //printf("Take profile for pedestals..\n");
-  printf("Set SiPM bias ON..\n");
-  HVON();
-  printf("Starting DAQ for %d seconds..\n",int(fNumberEntryTME->GetNumber()));
-  if(RunOn==0) StartDAQ();
-  printf("Set SiPM bias to 0V..\n");
-  HVOF();
-  printf("Done.\n");
+printf("Rescanning the net..\n");
+RescanNet();
+Reset();
+//printf("Set SiPM bias to 0V..\n");
+//HVOF();
+//printf("Take profile for pedestals..\n");
+printf("Set SiPM bias ON..\n");
+HVON();
+printf("Starting DAQ for %d seconds..\n",int(fNumberEntryTME->GetNumber()));
+if(RunOn==0) StartDAQ();
+printf("Set SiPM bias to 0V..\n");
+HVOF();
+printf("Done.\n");
 }
 
-
-Float_t FitPedestal(TH1F *hp)
+void ConfigSetFIL(uint32_t mask1)
 {
-  Float_t mean, sigma;
-  Float_t maxadc=hp->GetXaxis()->GetBinCenter(hp->GetMaximumBin());
-  TF1 *gfit = new TF1("gfit","gaus",maxadc-10,maxadc+10);
-  hp->Fit(gfit,"R+");
-  mean=gfit->GetParameter(1);  
-  sigma=gfit->GetParameter(2);  
-  hp->Fit(gfit,"","",mean-2*sigma,mean+2*sigma);
-  return mean; 
+ uint8_t bufFIL[256]; 
+ *((uint32_t*)(&(bufFIL[0])))=mask1;
+// *((uint32_t*)(&(bufFIL[4])))=mask2;
+// *((uint32_t*)(&(bufFIL[8])))=mask3;
+// *((uint8_t*)(&(bufFIL[12])))=majority;
+ 
+ for(int feb=0; feb<t->nclients; feb++)
+ {
+  SetDstMacByIndex(feb);
+  t->SendCMD(t->dstmac,FEB_WR_FIL,0x0000,bufFIL); 
+ }
 }
-
-Float_t FitGain(TH1F *hs)
-{
-  Float_t gain=0;
-  TSpectrum *s = new TSpectrum();
-  Int_t nfound = s->Search(hs,2,"",0.009);
-  Int_t npeaks = s->GetNPeaks();
-  printf("Found %d peaks to fit\n",nfound);
-  printf("Found %d peaks to fit\n",npeaks);
-
-  Double_t *peaks;
-  Double_t *altpeaks;
-  peaks = s->GetPositionX();
-  //  altpeaks = s->GetPositionY();
-
-  //Sort peaks
-  double temp;
-  int nchanges=0;
-  do{
-    nchanges=0;
-    for(int p=0;p<nfound-1;p++){
-      if(peaks[p]>peaks[p+1]){
-
-	temp=peaks[p];
-	peaks[p]=peaks[p+1];
-	peaks[p+1]=temp;
-	nchanges++;
-      }
-      //cout<<"iteraciones "<<nchanges<<endl;
-    }
-
-  }while(nchanges!=0);
-
-
-  for (int j=0 ; j<npeaks ; j++) {
-
-    //cout << "Peak "<<j<<" at = " << peaks[j] <<", with "<<altpeaks[j] <<" counts"<< endl;
-
-    x[j] =j+1;
-    y[j]=peaks[j];
-
-  }
-
-  int gg = 1;
-  for (int g=0 ; g<npeaks ; g++){
-
-    TF1 *gfit = new TF1("gfit","gaus",y[g]-20,y[g]+20);
-
-    hs->Fit(gfit,"QR+");
-
-    // cout<<"Peak "<<g<<" in "<< y[g]<< " centroid: "<< gfit->GetParameter(1)<<endl; 
-    //cout<<"Difference: "<<abs( y[g] - gfit->GetParameter(1) )<<endl;
-    //getchar();
-
-    if( (abs(y[g] - gfit->GetParameter(1)) ) < 25 ){
-      gx[gg] = gg;
-      gy[gg] = gfit->GetParameter(1);
-      gey[gg] = gfit->GetParError(1);
-      gg++;
-      // cout<<"good"<<endl;
-      //getchar();
-    }
-
-  }
-
-  if(!grpeaks) grpeaks = new TGraphErrors(gg,gx,gy,0,gey);
-  else { grpeaks->Clear();}
-  for (int p=0; p<20 ; p++){grpeaks->SetPoint(p,p,0); grpeaks->SetPointError(p,p,0);}
-
-  for(int p=0;p<gg;p++){ grpeaks->SetPoint(p,gx[p],gy[p]); grpeaks->SetPointError(p,0,gey[p]);}
-
-
-  grpeaks->SetTitle("SiPM Gain");
-  grpeaks->GetXaxis()->SetTitle("Peak N+i");
-  grpeaks->GetYaxis()->SetTitle("ADC Channel");
-  grpeaks->SetMarkerColor(4);
-  grpeaks->SetMarkerStyle(20);
-  grpeaks->SetFillColor(0);
-
-
-  //Fit
-  //TF1 *fit = new TF1("fit","[0] + [1]*x",0.5,gg-0.5);
-  fit = new TF1("fit","[0] + [1]*x",0.5,8.5);
-
-  fit->SetParName(1,"Gain");
-  fit->SetParName(0, "Pedestal");
-  fit->SetParameter(1,50);
-  fit->SetParameter(0,190);
-  grpeaks->Fit(fit, "QR"); 
-  c7->cd();
-  gStyle->SetOptFit();
-  grpeaks->Draw("AL*");
-  c7->Update();   
-
-  Double_t p1 = fit->GetParameter(1);
-  Double_t p1error = fit->GetParError(1);
-  Double_t p0 = fit->GetParameter(0);
-  Double_t p0error = fit->GetParError(0);
-
-  cout<<"Gain "<<p1<<" error "<<p1error<<" ADC Counts/photoelectron"<<endl;
-  cout<<"Pedestal "<<p0<<" error "<<p0error<<endl;
-
-
-  return p1;
-}
-
-void SendAllCheckedGSU()
-{
-  for(int i=0; i<NumOfChannels;i++)
-  {
-    fChanEnaAmp[i]->SetOn(); 
-    ConfigSetBit(bufSCR,1144,633+i*15,0); 
-  }
-
-  SetDstMacByIndex(BoardToMon);  
-  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-  fChanEnaAmp[NumOfChannels+1]->SetOn(kFALSE);fChanEnaAmp[NumOfChannels]->SetOn(kFALSE);
-}
-void SendAllUnCheckedGSU()
-{
-  for(int i=0; i<NumOfChannels;i++)
-  {
-    fChanEnaAmp[i]->SetOn(kFALSE); 
-    ConfigSetBit(bufSCR,1144,633+i*15,1); 
-  }
-
-  SetDstMacByIndex(BoardToMon);  
-  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
-  fChanEnaAmp[NumOfChannels+1]->SetOn(kFALSE);fChanEnaAmp[NumOfChannels]->SetOn(kFALSE);
-}
-
-void GSUGUI()
-{
-
-  // main frame
-  TGMainFrame *fMainFrame1314 = new TGMainFrame(gClient->GetRoot(),10,10,kMainFrame | kVerticalFrame);
-  fMainFrame1314->SetName("fMainFrame1314");
-  fMainFrame1314->SetLayoutBroken(kTRUE);
-
-  // composite frame
-  TGCompositeFrame *fMainFrame1560 = new TGCompositeFrame(fMainFrame1314,1329,789+100,kVerticalFrame);
-  fMainFrame1560->SetName("fMainFrame1560");
-  fMainFrame1560->SetLayoutBroken(kTRUE);
-
-  // composite frame
-  TGCompositeFrame *fMainFrame1241 = new TGCompositeFrame(fMainFrame1560,1329,789+100,kVerticalFrame);
-  fMainFrame1241->SetName("fMainFrame1241");
-
-  // vertical frame
-  TGVerticalFrame *fVerticalFrame734 = new TGVerticalFrame(fMainFrame1241,1327,787+100,kVerticalFrame);
-  fVerticalFrame734->SetName("fVerticalFrame734");
-
-  // status bar
-  Int_t parts[] = {15, 15, 15, 15, 15, 25};
-  fStatusBar739 = new TGStatusBar(fVerticalFrame734,1327,18);
-  fStatusBar739->SetName("fStatusBar739");
-  fStatusBar739->SetParts(parts, 6);
-  fVerticalFrame734->AddFrame(fStatusBar739, new TGLayoutHints(kLHintsBottom | kLHintsExpandX));
-
-
-
-  // horizontal frame
-  TGHorizontalFrame *fHorizontalFrame768 = new TGHorizontalFrame(fVerticalFrame734,1350,765+100,kHorizontalFrame);
-  fHorizontalFrame768->SetName("fHorizontalFrame768");
-
-  // "DAQ FEB controls" group frame
-  TGGroupFrame *fGroupFrame679 = new TGGroupFrame(fHorizontalFrame768,"DAQ FEB controls");
-  TGTextButton *fTextButton680 = new TGTextButton(fGroupFrame679,"Update Config");
-  fTextButton680->SetTextJustify(36);
-  fTextButton680->SetMargins(0,0,0,0);
-  fTextButton680->SetWrapLength(-1);
-  fTextButton680->Resize(123,22);
-  fTextButton680->SetCommand("UpdateConfig()");
-  fGroupFrame679->AddFrame(fTextButton680, new TGLayoutHints(kLHintsLeft | kLHintsCenterX | kLHintsTop | kLHintsExpandX,0,0,37,0));
-
-  TGTextButton *bStartDAQ = new TGTextButton(fGroupFrame679,"Start DAQ");
-  bStartDAQ->SetTextJustify(36);
-  bStartDAQ->SetMargins(0,0,0,0);
-  bStartDAQ->SetWrapLength(-1);
-  bStartDAQ->Resize(123,22);
-  bStartDAQ->SetCommand("if(RunOn==0) StartDAQ();");
-  fGroupFrame679->AddFrame(bStartDAQ, new TGLayoutHints(kLHintsLeft | kLHintsCenterX | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-
-  TGTextButton *bStopDAQ = new TGTextButton(fGroupFrame679,"Stop DAQ");
-  bStopDAQ->SetTextJustify(36);
-  bStopDAQ->SetMargins(0,0,0,0);
-  bStopDAQ->SetWrapLength(-1);
-  bStopDAQ->Resize(123,22);
-  bStopDAQ->SetCommand("RunOn=0; StopDAQ();");
-  fGroupFrame679->AddFrame(bStopDAQ, new TGLayoutHints(kLHintsLeft | kLHintsCenterX | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-  TGTextButton *bResetHistos = new TGTextButton(fGroupFrame679,"Reset Histos");
-  bResetHistos->SetTextJustify(36);
-  bResetHistos->SetMargins(0,0,0,0);
-  bResetHistos->SetWrapLength(-1);
-  bResetHistos->Resize(123,22);
-  bResetHistos->SetCommand("Reset()");
-  fGroupFrame679->AddFrame(bResetHistos, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-  /*
-  TGTextButton *bHVStatus = new TGTextButton(fGroupFrame679,"High Voltage",418);
-  bHVStatus->SetTextJustify(36);
-  bHVStatus->SetMargins(0,0,0,0);
-  bHVStatus->SetWrapLength(-1);
-  bHVStatus->Resize(123,22);
-  bHVStatus->SetCommand("HandleButtons(Int_t)");
-  fGroupFrame->AddFrame(bHVStatus, new TGLayoutHints(kLHintsCenterX,10,10,10,10));
-  */
-
-  TGTextButton *fTextButton78 = new TGTextButton(fGroupFrame679,"SiPM HV ON");
-  fTextButton78->SetTextJustify(36);
-  fTextButton78->SetMargins(0,0,0,0);
-  fTextButton78->SetWrapLength(-1);
-  fTextButton78->Resize(123,22);
-  fTextButton78->SetCommand("HVON()");
-  fGroupFrame679->AddFrame(fTextButton78, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-  TGTextButton *fTextButton88 = new TGTextButton(fGroupFrame679,"SiPM HV OFF");
-  fTextButton88->SetTextJustify(36);
-  fTextButton88->SetMargins(0,0,0,0);
-  fTextButton88->SetWrapLength(-1);
-  fTextButton88->Resize(123,22);
-  fGroupFrame679->AddFrame(fTextButton88, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-  fTextButton88->SetCommand("HVOF()");
-
-  fNumberEntry755 = new TGNumberEntry(fGroupFrame679, (Double_t) 250,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1023);
-  fGroupFrame679->AddFrame(fNumberEntry755, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,62,2));
-  TGTextButton *bSetThresholdAll = new TGTextButton(fGroupFrame679,"Set Threshold all");
-  bSetThresholdAll->SetTextJustify(36);
-  bSetThresholdAll->SetMargins(0,0,0,0);
-  bSetThresholdAll->SetWrapLength(-1);
-  bSetThresholdAll->Resize(123,22);
-  bSetThresholdAll->SetCommand("GUI_UpdateThresholdAll()");
-  fGroupFrame679->AddFrame(bSetThresholdAll, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
-
-  fUpdateHisto = new TGCheckButton(fGroupFrame679,"Auto update histograms");
-  fUpdateHisto->SetTextJustify(36);
-  fUpdateHisto->SetMargins(0,0,0,0);
-  fUpdateHisto->SetWrapLength(-1);
-  fUpdateHisto->SetCommand("UpdateHisto()");
-  fGroupFrame679->AddFrame(fUpdateHisto, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
-  fUpdateHisto->SetOn();
-
-  TGTextButton *bSaveDataTree = new TGTextButton(fGroupFrame679,"Save data tree");
-  bSaveDataTree->SetTextJustify(36);
-  bSaveDataTree->SetMargins(0,0,0,0);
-  bSaveDataTree->SetWrapLength(-1);
-  bSaveDataTree->Resize(123,22);
-  bSaveDataTree->SetCommand("tr->SaveAs(\"mppc.root\");");
-  fGroupFrame679->AddFrame(fTextButton111, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-  // tab widget
-  fTab683 = new TGTab(fHorizontalFrame768,1187,761+100);
-
-  // container of "Configuration"
-  TGCompositeFrame *fCompositeFrame686;
-  fCompositeFrame686 = fTab683->AddTab("Configuration");
-  fCompositeFrame686->SetLayoutManager(new TGHorizontalLayout(fCompositeFrame686));
-  char str[32];
-
-  TGVButtonGroup* fButtonGroup2=new TGVButtonGroup(fCompositeFrame686,"Enable Amplifier");
-  for(int i=0;i<NumOfChannels;i++)
-  {
-    sprintf(str,"ch%d",i);
-    fChanEnaAmp[i] = new TGCheckButton(fButtonGroup2,str);
-    fChanEnaAmp[i]->SetTextJustify(36);
-    fChanEnaAmp[i]->SetMargins(0,0,0,0);
-    fChanEnaAmp[i]->SetWrapLength(-1);
-    fChanEnaAmp[i]->SetCommand("SendConfig()");
-  }
-  fChanEnaAmp[NumOfChannels] = new TGCheckButton(fButtonGroup2,"All");
-  fChanEnaAmp[NumOfChannels]->SetTextJustify(36);
-  fChanEnaAmp[NumOfChannels]->SetMargins(0,0,0,0);
-  fChanEnaAmp[NumOfChannels]->SetWrapLength(-1);
-  fChanEnaAmp[NumOfChannels]->SetCommand("SendAllCheckedGSU()");
-  fChanEnaAmp[NumOfChannels+1] = new TGCheckButton(fButtonGroup2,"None");
-  fChanEnaAmp[NumOfChannels+1]->SetTextJustify(36);
-  fChanEnaAmp[NumOfChannels+1]->SetMargins(0,0,0,0);
-  fChanEnaAmp[NumOfChannels+1]->SetWrapLength(-1);
-  fChanEnaAmp[NumOfChannels+1]->SetCommand("SendAllUnCheckedGSU()");
-
-  fCompositeFrame686->AddFrame(fButtonGroup2, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
-  fButtonGroup2->Show();
-
-  TGVButtonGroup* fButtonGroup3=new TGVButtonGroup(fCompositeFrame686,"Enable Trigger");
-  for(int i=0;i<NumOfChannels;i++)
-  {
-    sprintf(str,"ch%d",i);
-    fChanEnaTrig[i] = new TGCheckButton(fButtonGroup3,str);
-    fChanEnaTrig[i]->SetTextJustify(36);
-    fChanEnaTrig[i]->SetMargins(0,0,0,0);
-    fChanEnaTrig[i]->SetWrapLength(-1);
-    fChanEnaTrig[i]->SetCommand("SendConfig()");
-  }
-  fChanEnaTrig[NumOfChannels] = new TGCheckButton(fButtonGroup3,"OR32");
-  fChanEnaTrig[NumOfChannels]->SetTextJustify(36);
-  fChanEnaTrig[NumOfChannels]->SetMargins(0,0,0,0);
-  fChanEnaTrig[NumOfChannels]->SetWrapLength(-1);
-  fChanEnaTrig[NumOfChannels]->SetCommand("SendConfig()");
-
-  fCompositeFrame686->AddFrame(fButtonGroup3, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
-  fButtonGroup3->Show();
-
-  TGGroupFrame* fGains=new TGGroupFrame(fCompositeFrame686,"HG preamp gain/bias");
-  fGains->SetLayoutManager(new TGMatrixLayout(fGains, 32, 3, 0, kLHintsLeft | kLHintsTop));
-  for(int i=0;i<NumOfChannels;i++)
-  {
-    sprintf(str," CH %d",i);
-    fChanGain[i] = new TGNumberEntry(fGains, (Double_t) i,2,-1,(TGNumberFormat::EStyle) 0,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,64);
-    fChanGain[i]->Connect("ValueSet(Long_t)", 0, 0,  "SendConfig()");
-    fChanGain[i]->SetHeight(20);
-    fChanBias[i] = new TGNumberEntry(fGains, (Double_t) i,3,-1,(TGNumberFormat::EStyle) 0,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,256);
-    fChanBias[i]->Connect("ValueSet(Long_t)", 0, 0,  "SendConfig()");
-    fChanBias[i]->SetHeight(20);
-    fGains->AddFrame(new TGLabel(fGains,str));
-    fGains->AddFrame(fChanGain[i]);
-    fGains->AddFrame(fChanBias[i]);
-
-  }
-  fCompositeFrame686->AddFrame(fGains, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
-
-
-  // container of "All histos"
-  TGCompositeFrame *fCompositeFrame720;
-  fCompositeFrame720 = fTab683->AddTab("All histos");
-  fCompositeFrame720->SetLayoutManager(new TGVerticalLayout(fCompositeFrame720));
-
-  // embedded canvas
-  TRootEmbeddedCanvas *fRootEmbeddedCanvas721 = new TRootEmbeddedCanvas(0,fCompositeFrame720,1179,732+100);
-  Int_t wfRootEmbeddedCanvas721 = fRootEmbeddedCanvas721->GetCanvasWindowId();
-  c = new TCanvas("c", 10, 10, wfRootEmbeddedCanvas721);    c->Divide(2,4);
-
-  fRootEmbeddedCanvas721->AdoptCanvas(c);
-  fCompositeFrame720->AddFrame(fRootEmbeddedCanvas721, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX | kLHintsExpandY,2,2,2,2));
-
-  fTab683->SetTab(2);
-
-  fTab683->Resize(fTab683->GetDefaultSize());
-  fHorizontalFrame768->AddFrame(fTab683, new TGLayoutHints(kLHintsRight | kLHintsTop | kLHintsExpandX | kLHintsExpandY,2,2,2,2));
-
-  fVerticalFrame734->AddFrame(fHorizontalFrame768, new TGLayoutHints(kLHintsTop | kLHintsExpandX | kLHintsExpandY,2,2,2,2));
-
-  fMainFrame1241->AddFrame(fVerticalFrame734, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY,1,1,1,1));
-
-  fMainFrame1560->AddFrame(fMainFrame1241, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
-  fMainFrame1241->MoveResize(0,0,1329,789+100);
-
-  fMainFrame1314->AddFrame(fMainFrame1560, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
-  fMainFrame1560->MoveResize(0,0,1329,789+100);
-
-  fMainFrame1314->SetMWMHints(kMWMDecorAll,
-      kMWMFuncAll,
-      kMWMInputModeless);
-  fMainFrame1314->MapSubwindows();
-
-  fMainFrame1314->Resize(fMainFrame1314->GetDefaultSize());
-  fMainFrame1314->MapWindow();
-  fMainFrame1314->Resize(1329,789+100);
-}  
