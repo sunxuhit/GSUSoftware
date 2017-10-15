@@ -191,6 +191,7 @@ int FEBDTP::SendCMD(UChar_t* mac, UShort_t cmd, UShort_t reg, UChar_t* buf)
   		case FEB_WR_SRFF : 
   		case FEB_WR_SCR  : 
   		case FEB_WR_PMR  : 
+ 		case FEB_WR_FIL  : 
   		case FEB_WR_CDR : 
  			tout=50000; //timeout 50ms
      			memcpy(&gpkt.Data,buf,256); // Copy 256 register values to the data buffer
@@ -223,6 +224,7 @@ int FEBDTP::SendCMD(UChar_t* mac, UShort_t cmd, UShort_t reg, UChar_t* buf)
    		case FEB_OK_SR : 
    		case FEB_OK_SCR : 
    		case FEB_OK_PMR : 
+  		case FEB_OK_FIL : 
   		case FEB_OK_FW : 
      			memcpy(buf,&gpkt.Data,(packlen>256)?256:1); // Copy register value(s) from the data buffer 
                         retval=1;
@@ -235,6 +237,7 @@ int FEBDTP::SendCMD(UChar_t* mac, UShort_t cmd, UShort_t reg, UChar_t* buf)
     		case FEB_ERR_SR : 
    		case FEB_ERR_SCR : 
    		case FEB_ERR_PMR : 
+   		case FEB_ERR_FIL : 
    		case FEB_ERR_CDR : 
    		case FEB_ERR_FW : 
     			printf("Error code in reply.\n");
@@ -321,6 +324,19 @@ void FEBDTP::CMD_stoa(UShort_t cmd, char* str)
     break;
   case FEB_ERR_PMR : 
     sprintf(str,"FEB_ERR_PMR");
+    break;
+
+  case FEB_RD_FIL : 
+    sprintf(str,"FEB_RD_FIL");
+    break;
+  case FEB_WR_FIL  : 
+    sprintf(str,"FEB_WR_FIL");
+    break;
+  case FEB_OK_FIL : 
+    sprintf(str,"FEB_OK_FIL");
+    break;
+  case FEB_ERR_FIL : 
+    sprintf(str,"FEB_ERR_FIL");
     break;
 
   case FEB_RD_CDR : 
