@@ -121,7 +121,10 @@
 #include "TF1.h"
 #include "TTree.h"
 #include "time.h"
+#include "TDatime.h"
+#include "TGProgressBar.h"
 #include <sys/timeb.h>
+#include <string>
 
 #define maxpe 10 //max number of photoelectrons to use in the fit
 #define NumOfChannels 8
@@ -185,14 +188,12 @@ time_t tm0,tm1;
 uint32_t CHAN_MASK=0xFFFFFFFF; // by default all channels are recorded
 
 void FEBGUI();
-void GSUGUI();
 void SetThresholdDAC1(UShort_t dac1);
 UShort_t GetThresholdDAC1();
 void SetThresholdDAC2(UShort_t dac2);
 int Init(const char* iface);
 float GetTriggerRate();
 void UpdateConfig();
-void UpdateConfigGSU();
 void UpdateHisto();
 void UpdateHistoGSU();
 void UpdateBoardMonitor();
@@ -204,6 +205,12 @@ void ConfigSetGain(int chan, UChar_t val);
 void ConfigSetBias(int chan, UChar_t val);
 void ConfigSetFIL(uint32_t mask1, uint32_t mask2, uint8_t majority); 
  
+void GSUGUI();
+void UpdateConfigGSU();
+void HandleButtons(Int_t id = -1);
+TGTextButton *bHVStatus;
+TDatime *Time_Stop;
+
 UInt_t GrayToBin(UInt_t n)
 {
 UInt_t res=0;
@@ -526,25 +533,25 @@ void RescanNet()
 int Init(const char *iface="eth1")
 {
   t=new FEBDTP(iface);
- if(t->ScanClients()==0) {printf("No clients connected, exiting\n"); return 0;};
- t->PrintMacTable(); 
- 
- t->VCXO=500;
- for(int feb=0; feb<t->nclients; feb++)  { ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; }
+  if(t->ScanClients()==0) {printf("No clients connected, exiting\n"); return 0;};
+  t->PrintMacTable(); 
 
- t->setPacketHandler(&FillHistos);
-   char str1[32];
+  t->VCXO=500;
+  for(int feb=0; feb<t->nclients; feb++)  { ts0_ref_AVE[t->macs[feb][5]]=0;ts0_ref_IND[t->macs[feb][5]]=0; }
+
+  t->setPacketHandler(&FillHistos);
+  char str1[32];
   char str2[32];
   SetDstMacByIndex(0);
   evs=0;
   for(int i=0;i<32;i++) {
-      sprintf(str1,"h%d",i);
-      sprintf(str2,"ADC # %d",i);
-      hst[i]=new TH1F(str1,str2,820,0,4100);
-      hst[i]->GetXaxis()->SetTitle("ADC value");
-      hst[i]->GetYaxis()->SetTitle("Events");
+    sprintf(str1,"h%d",i);
+    sprintf(str2,"ADC # %d",i);
+    hst[i]=new TH1F(str1,str2,820,0,4100);
+    hst[i]->GetXaxis()->SetTitle("ADC value");
+    hst[i]->GetYaxis()->SetTitle("Events");
 
-    }
+  }
   for(int i=0;i<256;i++) gts0[i]=new TGraph();
   for(int i=0;i<256;i++) gts1[i]=new TGraph();
   hcprof=new TH1F("hcprof","Channel profile",32,0,32);
@@ -570,10 +577,10 @@ int Init(const char *iface="eth1")
   tr->Branch("ts1",&ts1,"ts1/i");
   tr->Branch("ts0_ref",&ts0_ref,"ts0_ref/i");
   tr->Branch("ts1_ref",&ts1_ref,"ts1_ref/i");
- 
-   BenchMark=new TBenchmark();
-   BenchMark->Start("Poll");
-return 1;
+
+  BenchMark=new TBenchmark();
+  BenchMark->Start("Poll");
+  return 1;
 }
 
 UInt_t overwritten=0;
@@ -702,14 +709,14 @@ void UpdateHisto()
 
 void StopDAQ()
 {
-t->dstmac[5]=0xff; //Broadcast
+  t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_GEN_INIT,0,buf);  
 }
 
 
 void StartDAQ(int nev=0)
 {
-t->dstmac[5]=0xff; //Broadcast
+  t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_GEN_INIT,1,buf); //reset buffer
   t->SendCMD(t->dstmac,FEB_GEN_INIT,2,buf); //set DAQ_Enable flag on FEB
   DAQ(nev);
@@ -734,10 +741,10 @@ void DAQ(int nev=0)
   float rate;
   tm0=time(NULL);
   tm1=time(NULL);
-  while(RunOn==1 && (nevv==0 || evs<nevv))
+  while(RunOn==1 && (nevv==0 || evs<nevv) && (fNumberEntryTME->GetNumber()==0 || tm1-tm0 < fNumberEntryTME->GetNumber() ))
   {
 
-    BenchMark->Show("Poll");
+    // BenchMark->Show("Poll");
     PollPeriod=BenchMark->GetRealTime("Poll");
     BenchMark->Reset();
     BenchMark->Start("Poll");
@@ -782,9 +789,9 @@ void DAQ(int nev=0)
     }
 
     gSystem->ProcessEvents();
-    printf("Per request: %d events acquired, overwritten (flags field of last event) %d\n",evsperrequest,overwritten);
-    if(nevv>0) printf("%d events to go...\n",nevv-evs);
-    sprintf(str1,"Poll: %d events acquired in %2.2f sec.",evsperrequest,PollPeriod);
+    // printf("Per request: %d events acquired, overwritten (flags field of last event) %d\n",evsperrequest,overwritten);
+    // if(nevv>0) printf("%d events to go...\n",nevv-evs);
+    // sprintf(str1,"Poll: %d events acquired in %2.2f sec.",evsperrequest,PollPeriod);
     if(evsperrequest>0) fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xbbffbb);
     else fStatusBar739->GetBarPart(1)->SetBackgroundColor(0xffaaaa);
 
@@ -865,22 +872,21 @@ void All()
 
 void HVON()
 {
-//for(int feb=0; feb<t->nclients; feb++)
-//{
-//SetDstMacByIndex(feb);
-t->dstmac[5]=0xff; //Broadcast
-t->SendCMD(t->dstmac,FEB_GEN_HVON,0x0000,buf);
-//}
+  t->dstmac[5]=0xff; //Broadcast
+  t->SendCMD(t->dstmac,FEB_GEN_HVON,0x0000,buf);
+
+  Pixel_t green;
+  gClient->GetColorByName("green", green);
+  bHVStatus->ChangeBackground(green);
 }
 
 void HVOF()
 {
-//for(int feb=0; feb<t->nclients; feb++)
-//{
-//SetDstMacByIndex(feb);
-t->dstmac[5]=0xff; //Broadcast
- t->SendCMD(t->dstmac,FEB_GEN_HVOF,0x0000,buf);
-//}
+  t->dstmac[5]=0xff; //Broadcast
+  t->SendCMD(t->dstmac,FEB_GEN_HVOF,0x0000,buf);
+  Pixel_t white;
+  gClient->GetColorByName("white", white);
+  bHVStatus->ChangeBackground(white);
 }
 
 float GetTriggerRate()
@@ -910,30 +916,30 @@ for( thr=start; thr<=stop; thr++)
 
 void SetThresholdDAC1(UShort_t dac1)
 {
-int offset=1107;
-for(int i=0; i<10;i++)
-{ 
-  if( (dac1 & 1)>0) ConfigSetBit(bufSCR,1144,offset+9-i,kTRUE);
-  else ConfigSetBit(bufSCR,1144,offset+9-i,kFALSE);
-  dac1= dac1 >> 1;
-}
-//UShort_t* pdac=(UShort_t*)(&bufSCR[3]);
-// printf("%4x",((*pdac)>>3)&0x3ff)
-//*pdac=*pdac & 0xE007; //clean bits of ADC1
-//*pdac=*pdac | ((dac1 << 3) & 0x1FF8);
-t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
+  int offset=1107;
+  for(int i=0; i<10;i++)
+  { 
+    if( (dac1 & 1)>0) ConfigSetBit(bufSCR,1144,offset+9-i,kTRUE);
+    else ConfigSetBit(bufSCR,1144,offset+9-i,kFALSE);
+    dac1= dac1 >> 1;
+  }
+  //UShort_t* pdac=(UShort_t*)(&bufSCR[3]);
+  // printf("%4x",((*pdac)>>3)&0x3ff)
+  //*pdac=*pdac & 0xE007; //clean bits of ADC1
+  //*pdac=*pdac | ((dac1 << 3) & 0x1FF8);
+  t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
 }
 
 UShort_t GetThresholdDAC1()
 {
-int offset=1107;
-UShort_t dac1=0;
-for(int i=0; i<10;i++)
-{ 
-  dac1= dac1 >> 1;
-  if(ConfigGetBit(bufSCR,1144,offset+9-i)) dac1=dac1 | 0x0200;
-}
-return dac1;
+  int offset=1107;
+  UShort_t dac1=0;
+  for(int i=0; i<10;i++)
+  { 
+    dac1= dac1 >> 1;
+    if(ConfigGetBit(bufSCR,1144,offset+9-i)) dac1=dac1 | 0x0200;
+  }
+  return dac1;
 }
 
 void SetThresholdDAC2(UShort_t dac1)
@@ -954,18 +960,18 @@ t->SendCMD(t->dstmac,FEB_WR_SCR,0x0000,bufSCR);
 
 
 
-   void GUI_UpdateThreshold()
-    {
-     UShort_t dac1;
-     dac1=fNumberEntry755->GetNumber();
-//	for(int feb=0; feb<t->nclients; feb++)
-//	{
-//	SetDstMacByIndex(feb);
-t->dstmac[5]=0xff; //Broadcast
-      	SetThresholdDAC1(dac1);
-      	SetThresholdDAC2(dac1);
-//        }
-    }
+void GUI_UpdateThreshold()
+{
+  UShort_t dac1;
+  dac1=fNumberEntry755->GetNumber();
+  //	for(int feb=0; feb<t->nclients; feb++)
+  //	{
+  //	SetDstMacByIndex(feb);
+  t->dstmac[5]=0xff; //Broadcast
+  SetThresholdDAC1(dac1);
+  SetThresholdDAC2(dac1);
+  //        }
+}
    void GUI_UpdateVCXO()
     {
      t->VCXO=fNumberEntry75->GetNumber();
@@ -1752,6 +1758,74 @@ void ResetGSU()
   total_lost=0;
 }
 
+void SaveDataTree()
+{
+  if(!Time_Stop) Time_Stop = new TDatime();
+  string outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+  cout << "Save data to " << outputfile.c_str() << endl;
+  tr->SaveAs(outputfile.c_str());
+}
+
+void TestRun()
+{
+  ResetGSU();
+  printf("Set SiPM bias ON..\n");
+  HVON();
+  printf("Starting DAQ for %d seconds..\n",int(fNumberEntryTME->GetNumber()));
+  fTab683->SetTab(1);
+  if(RunOn==0) StartDAQ();
+  printf("Set SiPM bias to 0V..\n");
+  StopDAQ();
+  HVOF();
+  SaveDataTree();
+  printf("Done.\n");
+}
+
+
+void HandleButtons(Int_t id)
+{
+   // Handle different buttons.
+
+   if (id == -1) {
+      TGButton *btn = (TGButton *) gTQSender;
+      id = btn->WidgetId();
+   }
+
+   printf("DoButton: id = %d\n", id);
+
+   switch (id) 
+   {
+     case 415:  // Start DAQ
+       if(RunOn == 0)
+       {
+	 HVON();
+	 fTab683->SetTab(1);
+	 StartDAQ();
+       }
+       break;
+     case 416:  // Stop DAQ
+       RunOn = 0;
+       StopDAQ();
+       HVOF();
+       break;
+     case 417: // Rest Histograms
+       ResetGSU();
+       break;
+     case 418: // HV status
+       cout << "Do not play with High Voltage!!" << endl;
+       break;
+     case 419: // update threshold
+       GUI_UpdateThreshold();
+       break;
+     case 420: // Save Data TTree
+       SaveDataTree();
+       break;
+     case 421: // test run
+       TestRun();
+       break;
+   }
+}
+
 void GSUGUI()
 {
   // main frame
@@ -1785,6 +1859,7 @@ void GSUGUI()
 
   // "DAQ FEB controls" group frame
   TGGroupFrame *fGroupFrame679 = new TGGroupFrame(fHorizontalFrame768,"DAQ FEB controls");
+
   TGTextButton *fTextButton680 = new TGTextButton(fGroupFrame679,"Update Config");
   fTextButton680->SetTextJustify(36);
   fTextButton680->SetMargins(0,0,0,0);
@@ -1793,57 +1868,69 @@ void GSUGUI()
   fTextButton680->SetCommand("UpdateConfigGSU()");
   fGroupFrame679->AddFrame(fTextButton680, new TGLayoutHints(kLHintsLeft | kLHintsCenterX | kLHintsTop | kLHintsExpandX,0,0,37,0));
 
-  TGTextButton *bStartDAQ = new TGTextButton(fGroupFrame679,"Start DAQ");
+  TGTextButton *bStartDAQ = new TGTextButton(fGroupFrame679,"Start DAQ",415);
   bStartDAQ->SetTextJustify(36);
   bStartDAQ->SetMargins(0,0,0,0);
   bStartDAQ->SetWrapLength(-1);
   bStartDAQ->Resize(123,22);
-  bStartDAQ->SetCommand("if(RunOn==0) StartDAQ();");
+  bStartDAQ->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
+  // bStartDAQ->SetCommand("if(RunOn==0) StartDAQ();");
   fGroupFrame679->AddFrame(bStartDAQ, new TGLayoutHints(kLHintsLeft | kLHintsCenterX | kLHintsTop | kLHintsExpandX,0,0,2,2));
-  // fNumberEntryTME= new TGNumberEntry(fGroupFrame679, (Double_t) 0,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1e9);
-  // fGroupFrame679->AddFrame(fNumberEntryTME, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
 
-
-  TGTextButton *bStopDAQ = new TGTextButton(fGroupFrame679,"Stop DAQ");
+  TGTextButton *bStopDAQ = new TGTextButton(fGroupFrame679,"Stop DAQ",416);
   bStopDAQ->SetTextJustify(36);
   bStopDAQ->SetMargins(0,0,0,0);
   bStopDAQ->SetWrapLength(-1);
   bStopDAQ->Resize(123,22);
-  bStopDAQ->SetCommand("RunOn=0; StopDAQ();");
+  bStopDAQ->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
+  // bStopDAQ->SetCommand("RunOn=0; StopDAQ();");
   fGroupFrame679->AddFrame(bStopDAQ, new TGLayoutHints(kLHintsLeft | kLHintsCenterX | kLHintsTop | kLHintsExpandX,0,0,2,2));
 
-  TGTextButton *bResetHistos = new TGTextButton(fGroupFrame679,"Reset Histos");
+  TGTextButton *bResetHistos = new TGTextButton(fGroupFrame679,"Reset Histos",417);
   bResetHistos->SetTextJustify(36);
   bResetHistos->SetMargins(0,0,0,0);
   bResetHistos->SetWrapLength(-1);
   bResetHistos->Resize(123,22);
-  bResetHistos->SetCommand("ResetGSU()");
+  // bResetHistos->SetCommand("ResetGSU()");
+  bResetHistos->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
   fGroupFrame679->AddFrame(bResetHistos, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
 
+  /*
   TGTextButton *fTextButton78 = new TGTextButton(fGroupFrame679,"SiPM HV ON");
   fTextButton78->SetTextJustify(36);
   fTextButton78->SetMargins(0,0,0,0);
   fTextButton78->SetWrapLength(-1);
   fTextButton78->Resize(123,22);
-  fGroupFrame679->AddFrame(fTextButton78, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
   fTextButton78->SetCommand("HVON()");
+  fGroupFrame679->AddFrame(fTextButton78, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
 
   TGTextButton *fTextButton88 = new TGTextButton(fGroupFrame679,"SiPM HV OFF");
   fTextButton88->SetTextJustify(36);
   fTextButton88->SetMargins(0,0,0,0);
   fTextButton88->SetWrapLength(-1);
   fTextButton88->Resize(123,22);
-  fGroupFrame679->AddFrame(fTextButton88, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
   fTextButton88->SetCommand("HVOF()");
+  fGroupFrame679->AddFrame(fTextButton88, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
+  */
+
+  bHVStatus = new TGTextButton(fGroupFrame679,"High Voltage",418);
+  bHVStatus->SetTextJustify(36);
+  bHVStatus->SetMargins(0,0,0,0);
+  bHVStatus->SetWrapLength(-1);
+  bHVStatus->Resize(123,22);
+  bHVStatus->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
+  fGroupFrame679->AddFrame(bHVStatus, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
+
 
   fNumberEntry755 = new TGNumberEntry(fGroupFrame679, (Double_t) 250,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1023);
   fGroupFrame679->AddFrame(fNumberEntry755, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,62,2));
-  TGTextButton *bSetThreshold = new TGTextButton(fGroupFrame679,"Set Threshold DAC1");
+  TGTextButton *bSetThreshold = new TGTextButton(fGroupFrame679,"Set Threshold DAC1",419);
   bSetThreshold->SetTextJustify(36);
   bSetThreshold->SetMargins(0,0,0,0);
   bSetThreshold->SetWrapLength(-1);
   bSetThreshold->Resize(123,22);
-  bSetThreshold->SetCommand("GUI_UpdateThreshold()");
+  // bSetThreshold->SetCommand("GUI_UpdateThreshold()");
+  bSetThreshold->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
   fGroupFrame679->AddFrame(bSetThreshold, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
 
 
@@ -1859,13 +1946,29 @@ void GSUGUI()
   fGroupFrame679->AddFrame(fUpdateHisto, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
   fUpdateHisto->SetOn();
 
-  TGTextButton *bSaveDataTree = new TGTextButton(fGroupFrame679,"Save data tree");
+  TGTextButton *bSaveDataTree = new TGTextButton(fGroupFrame679,"Save data tree",420);
   bSaveDataTree->SetTextJustify(36);
   bSaveDataTree->SetMargins(0,0,0,0);
   bSaveDataTree->SetWrapLength(-1);
   bSaveDataTree->Resize(123,22);
-  bSaveDataTree->SetCommand("tr->SaveAs(\"mppc.root\");");
+  // bSaveDataTree->SetCommand("tr->SaveAs(\"mppc.root\");");
+  bSaveDataTree->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
   fGroupFrame679->AddFrame(bSaveDataTree, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
+
+  TGTextButton *bTestRun = new TGTextButton(fGroupFrame679,"Test Run",421);
+  bTestRun->SetTextJustify(36);
+  bTestRun->SetMargins(0,0,0,0);
+  bTestRun->SetWrapLength(-1);
+  bTestRun->Resize(123,22);
+  bTestRun->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
+  fGroupFrame679->AddFrame(bTestRun, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
+
+  fNumberEntryTME= new TGNumberEntry(fGroupFrame679, (Double_t) 0,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1e9);
+  fGroupFrame679->AddFrame(fNumberEntryTME, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
+
+  // TGHProgressBar *ProgTimer = new TGHProgressBar(fGroupFrame679,100);
+  // ProgTimer->ShowPosition();
+  // fGroupFrame679->AddFrame(ProgTimer, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
 
   // tab widget
   fTab683 = new TGTab(fHorizontalFrame768,1187,761+100);
