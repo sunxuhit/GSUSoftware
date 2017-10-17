@@ -127,7 +127,7 @@
 #include <string>
 
 #define maxpe 10 //max number of photoelectrons to use in the fit
-#define NumOfChannels 8
+#define NumOfChannels 16
 int NEVDISP=200; //number of lines in the waterfall event display
 const Double_t initpar0[7]={7000,100,700,9.6,1.18,0.3,0.5};
 const Double_t initpar1[7]={3470,100,700,9.5,2.25,3e-3,3.7e-2};
@@ -784,7 +784,7 @@ void DAQ(int nev=0)
     }
 
     if(fUpdateHisto->IsOn() && fTab683->GetCurrent()==1) {   
-      for(int y=0;y<2;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+      for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
       c->Update();
     }
 
@@ -827,7 +827,7 @@ void DAQ(int nev=0)
   printf("Overal per DAQ call: %d events acquired, %d (%2.1f\%%) lost (skipping first request).\n",evs,total_lost, (100.*total_lost/(evs+total_lost)));
   sprintf(str1, "Overal: %d acquired, %d (%2.1f\%%) lost",evs,total_lost, (100.*total_lost/(evs+total_lost)));
   fStatusBar739->SetText(str1,5);
-  for(int y=0;y<2;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+  for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
   c->Update();
 }
 
@@ -1744,14 +1744,14 @@ void SendConfigGSU()
 
 void UpdateHistoGSU()
 {
-    for(int y=0;y<2;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+    for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
     c->Update();
 }
 
 void ResetGSU()
 {
-  for(int y=0;y<2;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
-  for(int y=0;y<2;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+  for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
+  for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
   c->Update();
   tr->Reset();
   evs=0;
@@ -2050,7 +2050,7 @@ void GSUGUI()
   // embedded canvas
   TRootEmbeddedCanvas *fRootEmbeddedCanvas721 = new TRootEmbeddedCanvas(0,fCompositeFrame720,1179,732+100);
   Int_t wfRootEmbeddedCanvas721 = fRootEmbeddedCanvas721->GetCanvasWindowId();
-  c = new TCanvas("c", 10, 10, wfRootEmbeddedCanvas721);    c->Divide(4,2);
+  c = new TCanvas("c", 10, 10, wfRootEmbeddedCanvas721);    c->Divide(4,NumOfChannels/4);
 
   fRootEmbeddedCanvas721->AdoptCanvas(c);
   fCompositeFrame720->AddFrame(fRootEmbeddedCanvas721, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX | kLHintsExpandY,2,2,2,2));
