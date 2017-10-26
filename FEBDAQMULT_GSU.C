@@ -125,6 +125,9 @@
 #include "TGProgressBar.h"
 #include <sys/timeb.h>
 #include <string>
+#include <fstream>
+#include <cstdio>
+#include "TFile.h"
 
 #define maxpe 10 //max number of photoelectrons to use in the fit
 #define NumOfChannels 16
@@ -207,9 +210,12 @@ void ConfigSetFIL(uint32_t mask1, uint32_t mask2, uint8_t majority);
  
 void GSUGUI();
 void UpdateConfigGSU();
+bool ReadTileIds(const char * fname);
 void HandleButtons(Int_t id = -1);
 TGTextButton *bHVStatus;
 TDatime *Time_Stop;
+std::string HistName[32];
+int NumOfTiles = 0;
 
 UInt_t GrayToBin(UInt_t n)
 {
@@ -306,6 +312,7 @@ void FEBDAQMULT_GSU(const char *iface="eth1")
 void FEBDAQMULT_GSU(const char *iface="eth1")
 {
   if(Init(iface)==0) return;
+  if(!ReadTileIds("TileIds.txt")) return;
   GSUGUI();
   UpdateConfigGSU();
 }
@@ -1690,6 +1697,24 @@ void UpdateConfigGSU()
   }
 }
 
+bool ReadTileIds(const char * fname = "TileIds.txt")
+{
+  std::ifstream tileIds;
+  tileIds.open(fname);
+  if(!tileIds.is_open()) {std::perror("Error opening TileIds.txt"); return false;}
+
+  for(int i_Tiles = 0; i_Tiles < 32; ++i_Tiles) HistName[i_Tiles] = "histo name not set";
+
+  while( std::getline(tileIds,HistName[NumOfTiles]) )
+  {
+    cout << "Set " << NumOfTiles << " histogram name to " << HistName[NumOfTiles].c_str() << endl;
+    hst[NumOfTiles]->SetNameTitle(("HCALTile_"+HistName[NumOfTiles]).c_str(),("HCALTile_"+HistName[NumOfTiles]).c_str());
+    NumOfTiles++;
+  }
+  tileIds.close();
+  return true;
+}
+
 void SendAllCheckedGSU()
 {
   for(int i=0; i<NumOfChannels;i++)
@@ -1761,9 +1786,26 @@ void ResetGSU()
 void SaveDataTree()
 {
   if(!Time_Stop) Time_Stop = new TDatime();
-  string outputfile = Form("HCALTileTest_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+  string outputfile = Form("HCALTile_Tested_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
   cout << "Save data to " << outputfile.c_str() << endl;
   tr->SaveAs(outputfile.c_str());
+
+  for(int i_Tiles = 0; i_Tiles < NumOfTiles; ++i_Tiles)
+  {
+    cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
+    std::string outputhisto = Form("HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+    cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
+    TFile *File_OutPutHisto = new TFile(outputhisto.c_str(),"RECREATE");
+    File_OutPutHisto->cd();
+    hst[i_Tiles]->Write();
+    File_OutPutHisto->Close();
+  }
+
+  std::ifstream tileIds("TileIds.txt");
+  if(!tileIds.is_open()) {std::perror("Error opening TileIds.txt"); return;}
+  std::string testedfilename = Form("HCALTileId_Tested_%d_%d.txt",Time_Stop->GetDate(),Time_Stop->GetTime());
+  int is_renamed = std::rename("TileIds.txt",testedfilename.c_str());
+  if(is_renamed) {std::perror("Error renaming"); return;}
 }
 
 void TestRun()
