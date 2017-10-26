@@ -1707,7 +1707,7 @@ bool ReadTileIds(const char * fname = "TileIds.txt")
 
   while( std::getline(tileIds,HistName[NumOfTiles]) )
   {
-    cout << "Set " << NumOfTiles << " histogram name to " << HistName[NumOfTiles].c_str() << endl;
+    cout << "Set " << NumOfTiles << " histogram name to " << ("HCALTile_"+HistName[NumOfTiles]).c_str() << endl;
     hst[NumOfTiles]->SetNameTitle(("HCALTile_"+HistName[NumOfTiles]).c_str(),("HCALTile_"+HistName[NumOfTiles]).c_str());
     NumOfTiles++;
   }
