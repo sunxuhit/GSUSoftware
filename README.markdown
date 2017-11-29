@@ -14,7 +14,7 @@ if you do **NOT** use `Test Run` please set the number below it to 0
 ### Output
 all root file will be saved under LocalRootBase
 
-all txt file will be saved under localDataBase include Tested\_TileIds and information of tested tiles
+all txt file will be saved under LocalDataBase include Tested\_TileIds and information of tested tiles
 
 #### Update Config
 > read default configuration file
@@ -35,7 +35,11 @@ all txt file will be saved under localDataBase include Tested\_TileIds and infor
 > set threshold to the number above
 
 #### Save data tree
-> save data to a ROOT TTree based on click time
+> save all data to a ROOT TTree based on click time under LocalRootBase
+>
+> save individual tile adc histogram to a ROOT file under LocalRootBase
+>
+> save relevant information for individual tile under LocalDataBase
 
 #### Test Run
 > start to standard test run
