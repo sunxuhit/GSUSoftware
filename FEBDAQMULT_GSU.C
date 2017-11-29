@@ -125,6 +125,7 @@
 #include "TGProgressBar.h"
 #include <sys/timeb.h>
 #include <string>
+#include <iostream>
 #include <fstream>
 #include <cstdio>
 #include "TFile.h"
@@ -1786,24 +1787,54 @@ void ResetGSU()
 void SaveDataTree()
 {
   if(!Time_Stop) Time_Stop = new TDatime();
-  string outputfile = Form("HCALTile_Tested_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+  string outputfile = Form("LocalRootBase/HCALTile_Tested_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
   cout << "Save data to " << outputfile.c_str() << endl;
   tr->SaveAs(outputfile.c_str());
 
   for(int i_Tiles = 0; i_Tiles < NumOfTiles; ++i_Tiles)
   {
     cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
-    std::string outputhisto = Form("HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+    std::string outputhisto = Form("LocalRootBase/HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
     cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
     TFile *File_OutPutHisto = new TFile(outputhisto.c_str(),"RECREATE");
     File_OutPutHisto->cd();
     hst[i_Tiles]->Write();
     File_OutPutHisto->Close();
+
+    int BinNumber = hst[i_Tiles]->FindBin(550);
+    if(hst[i_Tiles]->GetBinError(BinNumber) > 0)
+    {
+      TF1 *f_landau = new TF1("f_landau","landau",0,4096);
+      for(int i_par = 0; i_par < 3; ++i_par)
+      {
+	f_landau->ReleaseParameter(i_par);
+      }
+      f_landau->SetParameter(0,500.0);
+      f_landau->SetParameter(1,500.0);
+      f_landau->SetParameter(1,50.0);
+      f_landau->SetRange(500,2000);
+      hst[i_Tiles]->Fit(f_landau,"NQR");
+      double chi2 = f_landau->GetChisquare();
+      double ndf = f_landau->GetNDF();
+
+      std::string outputDB = Form("LocalDataBase/HCALTile_Tested_%d_%d_%s.txt",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+      ofstream localDB(outputDB.c_str());
+      localDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
+      localDB << "MPV         = " << f_landau->GetParameter(1) << endl;
+      localDB << "sigma       = " << f_landau->GetParameter(2) << endl;
+      localDB << "chi2/ndf    = " << chi2/ndf << endl;
+      localDB << "NumOfEvents = " << hst[i_Tiles]->GetEntries() << endl;
+      localDB << "Date        = " << Time_Stop->GetDate() << endl;
+      localDB << "Time        = " << Time_Stop->GetTime() << endl;
+      localDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
+      localDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
+      localDB.close();
+    }
   }
 
   std::ifstream tileIds("TileIds.txt");
   if(!tileIds.is_open()) {std::perror("Error opening TileIds.txt"); return;}
-  std::string testedfilename = Form("HCALTileId_Tested_%d_%d.txt",Time_Stop->GetDate(),Time_Stop->GetTime());
+  std::string testedfilename = Form("LocalDataBase/HCALTileId_Tested_%d_%d.txt",Time_Stop->GetDate(),Time_Stop->GetTime());
   int is_renamed = std::rename("TileIds.txt",testedfilename.c_str());
   if(is_renamed) {std::perror("Error renaming"); return;}
 }

@@ -3,3 +3,7 @@
 FEBDTP_Dict.cxx
 FEBDTP_Dict_rdict.pcm
 libFEBDTP.so
+
+HCALTileId_Tested_*.txt
+LocalDataBase/*.txt
+LocalRootBase/*.root
