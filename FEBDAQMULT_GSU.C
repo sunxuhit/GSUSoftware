@@ -214,7 +214,6 @@ void UpdateConfigGSU();
 bool ReadTileIds(const char * fname);
 void HandleButtons(Int_t id = -1);
 TGTextButton *bHVStatus;
-TDatime *Time_Stop;
 std::string HistName[32];
 int NumOfTiles = 0;
 
@@ -1786,7 +1785,7 @@ void ResetGSU()
 
 void SaveDataTree()
 {
-  if(!Time_Stop) Time_Stop = new TDatime();
+  TDatime *Time_Stop = new TDatime();
   string outputfile = Form("LocalRootBase/HCALTile_Tested_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
   cout << "Save data to " << outputfile.c_str() << endl;
   tr->SaveAs(outputfile.c_str());
@@ -1796,10 +1795,18 @@ void SaveDataTree()
     cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
     std::string outputhisto = Form("LocalRootBase/HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
     cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
-    TFile *File_OutPutHisto = new TFile(outputhisto.c_str(),"RECREATE");
-    File_OutPutHisto->cd();
+    TFile *File_OutPutHisto_local = new TFile(outputhisto.c_str(),"RECREATE");
+    File_OutPutHisto_local->cd();
     hst[i_Tiles]->Write();
-    File_OutPutHisto->Close();
+    File_OutPutHisto_local->Close();
+
+    const string homeDir = getenv("HOME");
+    outputhisto = Form("%s/Dropbox/RootBase/HCALTile_Tested_%d_%d_%s.root",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+    cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
+    TFile *File_OutPutHisto_dropbox = new TFile(outputhisto.c_str(),"RECREATE");
+    File_OutPutHisto_dropbox->cd();
+    hst[i_Tiles]->Write();
+    File_OutPutHisto_dropbox->Close();
 
     int BinNumber = hst[i_Tiles]->FindBin(550);
     if(hst[i_Tiles]->GetBinError(BinNumber) > 0)
@@ -1818,6 +1825,7 @@ void SaveDataTree()
       double ndf = f_landau->GetNDF();
 
       std::string outputDB = Form("LocalDataBase/HCALTile_Tested_%d_%d_%s.txt",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+      cout << "save " << HistName[i_Tiles] << " to " << outputDB.c_str() << endl;
       ofstream localDB(outputDB.c_str());
       localDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
       localDB << "MPV         = " << f_landau->GetParameter(1) << endl;
@@ -1829,14 +1837,29 @@ void SaveDataTree()
       localDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
       localDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
       localDB.close();
+
+      outputDB = Form("%s/Dropbox/DataBase/HCALTile_Tested_%d_%d_%s.txt",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+      cout << "save " << HistName[i_Tiles] << " to " << outputDB.c_str() << endl;
+      ofstream DropboxDB(outputDB.c_str());
+      DropboxDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
+      DropboxDB << "MPV         = " << f_landau->GetParameter(1) << endl;
+      DropboxDB << "sigma       = " << f_landau->GetParameter(2) << endl;
+      DropboxDB << "chi2/ndf    = " << chi2/ndf << endl;
+      DropboxDB << "NumOfEvents = " << hst[i_Tiles]->GetEntries() << endl;
+      DropboxDB << "Date        = " << Time_Stop->GetDate() << endl;
+      DropboxDB << "Time        = " << Time_Stop->GetTime() << endl;
+      DropboxDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
+      DropboxDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
+      DropboxDB.close();
     }
   }
 
   std::ifstream tileIds("TileIds.txt");
   if(!tileIds.is_open()) {std::perror("Error opening TileIds.txt"); return;}
   std::string testedfilename = Form("LocalDataBase/HCALTileId_Tested_%d_%d.txt",Time_Stop->GetDate(),Time_Stop->GetTime());
-  int is_renamed = std::rename("TileIds.txt",testedfilename.c_str());
-  if(is_renamed) {std::perror("Error renaming"); return;}
+  // int is_renamed = std::rename("TileIds.txt",testedfilename.c_str());
+  // if(is_renamed) {std::perror("Error renaming"); return;}
+  delete Time_Stop;
 }
 
 void TestRun()
