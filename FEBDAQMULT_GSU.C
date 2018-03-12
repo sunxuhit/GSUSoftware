@@ -1777,6 +1777,19 @@ void ResetGSU()
 {
   for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) { hst[y*4+x]->Reset();}
   for(int y=0;y<NumOfChannels/4;y++) for(int x=0;x<4;x++) {c->cd(y*4+x+1); gPad->SetLogy(); hst[y*4+x]->Draw();}
+  for(int i_Tiles = 0; i_Tiles < NumOfTiles; ++i_Tiles)
+  {
+    hst[i_Tiles]->SetNameTitle(("HCALTile_"+HistName[i_Tiles]).c_str(),("HCALTile_"+HistName[i_Tiles]).c_str());
+    hst[i_Tiles]->GetXaxis()->SetTitle("ADC value");
+    hst[i_Tiles]->GetXaxis()->SetTitleSize(0.02);
+    hst[i_Tiles]->GetXaxis()->SetTitleOffset(1.0);
+    hst[i_Tiles]->SetLabelColor(1,"X");
+    hst[i_Tiles]->SetAxisColor(1,"X");
+    hst[i_Tiles]->GetYaxis()->SetTitle("Events");
+    hst[i_Tiles]->GetYaxis()->SetTitleSize(0.02);
+    hst[i_Tiles]->SetLabelColor(1,"Y");
+    hst[i_Tiles]->SetAxisColor(1,"Y");
+  }
   c->Update();
   tr->Reset();
   evs=0;
@@ -1792,22 +1805,6 @@ void SaveDataTree()
 
   for(int i_Tiles = 0; i_Tiles < NumOfTiles; ++i_Tiles)
   {
-    cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
-    std::string outputhisto = Form("LocalRootBase/HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
-    cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
-    TFile *File_OutPutHisto_local = new TFile(outputhisto.c_str(),"RECREATE");
-    File_OutPutHisto_local->cd();
-    hst[i_Tiles]->Write();
-    File_OutPutHisto_local->Close();
-
-    const string homeDir = getenv("HOME");
-    outputhisto = Form("%s/Dropbox/RootBase/HCALTile_Tested_%d_%d_%s.root",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
-    cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
-    TFile *File_OutPutHisto_dropbox = new TFile(outputhisto.c_str(),"RECREATE");
-    File_OutPutHisto_dropbox->cd();
-    hst[i_Tiles]->Write();
-    File_OutPutHisto_dropbox->Close();
-
     int BinNumber = hst[i_Tiles]->FindBin(550);
     if(hst[i_Tiles]->GetBinError(BinNumber) > 0)
     {
@@ -1818,39 +1815,95 @@ void SaveDataTree()
       }
       f_landau->SetParameter(0,500.0);
       f_landau->SetParameter(1,500.0);
-      f_landau->SetParameter(1,50.0);
-      f_landau->SetRange(500,2000);
-      hst[i_Tiles]->Fit(f_landau,"NQR");
+      f_landau->SetParameter(2,50.0);
+      f_landau->SetRange(250,4000);
+      hst[i_Tiles]->Fit(f_landau,"QR");
       double chi2 = f_landau->GetChisquare();
       double ndf = f_landau->GetNDF();
 
-      std::string outputDB = Form("LocalDataBase/HCALTile_Tested_%d_%d_%s.txt",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
-      cout << "save " << HistName[i_Tiles] << " to " << outputDB.c_str() << endl;
-      ofstream localDB(outputDB.c_str());
-      localDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
-      localDB << "MPV         = " << f_landau->GetParameter(1) << endl;
-      localDB << "sigma       = " << f_landau->GetParameter(2) << endl;
-      localDB << "chi2/ndf    = " << chi2/ndf << endl;
-      localDB << "NumOfEvents = " << hst[i_Tiles]->GetEntries() << endl;
-      localDB << "Date        = " << Time_Stop->GetDate() << endl;
-      localDB << "Time        = " << Time_Stop->GetTime() << endl;
-      localDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
-      localDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
-      localDB.close();
+      double MPV = f_landau->GetParameter(1);
+      double sigma = f_landau->GetParameter(2);
 
-      outputDB = Form("%s/Dropbox/DataBase/HCALTile_Tested_%d_%d_%s.txt",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
-      cout << "save " << HistName[i_Tiles] << " to " << outputDB.c_str() << endl;
-      ofstream DropboxDB(outputDB.c_str());
-      DropboxDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
-      DropboxDB << "MPV         = " << f_landau->GetParameter(1) << endl;
-      DropboxDB << "sigma       = " << f_landau->GetParameter(2) << endl;
-      DropboxDB << "chi2/ndf    = " << chi2/ndf << endl;
-      DropboxDB << "NumOfEvents = " << hst[i_Tiles]->GetEntries() << endl;
-      DropboxDB << "Date        = " << Time_Stop->GetDate() << endl;
-      DropboxDB << "Time        = " << Time_Stop->GetTime() << endl;
-      DropboxDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
-      DropboxDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
-      DropboxDB.close();
+      // double Default_MPV = some number;
+      // double Default_Sigma = some number;
+
+      // if( (MPV-Default_MPV) > 3.0*Default_Sigma  )
+      if(MPV > 0)
+      {
+	cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
+	std::string outputhisto = Form("LocalRootBase/HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+	cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
+	TFile *File_OutPutHisto_local = new TFile(outputhisto.c_str(),"RECREATE");
+	File_OutPutHisto_local->cd();
+	hst[i_Tiles]->Write();
+	File_OutPutHisto_local->Close();
+
+	const string homeDir = getenv("HOME");
+	outputhisto = Form("%s/Dropbox/RootBase/HCALTile_Tested_%d_%d_%s.root",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+	cout << "save " << HistName[i_Tiles] << " to " << outputhisto.c_str() << endl;
+	TFile *File_OutPutHisto_dropbox = new TFile(outputhisto.c_str(),"RECREATE");
+	File_OutPutHisto_dropbox->cd();
+	hst[i_Tiles]->Write();
+	File_OutPutHisto_dropbox->Close();
+
+	std::string outputDB = Form("LocalDataBase/HCALTile_Tested_%d_%d_%s.txt",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+	cout << "save " << HistName[i_Tiles] << " to " << outputDB.c_str() << endl;
+	ofstream localDB(outputDB.c_str());
+	localDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
+	localDB << "MPV         = " << f_landau->GetParameter(1) << endl;
+	localDB << "sigma       = " << f_landau->GetParameter(2) << endl;
+	localDB << "chi2/ndf    = " << chi2/ndf << endl;
+	localDB << "NumOfEvents = " << hst[i_Tiles]->GetEntries() << endl;
+	localDB << "Date        = " << Time_Stop->GetDate() << endl;
+	localDB << "Time        = " << Time_Stop->GetTime() << endl;
+	localDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
+	localDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
+	localDB.close();
+
+	outputDB = Form("%s/Dropbox/DataBase/HCALTile_Tested_%d_%d_%s.txt",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
+	cout << "save " << HistName[i_Tiles] << " to " << outputDB.c_str() << endl;
+	ofstream DropboxDB(outputDB.c_str());
+	DropboxDB << "TileId      = " << HistName[i_Tiles].c_str() << endl;
+	DropboxDB << "MPV         = " << f_landau->GetParameter(1) << endl;
+	DropboxDB << "sigma       = " << f_landau->GetParameter(2) << endl;
+	DropboxDB << "chi2/ndf    = " << chi2/ndf << endl;
+	DropboxDB << "NumOfEvents = " << hst[i_Tiles]->GetEntries() << endl;
+	DropboxDB << "Date        = " << Time_Stop->GetDate() << endl;
+	DropboxDB << "Time        = " << Time_Stop->GetTime() << endl;
+	DropboxDB << "BiasVoltage = " << fChanBias[i_Tiles]->GetNumber() << endl;
+	DropboxDB << "Threshold   = " << fNumberEntry755->GetNumber() << endl;
+	DropboxDB.close();
+      }
+      else
+      {
+	// hst[i_Tiles]->Reset();
+	// hst[i_Tiles]->SetTitle("Failed");
+	hst[i_Tiles]->GetXaxis()->SetTitle("FAILED: Bad performance");
+	hst[i_Tiles]->GetXaxis()->CenterTitle();
+	hst[i_Tiles]->GetXaxis()->SetTitleSize(0.10);
+	hst[i_Tiles]->GetXaxis()->SetTitleOffset(-1.50);
+	hst[i_Tiles]->GetYaxis()->SetTitle("Failed");
+	hst[i_Tiles]->GetYaxis()->SetTitleSize(0.06);
+	hst[i_Tiles]->SetLabelColor(2,"X");
+	hst[i_Tiles]->SetLabelColor(2,"Y");
+	hst[i_Tiles]->SetAxisColor(2,"X");
+	hst[i_Tiles]->SetAxisColor(2,"Y");
+      }
+    }
+    else
+    {
+      // hst[i_Tiles]->Reset();
+      // hst[i_Tiles]->SetTitle("Failed");
+      hst[i_Tiles]->GetXaxis()->SetTitle("FAILED: Not Enough Statistics");
+      hst[i_Tiles]->GetXaxis()->CenterTitle();
+      hst[i_Tiles]->GetXaxis()->SetTitleSize(0.10);
+      hst[i_Tiles]->GetXaxis()->SetTitleOffset(-1.50);
+      hst[i_Tiles]->GetYaxis()->SetTitle("Failed");
+      hst[i_Tiles]->GetYaxis()->SetTitleSize(0.06);
+      hst[i_Tiles]->SetLabelColor(2,"X");
+      hst[i_Tiles]->SetLabelColor(2,"Y");
+      hst[i_Tiles]->SetAxisColor(2,"X");
+      hst[i_Tiles]->SetAxisColor(2,"Y");
     }
   }
 
@@ -1860,6 +1913,7 @@ void SaveDataTree()
   // int is_renamed = std::rename("TileIds.txt",testedfilename.c_str());
   // if(is_renamed) {std::perror("Error renaming"); return;}
   delete Time_Stop;
+  UpdateHistoGSU();
 }
 
 void TestRun()
