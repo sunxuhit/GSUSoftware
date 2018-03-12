@@ -1827,7 +1827,7 @@ void SaveDataTree()
       // double Default_MPV = some number;
       // double Default_Sigma = some number;
 
-      // if( (MPV-Default_MPV) > 3.0*Default_Sigma  )
+      // if( TMath::Abs(MPV-Default_MPV) > 3.0*Default_Sigma  )
       if(MPV > 0)
       {
 	cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
