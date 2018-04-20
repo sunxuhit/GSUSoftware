@@ -211,6 +211,7 @@ void ConfigSetFIL(uint32_t mask1, uint32_t mask2, uint8_t majority);
  
 void GSUGUI();
 void UpdateConfigGSU();
+void SendConfigGSU();
 bool ReadTileIds(const char * fname);
 void HandleButtons(Int_t id = -1);
 TGTextButton *bHVStatus;
@@ -315,6 +316,7 @@ void FEBDAQMULT_GSU(const char *iface="eth1")
   if(!ReadTileIds("TileIds.txt")) return;
   GSUGUI();
   UpdateConfigGSU();
+  SendConfigGSU();
 }
 
 void ConfigSetBit(UChar_t *buffer, UShort_t bitlen, UShort_t bit_index, Bool_t value)
@@ -1919,6 +1921,8 @@ void SaveDataTree()
 void TestRun()
 {
   ResetGSU();
+  UpdateConfigGSU();
+  SendConfigGSU();
   printf("Set SiPM bias ON..\n");
   HVON();
   printf("Starting DAQ for %d seconds..\n",int(fNumberEntryTME->GetNumber()));
@@ -2072,7 +2076,7 @@ void GSUGUI()
   fGroupFrame679->AddFrame(bHVStatus, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
 
 
-  fNumberEntry755 = new TGNumberEntry(fGroupFrame679, (Double_t) 250,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1023);
+  fNumberEntry755 = new TGNumberEntry(fGroupFrame679, (Double_t) 300,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1023);
   fGroupFrame679->AddFrame(fNumberEntry755, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,62,2));
   TGTextButton *bSetThreshold = new TGTextButton(fGroupFrame679,"Set Threshold DAC1",419);
   bSetThreshold->SetTextJustify(36);
@@ -2082,11 +2086,6 @@ void GSUGUI()
   // bSetThreshold->SetCommand("GUI_UpdateThreshold()");
   bSetThreshold->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
   fGroupFrame679->AddFrame(bSetThreshold, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
-
-
-  fGroupFrame679->SetLayoutManager(new TGVerticalLayout(fGroupFrame679));
-  fGroupFrame679->Resize(155,761);
-  fHorizontalFrame768->AddFrame(fGroupFrame679, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandY,2,2,2,2));
 
   fUpdateHisto = new TGCheckButton(fGroupFrame679,"Auto update histograms");
   fUpdateHisto->SetTextJustify(36);
@@ -2111,14 +2110,18 @@ void GSUGUI()
   bTestRun->SetWrapLength(-1);
   bTestRun->Resize(123,22);
   bTestRun->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
-  fGroupFrame679->AddFrame(bTestRun, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
+  fGroupFrame679->AddFrame(bTestRun, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandX,0,0,100,2));
 
-  fNumberEntryTME= new TGNumberEntry(fGroupFrame679, (Double_t) 0,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1e9);
+  fNumberEntryTME= new TGNumberEntry(fGroupFrame679, (Double_t) 900,6,-1,(TGNumberFormat::EStyle) 5,(TGNumberFormat::EAttribute) 1,(TGNumberFormat::ELimit) 2,0,1e9);
   fGroupFrame679->AddFrame(fNumberEntryTME, new TGLayoutHints(kLHintsLeft | kLHintsTop,2,2,2,2));
 
   // TGHProgressBar *ProgTimer = new TGHProgressBar(fGroupFrame679,100);
   // ProgTimer->ShowPosition();
   // fGroupFrame679->AddFrame(ProgTimer, new TGLayoutHints(kLHintsLeft | kLHintsTop,0,0,2,2));
+
+  fGroupFrame679->SetLayoutManager(new TGVerticalLayout(fGroupFrame679));
+  fGroupFrame679->Resize(155,761);
+  fHorizontalFrame768->AddFrame(fGroupFrame679, new TGLayoutHints(kLHintsLeft | kLHintsTop | kLHintsExpandY,2,2,2,2));
 
   // tab widget
   fTab683 = new TGTab(fHorizontalFrame768,1187,761+100);
@@ -2224,6 +2227,18 @@ void GSUGUI()
   fMainFrame1314->MapSubwindows();
 
   fMainFrame1314->Resize(fMainFrame1314->GetDefaultSize());
+
+  //----------------- expert buttons ---------------------
+  fGroupFrame679->HideFrame(fTextButton680);
+  fGroupFrame679->HideFrame(bResetHistos);
+  fGroupFrame679->HideFrame(fNumberEntry755);
+  fGroupFrame679->HideFrame(bSetThreshold);
+  fGroupFrame679->HideFrame(fUpdateHisto);
+  fGroupFrame679->HideFrame(bSaveDataTree);
+  fGroupFrame679->HideFrame(fNumberEntryTME);
+  fTab683->SetTab(1);
+  //----------------- expert buttons ---------------------
+
   fMainFrame1314->MapWindow();
   fMainFrame1314->Resize(1329,789+100);
 }  
