@@ -1923,6 +1923,7 @@ void TestRun()
   ResetGSU();
   UpdateConfigGSU();
   SendConfigGSU();
+  GUI_UpdateThreshold();
   printf("Set SiPM bias ON..\n");
   HVON();
   printf("Starting DAQ for %d seconds..\n",int(fNumberEntryTME->GetNumber()));
@@ -2230,6 +2231,7 @@ void GSUGUI()
 
   //----------------- expert buttons ---------------------
   fGroupFrame679->HideFrame(fTextButton680);
+  fGroupFrame679->HideFrame(bStartDAQ);
   fGroupFrame679->HideFrame(bResetHistos);
   fGroupFrame679->HideFrame(fNumberEntry755);
   fGroupFrame679->HideFrame(bSetThreshold);
