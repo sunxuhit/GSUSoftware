@@ -131,7 +131,7 @@
 #include "TFile.h"
 
 #define maxpe 10 //max number of photoelectrons to use in the fit
-#define NumOfChannels 16
+#define NumOfChannels 24
 int NEVDISP=200; //number of lines in the waterfall event display
 const Double_t initpar0[7]={7000,100,700,9.6,1.18,0.3,0.5};
 const Double_t initpar1[7]={3470,100,700,9.5,2.25,3e-3,3.7e-2};
@@ -884,18 +884,22 @@ void HVON()
   t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_GEN_HVON,0x0000,buf);
 
-  Pixel_t green;
-  gClient->GetColorByName("green", green);
-  bHVStatus->ChangeBackground(green);
+  Pixel_t red;
+  gClient->GetColorByName("red", red);
+  bHVStatus->ChangeBackground(red);
+  bHVStatus->SetText("HV ON");
+  bHVStatus->SetState(kButtonDown);
 }
 
 void HVOF()
 {
   t->dstmac[5]=0xff; //Broadcast
   t->SendCMD(t->dstmac,FEB_GEN_HVOF,0x0000,buf);
-  Pixel_t white;
-  gClient->GetColorByName("white", white);
-  bHVStatus->ChangeBackground(white);
+  Pixel_t green;
+  gClient->GetColorByName("green", green);
+  bHVStatus->ChangeBackground(green);
+  bHVStatus->SetText("HV OFF");
+  bHVStatus->SetState(kButtonUp);
 }
 
 float GetTriggerRate()
@@ -2049,24 +2053,6 @@ void GSUGUI()
   // bResetHistos->SetCommand("ResetGSU()");
   bResetHistos->Connect("Clicked()",0,0,"HandleButtons(Int_t)");
   fGroupFrame679->AddFrame(bResetHistos, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-  /*
-  TGTextButton *fTextButton78 = new TGTextButton(fGroupFrame679,"SiPM HV ON");
-  fTextButton78->SetTextJustify(36);
-  fTextButton78->SetMargins(0,0,0,0);
-  fTextButton78->SetWrapLength(-1);
-  fTextButton78->Resize(123,22);
-  fTextButton78->SetCommand("HVON()");
-  fGroupFrame679->AddFrame(fTextButton78, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-
-  TGTextButton *fTextButton88 = new TGTextButton(fGroupFrame679,"SiPM HV OFF");
-  fTextButton88->SetTextJustify(36);
-  fTextButton88->SetMargins(0,0,0,0);
-  fTextButton88->SetWrapLength(-1);
-  fTextButton88->Resize(123,22);
-  fTextButton88->SetCommand("HVOF()");
-  fGroupFrame679->AddFrame(fTextButton88, new TGLayoutHints(kLHintsLeft| kLHintsCenterX  | kLHintsTop | kLHintsExpandX,0,0,2,2));
-  */
 
   bHVStatus = new TGTextButton(fGroupFrame679,"High Voltage",418);
   bHVStatus->SetTextJustify(36);
