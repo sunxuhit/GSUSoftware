@@ -71,6 +71,7 @@ my $sensorGap=0.5;             #half the gap between sensor
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
 my $phodet_halfy = $phodet_halfx;
 my $phodet_halfz = 0.75;       #Hamamatsu H12700
+my $phodet_gapz = 3.0;
 
 my $metalSheet_halfx=$glassWindow_halfx;
 my $metalSheet_halfy=$metalSheet_halfx;
@@ -95,7 +96,7 @@ my $box_halfx = max(@all_halfx) + $box_thicknessX+1.0;
 my $box_halfy=$box_halfx;
 my $box_halfz = ($BoxDelz+2*$foamHolder_halfz+2*$agel_halfz
 		 +$lens_gap+2*$lens_halfz+$focalLength
-		 +2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz)
+		 +2*$glassWindow_halfz+2*$phodet_halfz+$phodet_gapz+(2*$readout_halfz+$BoxDelz)
 		 +$box_thicknessZ1+$box_thicknessZ2)/2.0;
 
 if ($build_copper) { $box_halfz = $box_halfz+(1*$metalSheet_halfz+$insulation)/2.0;}
@@ -116,7 +117,7 @@ my $agel_posz=$foamHolder_posz+$foamHolder_halfz+$agel_halfz;
 
 my $lens_z=$agel_posz+$agel_halfz+$lens_halfz+$lens_gap;
 my $glassWindow_z= $lens_z-$lens_halfz+$focalLength+$glassWindow_halfz;
-my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
+my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_gapz+$phodet_halfz;
 my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
 		     
 my @readout_z= ($glassWindow_z-$glassWindow_halfz, $phodet_z+$phodet_halfz);
