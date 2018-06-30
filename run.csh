@@ -5,4 +5,4 @@
 ./hit.pl config.dat
 ./materials.pl config.dat
 ./mirrors.pl config.dat
-eic_gemc meic_det1.gcard
+# eic_gemc meic_det1.gcard
