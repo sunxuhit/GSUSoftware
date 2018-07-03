@@ -738,7 +738,7 @@ sub build_mirrors()
     print"building mirror set...\n";
 
     my $mirror_thickness=2;
-    my @mirror_z=($lens_z+$lens_halfz+$lens_gap,$glassWindow_z-$glassWindow_halfz);
+    my @mirror_z=($lens_z+$lens_halfz+$lens_gap,$glassWindow_z-$glassWindow_halfz-$phodet_gapz); #introduce gap between photon sensor and mirror sets
     my @mirror_router = ( $agel_halfx+$mirror_thickness, $sensor_total_halfx+$mirror_thickness );
     my @mirror_rinner = ( $agel_halfx, $sensor_total_halfx);
     
