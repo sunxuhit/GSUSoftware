@@ -131,7 +131,8 @@
 #include "TFile.h"
 
 #define maxpe 10 //max number of photoelectrons to use in the fit
-#define NumOfChannels 24
+#define NumOfChannels 16
+const int firstChannel = 10;
 int NEVDISP=200; //number of lines in the waterfall event display
 const Double_t initpar0[7]={7000,100,700,9.6,1.18,0.3,0.5};
 const Double_t initpar1[7]={3470,100,700,9.5,2.25,3e-3,3.7e-2};
@@ -158,6 +159,9 @@ TGStatusBar *fStatusBar739;
    TBenchmark *BenchMark; 
 TF1* f0;
 TF1* f1;
+//Trigger channels
+const int trig1 = 0;
+const int trig2 = 1;
 
 UChar_t bufPMR[1500];
 UChar_t bufSCR[1500];
@@ -1705,8 +1709,11 @@ void UpdateConfigGSU()
 
 bool ReadTileIds(const char * fname = "TileIds.txt")
 {
+  NumOfTiles = 0;
+
   std::ifstream tileIds;
   tileIds.open(fname);
+  tileIds.seekg(0);
   if(!tileIds.is_open()) {std::perror("Error opening TileIds.txt"); return false;}
 
   for(int i_Tiles = 0; i_Tiles < 32; ++i_Tiles) HistName[i_Tiles] = "histo name not set";
@@ -1808,10 +1815,79 @@ void SaveDataTree()
   string outputfile = Form("LocalRootBase/HCALTile_Tested_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
   cout << "Save data to " << outputfile.c_str() << endl;
   tr->SaveAs(outputfile.c_str());
+  /*--------Comment this section out to undo benchmark mode-------x*/
+  
+  // double variances[12] = {4.26681, 7.20438, 2.70259, 3.74069, 1.59064, 2.75037, 2.34233, 2.99818, 3.39395, 6.77634, 3.2519, 7.13876};
+  //We're assigning a 15% variance to all tile shapes. 
+  /*
+  fstream tileangle;
+  tileangle.open("TileIds.txt");
+  cout << "1824" << endl;
+  tileangle.seekg(0);
+  for(int i = 0; i < firstChannel; i++)
+    {
+      tileangle.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
+  cout << "1830" << endl;
+   string tilename;
+   
+   tileangle >> tilename;
+   cout << tilename << endl;
+   cout << "1835" << endl;
+   tilename = tilename.substr(1,2);
+   cout << tilename << endl;
+   stringstream tilenum(tilename);
+   int tilenumconv;
+   tilenum >> tilenumconv;
+  */
+  float variance = 0.15;
+  TF1 *f_landauTrig1 = new TF1("f_landau_trig1","landau",0,4096);
+  TF1 *f_landauTrig2 = new TF1("f_landau_trig2","landau",0,4096);
 
+   
+
+  for(int i_par = 0; i_par < 3; ++i_par)
+     {
+       f_landauTrig1->ReleaseParameter(i_par);
+       f_landauTrig2->ReleaseParameter(i_par);
+     }
+  f_landauTrig1->SetParameter(0,500.0);
+  f_landauTrig1->SetParameter(1,500.0);
+   f_landauTrig1->SetParameter(2,50.0);
+   f_landauTrig1->SetRange(250,4000);
+   f_landauTrig2->SetParameter(0,500.0);
+   f_landauTrig2->SetParameter(1,500.0);
+   f_landauTrig2->SetParameter(2,50.0);
+   f_landauTrig2->SetRange(250,4000);
+   hst[trig1] -> Fit(f_landauTrig1,"QR");
+   hst[trig2] -> Fit(f_landauTrig2,"QR");
+   
+   float mpvUP = 0;
+   float mpvDOWN = 0;
+
+   if(f_landauTrig1 ->GetParameter(1) > f_landauTrig2->GetParameter(1) )
+     {
+       mpvUP = f_landauTrig1 ->GetParameter(1);
+       mpvDOWN =  f_landauTrig2->GetParameter(1);
+     }
+   else if(f_landauTrig1 ->GetParameter(1) == f_landauTrig2->GetParameter(1))
+     {
+       mpvUP = f_landauTrig1 ->GetParameter(1);
+       mpvDOWN = mpvUP;
+     }
+   else
+     {
+       mpvDOWN = f_landauTrig1 ->GetParameter(1);
+       mpvUP =  f_landauTrig2->GetParameter(1);
+     }
+   
+   //float mpvBase = (f_landauTrig1->GetParameter(1)+f_landauTrig2->GetParameter(2))/2;
+   
+  
+   /*---------End benchmark Mode------*/
   for(int i_Tiles = 0; i_Tiles < NumOfTiles; ++i_Tiles)
   {
-    int BinNumber = hst[i_Tiles]->FindBin(550);
+    int BinNumber = hst[i_Tiles]->FindBin(650);
     if(hst[i_Tiles]->GetBinError(BinNumber) > 0)
     {
       TF1 *f_landau = new TF1("f_landau","landau",0,4096);
@@ -1829,12 +1905,13 @@ void SaveDataTree()
 
       double MPV = f_landau->GetParameter(1);
       double sigma = f_landau->GetParameter(2);
-
-      // double Default_MPV = some number;
-      // double Default_Sigma = some number;
-
-      // if( TMath::Abs(MPV-Default_MPV) > 3.0*Default_Sigma  )
-      if(MPV > 0)
+      
+      
+     
+      
+      if(MPV >= mpvDOWN*(1-variance) && MPV <= mpvUP*(1+variance))
+      //if( MPV >= mpvBase*(1-(variances[tilenumconv-21]/100)) && MPV <= mpvBase*(1+(variances[tilenumconv-21]/100))  )// change to line below for standard mode
+      //if(MPV > 0)
       {
 	cout << "Tested HCAL Tile ID is: " << HistName[i_Tiles].c_str() << endl;
 	std::string outputhisto = Form("LocalRootBase/HCALTile_Tested_%d_%d_%s.root",Time_Stop->GetDate(),Time_Stop->GetTime(),HistName[i_Tiles].c_str());
@@ -1925,6 +2002,7 @@ void SaveDataTree()
 void TestRun()
 {
   ResetGSU();
+  ReadTileIds("TileIds.txt");
   UpdateConfigGSU();
   SendConfigGSU();
   GUI_UpdateThreshold();
