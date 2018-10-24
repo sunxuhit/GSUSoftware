@@ -44,7 +44,7 @@
 #include "TGuiBldNameFrame.h"
 #endif
 #ifndef ROOT_TGFrame
-s#include "TGFrame.h"
+#include "TGFrame.h"
 #endif
 #ifndef ROOT_TGFileDialog
 #include "TGFileDialog.h"
