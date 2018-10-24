@@ -221,6 +221,7 @@ void HandleButtons(Int_t id = -1);
 TGTextButton *bHVStatus;
 std::string HistName[32];
 int NumOfTiles = 0;
+const string homeDir = getenv("HOME");
 
 UInt_t GrayToBin(UInt_t n)
 {
@@ -1813,7 +1814,10 @@ void SaveDataTree()
 {
   TDatime *Time_Stop = new TDatime();
   string outputfile = Form("LocalRootBase/HCALTile_Tested_%d_%d.root",Time_Stop->GetDate(),Time_Stop->GetTime());
+  string outputfileDropBox = Form("%s/Dropbox/RootBase/HCALTile_Tested_%d_%d.root",homeDir.c_str(),Time_Stop->GetDate(),Time_Stop->GetTime());
   cout << "Save data to " << outputfile.c_str() << endl;
+  cout << "Duplicate tree saved to DropBox at location: " << outputfileDropBox.c_str() << endl;
+  tr->SaveAs(outputfileDropBox.c_str());
   tr->SaveAs(outputfile.c_str());
   /*--------Comment this section out to undo benchmark mode-------x*/
   
