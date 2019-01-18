@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class PixelMap;
+// class PixelMap;
 
 class Calibration
 {
@@ -27,7 +27,7 @@ class Calibration
     string mOutPutFile;
     TFile *mFile_OutPut;
 
-    const int MAXEDGE = 100000;
+    static const int MAXEDGE = 100000;
     const int MAROCPOLARITY = 1; // 1 falling, 0 rising
 
     TChain *mChainInPut; // branches list below

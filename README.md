@@ -25,3 +25,10 @@
 ##### Simulation
 
 ---------------
+
+#### compile the code
+- mkdir build
+- cd ./build
+- cmake /path/to/sorce/code
+- cmake --build .
+- you should get an executable file

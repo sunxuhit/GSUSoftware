@@ -1,6 +1,7 @@
 #include <iostream>
-#include "../../include/BeamTest/Calibration.h"
-#include "../../include/BeamTest/PixelMap.h"
+#include <fstream>
+// #include "../PixelMap/PixelMap.h"
+#include "./Calibration.h"
 
 // Calibration::Calibration(string outputfile)
 Calibration::Calibration()
@@ -45,8 +46,8 @@ int Calibration::InitChain()
        if(str[0] != 0)
        {
 	 string addfile;
-	 addfile = str + "/sspRich.root";
-	 addfile = inputdir+addfile;
+	 addfile = str;
+	 addfile = inputdir + addfile + "/sspRich.root";
 	 mChainInPut->AddFile(addfile.c_str(),-1,"data");
 	 Long64_t file_entries = mChainInPut->GetEntries();
 	 cout << "File added to data chain: " << addfile.c_str() << " with " << (file_entries-entries_save) << " entries" << endl;
@@ -85,6 +86,20 @@ int Calibration::Make()
 int Calibration::Finish()
 {
   cout << " this is Calibration::Finish" << endl;
+
+  return 0;
+}
+
+////// This is the main function
+int main()
+{
+  Calibration *Calibration_mRICH = new Calibration();
+
+  Calibration_mRICH->Init();
+  Calibration_mRICH->Make();
+  Calibration_mRICH->Finish();
+
+  cout << "This is the end of pid!!!" << endl;
 
   return 0;
 }

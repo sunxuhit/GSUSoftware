@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../../include/BeamTest/PixelMap.h"
+#include "./PixelMap.h"
 
 PixelMap::PixelMap()
 {
@@ -15,7 +15,7 @@ void PixelMap::Init_PixelMap_PMT()
 {
   int debug = 1;
   double var[1];
-  const char * hname = "../../include/H13700_180degree_v2.txt";
+  const char * hname = "./H13700_180degree_v2.txt";
   int anode, asic, pin, channel;
 
   //Right PMT side (front view)
@@ -83,7 +83,7 @@ void PixelMap::Init_PixelMap_MPPC()
 {
   int debug = 1;
   double var[1];
-  const char * hname = "../../include/H13700_180degree_v2.txt";
+  const char * hname = "./H13700_180degree_v2.txt";
   int anode, asic, pin, channel;
 
   //Right MPPC side (front view)
