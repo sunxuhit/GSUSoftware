@@ -154,6 +154,8 @@ int PixelMap::GetPMT_mRICH(int slot,int fiber,int asic)
   if(fiber==2 || fiber==3)return 2;
   if(fiber==4 || fiber==5)return 3;
   if(fiber==6 || fiber==7)return 4;
+
+  return -1;
 }
 
 int PixelMap::GetPixel_mRICH(int fiber, int asic, int maroc_channel)

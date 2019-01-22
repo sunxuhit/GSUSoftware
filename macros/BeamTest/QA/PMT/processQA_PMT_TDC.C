@@ -9,7 +9,7 @@
 #define MAXEDGE 100000
 
 // #define H13700MAP "h13700.txt"
-#define H13700MAP "../../../include/H13700_180degree_v2.txt"
+#define H13700MAP "../H13700_180degree_v2.txt"
 
 //MAROC configuration polarity (from ssptest_TDCAll.c)
 #define MAROCPOLARITY 1
@@ -40,14 +40,19 @@ int GetPMT_mRICH(int slot,int fiber,int asic);
 void GenCoord_mRICH(int ipmt, int x1, int y1);
 int GetPixel_mRICH(int fiber, int asic, int maroc_channel);
 
-void processQA_MPPC_TDC(const int runID = 649)
+void processQA_PMT_TDC(const int runID = 182)
 {
   int debug = 1;
-  float tdc_Start = 490;
-  float tdc_Stop  = 590;
+  float tdc_Start = 2000.0;
+  float tdc_Stop  = 2050.0;
+  if(runID > 343 && runID < 381) // meson run 344-380
+  {
+    tdc_Start = 490.0;
+    tdc_Stop  = 590.0;
+  }
 
   int const NumOfPixel = 33;
-  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/mRICH/BeamTest/tdc/sipmTDC_run%d/sspRich.root",runID);
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/richTDC_run%d/sspRich.root",runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   InitDisplay_mRICH();
@@ -58,7 +63,7 @@ void processQA_MPPC_TDC(const int runID = 649)
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
     {
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
-      h_mTDC[i_pixel_x][i_pixel_y] = new TH1F(HistName.c_str(),HistName.c_str(),1500,-0.5,1499.5);
+      h_mTDC[i_pixel_x][i_pixel_y] = new TH1F(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
     }
   }
 
@@ -75,8 +80,7 @@ void processQA_MPPC_TDC(const int runID = 649)
   tree_mRICH->SetBranchAddress("time",tTime);
 
   int NumOfEvents = tree_mRICH->GetEntries();
-  // if(NumOfEvents > 50000) NumOfEvents = 50000;
-  // int NumOfEvents = 10000;
+  // if(NumOfEvents > 50000) NumOfEvents = 50000; // for test only
   printf("NEntries %d\n",NumOfEvents);
 
   tree_mRICH->GetEntry(0);
@@ -110,15 +114,16 @@ void processQA_MPPC_TDC(const int runID = 649)
       int pixel_y = y_mRICH[pixel-1];
       if(tPolarity[i_photon] == pol) h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
 
-      if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop) // MPPC
+      if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop)
       {
-	h_mRingImage->Fill(x_mRICH[pixel-1],y_mRICH[pixel-1]);
+	// h_mRingImage->Fill(x_mRICH[pixel-1],y_mRICH[pixel-1]);
+	h_mRingImage->Fill(pixel_x,pixel_y);
       }
     }
   }
   printf("Processed events %d\n",NumOfEvents);
 
-  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run%d.root",runID);
+  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/richTDC_run%d.root",runID);
   TFile *File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
   h_mRingImage->Write();
@@ -140,16 +145,16 @@ void InitDisplay_mRICH()
   const char * hname = H13700MAP;
   int anode, asic, pin, channel;
 
-  //Right MPPC side (front view)
-  xp_mRICH[0]=17;
+  //Right PMT side (front view)
+  xp_mRICH[0]=32;
   yp_mRICH[0]=0;
-  xp_mRICH[1]=17;
+  xp_mRICH[1]=32;
   yp_mRICH[1]=17;
 
-  //Left MPPC side (front view)
-  xp_mRICH[2]=15;
+  //Left PMT side (front view)
+  xp_mRICH[2]=0;
   yp_mRICH[2]=32;
-  xp_mRICH[3]=15;
+  xp_mRICH[3]=0;
   yp_mRICH[3]=15;
 
   FILE* fin = fopen(hname,"r");
@@ -228,10 +233,10 @@ void GenCoord_mRICH(int ipmt, int x1, int y1)
     rw=(int) j/16.;
     cm=j%16;
     if(ipmt<3){
-      x_mRICH[j]=x1+cm; // MPPC
+      x_mRICH[j]=x1-cm; // PMT
       y_mRICH[j]=y1+rw;
     }else{
-      x_mRICH[j]=x1-cm; // MPPC
+      x_mRICH[j]=x1+cm; // PMT
       y_mRICH[j]=y1-rw;
     }
     // if(debug)if(j==0||j==255)printf("PMT %2d  Pixel %2d  -->  rw %3d  cm  %3d  X %3d Y %3d\n",ipmt, j+1,rw, cm,x_mRICH[j],y_mRICH[j]);
