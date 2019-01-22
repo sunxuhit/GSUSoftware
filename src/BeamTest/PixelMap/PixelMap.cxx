@@ -15,6 +15,7 @@ PixelMap::~PixelMap()
 
 void PixelMap::Init_PixelMap_PMT()
 {
+  cout << "This is PixelMap::Init_PixelMap_PMT!" << endl;
   int debug = 1;
   double var[1];
   const char * hname = "./H13700_180degree_v2.txt";

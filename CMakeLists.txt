@@ -1,6 +1,7 @@
 # CMakeLists.txt for event package. It creates a library with dictionary and a main program
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(BeamTest_mRICH)
+set(CMAKE_INSTALL_PREFIX /Users/xusun/WorkSpace/EICPID/BeamTest_mRICH)
 
 # You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:
 #   - ROOT built with classic configure/make use the provided $ROOTSYS/etc/cmake/FindROOT.cmake
