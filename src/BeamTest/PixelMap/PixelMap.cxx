@@ -1,6 +1,8 @@
 #include <iostream>
 #include "./PixelMap.h"
 
+ClassImp(PixelMap)
+
 PixelMap::PixelMap()
 {
   cout << "PixelMap::PixelMap() ----- Constructor ! ------" << endl;
