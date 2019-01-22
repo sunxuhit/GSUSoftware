@@ -167,3 +167,13 @@ int PixelMap::GetPixel_mRICH(int fiber, int asic, int maroc_channel)
  return maroc2h13700[i];
 }
 
+int main()
+{
+  PixelMap *PixelMap_mRICH = new PixelMap();
+
+  PixelMap_mRICH->Init_PixelMap_PMT();
+
+  cout << "This is the end of PixelMap!!!" << endl;
+
+  return 0;
+}

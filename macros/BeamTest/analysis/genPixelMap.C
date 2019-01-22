@@ -7,8 +7,8 @@ int genPixelMap()
 
   std::cout << "gSystem::Load <- libPixelMap.dylib" << endl;
 
-  PixelMap pixel_map = PixelMap();
-  pixel_map.Init_PixelMap_PMT();
+  PixelMap *pixel_map = new PixelMap();
+  pixel_map->Init_PixelMap_PMT();
   /* pixel_map->Init_PixelMap_MPPC(); */
 
 

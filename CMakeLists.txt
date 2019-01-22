@@ -18,3 +18,10 @@ include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
 add_subdirectory(src/BeamTest/PixelMap)
 # set(PixelMap_Libs PixelMap)
 
+# add the executable
+add_executable(BeamTest_mRICH
+  ${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.cxx)
+target_link_libraries(BeamTest_mRICH PixelMap ${ROOT_LIBRARIES})
+
+# add the install targets
+install (TARGETS BeamTest_mRICH DESTINATION bin)
