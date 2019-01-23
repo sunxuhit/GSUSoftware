@@ -1,10 +1,8 @@
 ROOT_GENERATE_DICTIONARY(G__Calibration
-  ${CMAKE_CURRENT_SOURCE_DIR}/Calibration.h
-  ${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.h LINKDEF
-  ${CMAKE_CURRENT_SOURCE_DIR}/CalibrationLinkDef.h)
+  ${CMAKE_CURRENT_SOURCE_DIR}/Calibration.h ${CMAKE_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.h
+  LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/CalibrationLinkDef.h)
 
-add_library(Calibration SHARED Calibration.cxx G__Calibration.cxx
-  ${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.cxx)
+add_library(Calibration SHARED Calibration.cxx ${CMAKE_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.cxx G__Calibration.cxx)
 target_link_libraries(Calibration ${ROOT_LIBRARIES})
 
 install(TARGETS Calibration DESTINATION lib)

@@ -30,7 +30,7 @@ include(${ROOT_USE_FILE})
 
 # include Pixel Map
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
-# add_subdirectory(src/BeamTest/PixelMap)
+add_subdirectory(src/BeamTest/PixelMap)
 
 # include Calibration
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/Calibration")
