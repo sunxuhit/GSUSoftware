@@ -7,7 +7,7 @@ int genCalibration()
 {
   std::cout << "gSystem::Load <- libCalibration.dylib" << endl;
 
-  Calibration *calib = new Calibration();
+  Calibration *calib = new Calibration("PMT","Calibration");
   calib->Init();
   calib->Make();
   calib->Finish();

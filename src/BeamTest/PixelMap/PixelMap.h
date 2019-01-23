@@ -21,6 +21,10 @@ class PixelMap : public TObject
     int GetPMT_mRICH(int slot,int fiber,int asic);
     int GetPixel_mRICH(int fiber, int asic, int maroc_channel);
 
+    int get_Pixel_x(int slot, int fiber, int asic, int pin, string det);
+    int get_Pixel_y(int slot, int fiber, int asic, int pin, string det);
+
+
   private:
     // global variables for display
     int x_mRICH[256];
