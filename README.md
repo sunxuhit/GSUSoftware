@@ -29,6 +29,6 @@
 #### compile the code
 - mkdir build
 - cd ./build
-- cmake /path/to/sorce/code
+- cmake ..
 - cmake --build .
-- you should get an executable file
+- a shared lib can be found at ${PROJECT\_SOURCE\_DIR}/build/src/BeamTest/PROJECT\_NAME

@@ -1,6 +1,9 @@
 #include "TSystem.h"
 #include <iostream>
 
+/* R__LOAD_LIBRARY(/Users/xusun/WorkSpace/EICPID/BeamTest_mRICH/lib/libPixelMap.dylib) */
+R__LOAD_LIBRARY(/Users/xusun/WorkSpace/EICPID/BeamTest_mRICH/build/src/BeamTest/PixelMap/libPixelMap.dylib)
+
 int genPixelMap()
 {
   gSystem->Load("/Users/xusun/WorkSpace/EICPID/BeamTest_mRICH/lib/libPixelMap.dylib");
@@ -13,5 +16,6 @@ int genPixelMap()
 
 
   std::cout << "All done" << endl;
-  gSystem->Exit(0);
+
+  return 1;
 }
