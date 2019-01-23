@@ -3,15 +3,16 @@
 
 #include <string>
 
+#include "TObject.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TChain.h"
 
+#include "../PixelMap/PixelMap.h"
+
 using namespace std;
 
-// class PixelMap;
-
-class Calibration
+class Calibration : public TObject
 {
   public:
     Calibration();
@@ -24,6 +25,8 @@ class Calibration
     int Finish();
 
   private:
+    PixelMap *pixel_map;
+
     string mOutPutFile;
     TFile *mFile_OutPut;
 
@@ -41,6 +44,8 @@ class Calibration
     unsigned int tTime[MAXEDGE];
     unsigned int tSlot[MAXEDGE];
     unsigned int tFiber[MAXEDGE];
+
+    ClassDef(Calibration,1)
 };
 
 #endif

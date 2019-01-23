@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
-// #include "../PixelMap/PixelMap.h"
 #include "./Calibration.h"
+
+ClassImp(Calibration)
 
 // Calibration::Calibration(string outputfile)
 Calibration::Calibration()
@@ -19,6 +20,11 @@ int Calibration::Init()
 {
   cout << "Calibration::Init(), create output file: "<< mOutPutFile.c_str() <<endl;
   // mFile_OutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
+
+  cout << "Create and Initialize Pixel Map: " << endl;
+  pixel_map = new PixelMap();
+  pixel_map->Init_PixelMap_PMT();
+
   InitChain();
 
   return 0;

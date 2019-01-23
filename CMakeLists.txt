@@ -1,7 +1,7 @@
 # CMakeLists.txt for event package. It creates a library with dictionary and a main program
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(BeamTest_mRICH)
-set(CMAKE_INSTALL_PREFIX /Users/xusun/WorkSpace/EICPID/BeamTest_mRICH)
+set(CMAKE_INSTALL_PREFIX $ENV{HOME}/WorkSpace/EICPID/BeamTest_mRICH)
 
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -30,7 +30,11 @@ include(${ROOT_USE_FILE})
 
 # include Pixel Map
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
-add_subdirectory(src/BeamTest/PixelMap)
+# add_subdirectory(src/BeamTest/PixelMap)
+
+# include Calibration
+include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/Calibration")
+add_subdirectory(src/BeamTest/Calibration)
 
 # add the executable
 # add_executable(BeamTest_mRICH ${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.cxx)
