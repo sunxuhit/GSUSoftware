@@ -90,7 +90,6 @@ int Calibration::Finish()
   return 0;
 }
 
-/*
 int main()
 {
   Calibration *Calibration_mRICH = new Calibration();
@@ -103,4 +102,3 @@ int main()
 
   return 0;
 }
-*/

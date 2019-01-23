@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <string> 
 #include "./PixelMap.h"
 
 ClassImp(PixelMap)
@@ -18,7 +20,8 @@ void PixelMap::Init_PixelMap_PMT()
   cout << "This is PixelMap::Init_PixelMap_PMT!" << endl;
   int debug = 1;
   double var[1];
-  const char * hname = "./H13700_180degree_v2.txt";
+  const string homeDir = getenv("HOME");
+  const string hname = homeDir + "/WorkSpace/EICPID/BeamTest_mRICH/src/BeamTest/PixelMap/H13700_180degree_v2.txt";
   int anode, asic, pin, channel;
 
   //Right PMT side (front view)
@@ -33,7 +36,7 @@ void PixelMap::Init_PixelMap_PMT()
   xp_mRICH[3]=0;
   yp_mRICH[3]=15;
 
-  FILE* fin = fopen(hname,"r");
+  FILE* fin = fopen(hname.c_str(),"r");
   if(!fin) return ;
   while(fscanf(fin,"%lf",var)!=EOF){
     anode   = (int)var[0];
@@ -86,7 +89,8 @@ void PixelMap::Init_PixelMap_MPPC()
 {
   int debug = 1;
   double var[1];
-  const char * hname = "./H13700_180degree_v2.txt";
+  const string homeDir = getenv("HOME");
+  const string hname = homeDir + "/WorkSpace/EICPID/BeamTest_mRICH/src/BeamTest/PixelMap/H13700_180degree_v2.txt";
   int anode, asic, pin, channel;
 
   //Right MPPC side (front view)
@@ -101,7 +105,7 @@ void PixelMap::Init_PixelMap_MPPC()
   xp_mRICH[3]=15;
   yp_mRICH[3]=15;
 
-  FILE* fin = fopen(hname,"r");
+  FILE* fin = fopen(hname.c_str(),"r");
   if(!fin) return ;
   while(fscanf(fin,"%lf",var)!=EOF){
     anode   = (int)var[0];
