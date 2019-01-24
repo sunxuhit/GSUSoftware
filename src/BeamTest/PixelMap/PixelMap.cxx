@@ -192,7 +192,7 @@ int PixelMap::get_Pixel_x_MPPC(int slot, int fiber, int asic, int pin)
   int pixel = GetPixel_mRICH(fiber, asic, pin);
   pixel_x = x_mRICH[pixel-1];
 
-  cout << "pmt_x = " << pmt << endl;
+  // cout << "pmt_x = " << pmt << endl;
 
   return pixel_x;
 }
@@ -206,7 +206,7 @@ int PixelMap::get_Pixel_y_MPPC(int slot, int fiber, int asic, int pin)
   int pixel = GetPixel_mRICH(fiber, asic, pin);
   pixel_y = y_mRICH[pixel-1];
 
-  cout << "pmt_y = " << pmt << endl;
+  // cout << "pmt_y = " << pmt << endl;
 
   return pixel_y;
 }

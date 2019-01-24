@@ -14,6 +14,7 @@ Calibration::Calibration() : mDet("PMT"), is_pmt(true), mTdc_Start(2000.0), mTdc
 Calibration::~Calibration()
 {
   cout << "Calibration::~Calibration() ----- Release memory ! ------" << endl;
+  delete pixel_map;
 }
 
 int Calibration::Init()
@@ -123,7 +124,7 @@ int Calibration::Make()
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
-    if(NumOfEvents>20)if(i_event%(NumOfEvents/10)==0)printf("Processing Event %6d\n",i_event);
+    if(NumOfEvents>20)if(i_event%(NumOfEvents/100)==0)printf("Processing Event %6d\n",i_event);
     ResetEventData();
     mChainInPut->GetEntry(i_event);
 
@@ -131,6 +132,8 @@ int Calibration::Make()
       printf("Event to big: %u edges vs %u array size...skip\n",tNedge,MAXEDGE);
       continue;
     }
+
+    cout << "i_event = " << i_event << ", tNedge = " << tNedge << endl;
 
     for(unsigned int i_photon = 0; i_photon < tNedge; ++i_photon)
     {
@@ -143,43 +146,53 @@ int Calibration::Make()
       int pixel_x = -1;
       int pixel_y = -1;
 
-      if(tSlot[i_photon] < 3 || tSlot[i_photon] > 7){printf("%s EVT %d Data Error: bad slot %d \n",__FUNCTION__,i_event,slot);continue;}
-      if(tFiber[i_photon] > 31){printf("%s EVT %d Data Error: bad fiber %d \n",__FUNCTION__,i_event,fiber);continue;}
-      if(tChannel[i_photon] > 191){printf("%s EVT %d Data Error: bad channel %d \n",__FUNCTION__,i_photon,channel); continue;}
+      if(tSlot[i_photon] < 3 || tSlot[i_photon] > 7)
+      {
+	printf("%s EVT %d Data Error: bad slot %d \n",__FUNCTION__,i_event,slot);
+	continue;
+      }
+      if(tFiber[i_photon] > 31)
+      {
+	printf("%s EVT %d Data Error: bad fiber %d \n",__FUNCTION__,i_event,fiber);
+	continue;
+      }
+      if(tChannel[i_photon] > 191)
+      {
+	printf("%s EVT %d Data Error: bad channel %d \n",__FUNCTION__,i_photon,channel); 
+	continue;
+      }
 
       if( is_pmt ) 
       {
 	pixel_x = pixel_map->get_Pixel_x_PMT(slot, fiber, asic, pin);
 	pixel_y = pixel_map->get_Pixel_y_PMT(slot, fiber, asic, pin);
-	cout << "pmt: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
+	// cout << "pmt: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
       }
       if( !is_pmt ) 
       {
-	cout << endl;
+	// cout << endl;
 	pixel_x = pixel_map->get_Pixel_x_MPPC(slot, fiber, asic, pin);
 	pixel_y = pixel_map->get_Pixel_y_MPPC(slot, fiber, asic, pin);
-	cout << "mppc: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
+	// cout << "mppc: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
       }
 
       if(pixel_x < 0 || pixel_y < 0) return -1;
 
-      cout << "i_event = " << i_event << ", i_photon = " << i_photon << ", tPolarity = " << tPolarity[i_photon] << ", tTime = " << tTime[i_photon] << ", tNedge = " << tNedge << endl;
-
       if(tPolarity[i_photon] == MAROCPOLARITY) 
       {
-	cout << "in h_mTDC: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
+	// cout << "in h_mTDC: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
 	h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
-	cout << "filled h_mTDC " << endl;
+	// cout << "filled h_mTDC " << endl;
       }
 
       if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start && tTime[i_photon] < mTdc_Stop)
       {
 	h_mRingImage->Fill(pixel_x,pixel_y);
-	cout << "filled h_mRingImage" << endl;
+	// cout << "filled h_mRingImage" << endl;
       }
     }
   }
-  printf("Processed events %d\n",NumOfEvents);
+  printf("Processed events %ld\n",NumOfEvents);
 
   return 0;
 }

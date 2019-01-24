@@ -47,7 +47,7 @@ void processQA_MPPC_TDC(const int runID = 649)
   float tdc_Stop  = 590;
 
   int const NumOfPixel = 33;
-  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/mRICH/BeamTest/tdc/sipmTDC_run%d/sspRich.root",runID);
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/sipmTDC_run%d/sspRich.root",runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   InitDisplay_mRICH();
@@ -118,7 +118,7 @@ void processQA_MPPC_TDC(const int runID = 649)
   }
   printf("Processed events %d\n",NumOfEvents);
 
-  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run%d.root",runID);
+  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/sipmTDC_run%d.root",runID);
   TFile *File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
   h_mRingImage->Write();
