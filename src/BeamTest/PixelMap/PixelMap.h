@@ -1,7 +1,6 @@
 #ifndef PixelMap_h
 #define PixelMap_h
 
-#include <string>
 #include "TObject.h"
 
 using namespace std;
@@ -14,15 +13,16 @@ class PixelMap : public TObject
 
     void Init_PixelMap_PMT();
     void GenCoord_PMT(int ipmt, int x1, int y1);
+    int get_Pixel_x_PMT(int slot, int fiber, int asic, int pin);
+    int get_Pixel_y_PMT(int slot, int fiber, int asic, int pin);
 
     void Init_PixelMap_MPPC();
     void GenCoord_MPPC(int ipmt, int x1, int y1);
+    int get_Pixel_x_MPPC(int slot, int fiber, int asic, int pin);
+    int get_Pixel_y_MPPC(int slot, int fiber, int asic, int pin);
 
     int GetPMT_mRICH(int slot,int fiber,int asic);
     int GetPixel_mRICH(int fiber, int asic, int maroc_channel);
-
-    int get_Pixel_x(int slot, int fiber, int asic, int pin, string det);
-    int get_Pixel_y(int slot, int fiber, int asic, int pin, string det);
 
 
   private:

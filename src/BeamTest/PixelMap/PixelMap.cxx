@@ -15,6 +15,8 @@ PixelMap::~PixelMap()
   cout << "PixelMap::~PixelMap() ----- Release memory ! ------" << endl;
 }
 
+//--------------------------------------------------------------------
+
 void PixelMap::Init_PixelMap_PMT()
 {
   cout << "This is PixelMap::Init_PixelMap_PMT!" << endl;
@@ -84,6 +86,32 @@ void PixelMap::GenCoord_PMT(int ipmt, int x1, int y1)
     // if(debug)if(j==0||j==255)printf("PMT %2d  Pixel %2d  -->  rw %3d  cm  %3d  X %3d Y %3d\n",ipmt, j+1,rw, cm,x_mRICH[j],y_mRICH[j]);
   }
 }
+
+int PixelMap::get_Pixel_x_PMT(int slot, int fiber, int asic, int pin)
+{
+  int pixel_x = -1;
+
+  int pmt = GetPMT_mRICH(slot,fiber,asic);
+  GenCoord_PMT(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
+  int pixel = GetPixel_mRICH(fiber, asic, pin);
+  pixel_x = x_mRICH[pixel-1];
+
+  return pixel_x;
+}
+
+int PixelMap::get_Pixel_y_PMT(int slot, int fiber, int asic, int pin)
+{
+  int pixel_y = -1;
+
+  int pmt = GetPMT_mRICH(slot,fiber,asic);
+  GenCoord_PMT(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
+  int pixel = GetPixel_mRICH(fiber, asic, pin);
+  pixel_y = y_mRICH[pixel-1];
+
+  return pixel_y;
+}
+
+//--------------------------------------------------------------------
 
 void PixelMap::Init_PixelMap_MPPC()
 {
@@ -155,6 +183,36 @@ void PixelMap::GenCoord_MPPC(int ipmt, int x1, int y1)
   }
 }
 
+int PixelMap::get_Pixel_x_MPPC(int slot, int fiber, int asic, int pin)
+{
+  int pixel_x = -1;
+
+  int pmt = GetPMT_mRICH(slot,fiber,asic);
+  GenCoord_MPPC(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
+  int pixel = GetPixel_mRICH(fiber, asic, pin);
+  pixel_x = x_mRICH[pixel-1];
+
+  cout << "pmt_x = " << pmt << endl;
+
+  return pixel_x;
+}
+
+int PixelMap::get_Pixel_y_MPPC(int slot, int fiber, int asic, int pin)
+{
+  int pixel_y = -1;
+
+  int pmt = GetPMT_mRICH(slot,fiber,asic);
+  GenCoord_MPPC(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
+  int pixel = GetPixel_mRICH(fiber, asic, pin);
+  pixel_y = y_mRICH[pixel-1];
+
+  cout << "pmt_y = " << pmt << endl;
+
+  return pixel_y;
+}
+
+//--------------------------------------------------------------------
+
 int PixelMap::GetPMT_mRICH(int slot,int fiber,int asic)
 {
   if(fiber==0 || fiber==1)return 1;
@@ -174,28 +232,4 @@ int PixelMap::GetPixel_mRICH(int fiber, int asic, int maroc_channel)
  return maroc2h13700[i];
 }
 
-int PixelMap::get_Pixel_x(int slot, int fiber, int asic, int pin, string det)
-{
-  int pixel_x = -1;
-
-  int pmt = GetPMT_mRICH(slot,fiber,asic);
-  if(det == "PMT") GenCoord_PMT(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
-  if(det == "MPPC") GenCoord_MPPC(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
-  int pixel = GetPixel_mRICH(fiber, asic, pin);
-  pixel_x = x_mRICH[pixel-1];
-
-  return pixel_x;
-}
-
-int PixelMap::get_Pixel_y(int slot, int fiber, int asic, int pin, string det)
-{
-  int pixel_y = -1;
-
-  int pmt = GetPMT_mRICH(slot,fiber,asic);
-  if(det == "PMT") GenCoord_PMT(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
-  if(det == "MPPC") GenCoord_MPPC(pmt, xp_mRICH[pmt-1], yp_mRICH[pmt-1]);
-  int pixel = GetPixel_mRICH(fiber, asic, pin);
-  pixel_y = y_mRICH[pixel-1];
-
-  return pixel_y;
-}
+//--------------------------------------------------------------------

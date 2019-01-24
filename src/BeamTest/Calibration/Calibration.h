@@ -17,8 +17,19 @@ using namespace std;
 class Calibration : public TObject
 {
   public:
-    Calibration(const string &det = "PMT", const string &mode = "Calibration");
+    Calibration();
     ~Calibration();
+
+    // is processing with PMT? true for PMT | false for MPPC
+    void is_PMT(bool b)
+    {
+      is_pmt = b;
+    }
+
+    void set_det(std::string detector)
+    {
+      mDet = detector;
+    }
 
     int Init();
     int InitChain();
@@ -28,14 +39,16 @@ class Calibration : public TObject
 
   private:
     PixelMap *pixel_map;
-    string mDet, mMode, mHome;
+    string mDet, mHome;
+
+    bool is_pmt;
 
     string mOutPutFile;
     TFile *mFile_OutPut;
 
     static int const NumOfPixel = 33;
-    float const tdc_Start = 2000.0;
-    float const tdc_Stop  = 2050.0;
+    float mTdc_Start;
+    float mTdc_Stop;
     TH1F *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
     TH2F *h_mRingImage;
 

@@ -5,11 +5,9 @@
 ClassImp(Calibration)
 
 // Calibration::Calibration(string outputfile)
-Calibration::Calibration(const string &det, const string &mode)
+Calibration::Calibration() : mDet("PMT"), is_pmt(true), mTdc_Start(2000.0), mTdc_Stop(2050.0)
 {
   cout << "Calibration::Calibration() ----- Constructor ! ------" << endl;
-  mDet = det;
-  mMode = mode;
   mHome = getenv("HOME");
 }
 
@@ -20,17 +18,17 @@ Calibration::~Calibration()
 
 int Calibration::Init()
 {
-  mOutPutFile = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/%s/BeamTest_%s.root",mHome.c_str(),mDet.c_str(),mMode.c_str());
+  mOutPutFile = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/%s/BeamTest_Calibration.root",mHome.c_str(),mDet.c_str());
   cout << "Calibration::Init(), create output file: "<< mOutPutFile.c_str() <<endl;
   mFile_OutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
 
   pixel_map = new PixelMap();
-  if(mDet == "PMT") 
+  if( is_pmt ) 
   {
     cout << "Initialize Pixel Map for PMT runs: " << endl;
     pixel_map->Init_PixelMap_PMT();
   }
-  if(mDet == "MPPC") 
+  if( !is_pmt ) 
   {
     cout << "Initialize Pixel Map for MPPC runs: " << endl;
     pixel_map->Init_PixelMap_MPPC();
@@ -38,18 +36,18 @@ int Calibration::Init()
 
   InitChain();
 
-  cout << "Initialize QA histograms: " << endl;
-
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
     {
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
-      cout << HistName.c_str() << endl;
+      // cout << HistName.c_str() << endl;
       h_mTDC[i_pixel_x][i_pixel_y] = new TH1F(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
     }
   }
   h_mRingImage = new TH2F("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+
+  cout << "Initialized QA histograms: " << endl;
 
   return 0;
 }
@@ -57,7 +55,7 @@ int Calibration::Init()
 int Calibration::InitChain()
 {
  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/",mHome.c_str());
- string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/%s/%s/proton_calibration_1.list",mHome.c_str(),mDet.c_str(),mMode.c_str());
+ string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
 
  mChainInPut = new TChain("data");
 
@@ -109,9 +107,19 @@ int Calibration::InitChain()
 int Calibration::Make()
 {
   cout << " this is Calibration::Make" << endl;
+  if( is_pmt)
+  {
+    mTdc_Start = 2000.0;
+    mTdc_Stop  = 2050.0;
+  }
+  if( !is_pmt)
+  {
+    mTdc_Start = 490.0;
+    mTdc_Stop  = 590.0;
+  }
 
   // long NumOfEvents = (long)mChainInPut->GetEntries();
-  long NumOfEvents = 1000;
+  long NumOfEvents = 100;
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
@@ -132,20 +140,42 @@ int Calibration::Make()
       int asic = channel/64;
       int pin = channel%64;
 
+      int pixel_x = -1;
+      int pixel_y = -1;
+
       if(tSlot[i_photon] < 3 || tSlot[i_photon] > 7){printf("%s EVT %d Data Error: bad slot %d \n",__FUNCTION__,i_event,slot);continue;}
       if(tFiber[i_photon] > 31){printf("%s EVT %d Data Error: bad fiber %d \n",__FUNCTION__,i_event,fiber);continue;}
       if(tChannel[i_photon] > 191){printf("%s EVT %d Data Error: bad channel %d \n",__FUNCTION__,i_photon,channel); continue;}
 
-      int pixel_x = pixel_map->get_Pixel_x(slot, fiber, asic, pin, mDet);
-      int pixel_y = pixel_map->get_Pixel_y(slot, fiber, asic, pin, mDet);
+      if( is_pmt ) 
+      {
+	pixel_x = pixel_map->get_Pixel_x_PMT(slot, fiber, asic, pin);
+	pixel_y = pixel_map->get_Pixel_y_PMT(slot, fiber, asic, pin);
+	cout << "pmt: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
+      }
+      if( !is_pmt ) 
+      {
+	cout << endl;
+	pixel_x = pixel_map->get_Pixel_x_MPPC(slot, fiber, asic, pin);
+	pixel_y = pixel_map->get_Pixel_y_MPPC(slot, fiber, asic, pin);
+	cout << "mppc: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
+      }
 
       if(pixel_x < 0 || pixel_y < 0) return -1;
 
-      if(tPolarity[i_photon] == MAROCPOLARITY) h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
+      cout << "i_event = " << i_event << ", i_photon = " << i_photon << ", tPolarity = " << tPolarity[i_photon] << ", tTime = " << tTime[i_photon] << ", tNedge = " << tNedge << endl;
 
-      if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop)
+      if(tPolarity[i_photon] == MAROCPOLARITY) 
+      {
+	cout << "in h_mTDC: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
+	h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
+	cout << "filled h_mTDC " << endl;
+      }
+
+      if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start && tTime[i_photon] < mTdc_Stop)
       {
 	h_mRingImage->Fill(pixel_x,pixel_y);
+	cout << "filled h_mRingImage" << endl;
       }
     }
   }
@@ -186,17 +216,4 @@ void Calibration::ResetEventData()
   }
 }
 
-/*
-int main()
-{
-  Calibration *Calibration_mRICH = new Calibration();
-
-  Calibration_mRICH->Init();
-  Calibration_mRICH->Make();
-  Calibration_mRICH->Finish();
-
-  cout << "This is the end of pid!!!" << endl;
-
-  return 0;
-}
-*/
+//--------------------------------------------------------------------
