@@ -6,14 +6,15 @@
 #include "TMath.h"
 #include "TF1.h"
 #include "TCanvas.h"
-#include "../../draw.h"
+#include "../../../draw.h"
 
 void plotQA_PMT_TimeCuts(const int runID = 182)
 {
+  const string mode = "Calibration";
   float tdc_Start = 2000.0;
   float tdc_Stop  = 2050.0;
 
-  float ratio_cut = 2.0; // run dependent
+  float ratio_cut = 1.8; // run dependent
   int x_OnRing = 10;
   int y_OnRing = 5;
   int x_OffRing = 20;
@@ -76,7 +77,7 @@ void plotQA_PMT_TimeCuts(const int runID = 182)
   }
 
   int const NumOfPixel = 33;
-  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/richTDC_run%d.root",runID);
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/%s/richTDC_run%d.root",mode.c_str(),runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TH2F *h_ratio_all = new TH2F("h_ratio_all","h_ratio_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
@@ -259,7 +260,7 @@ void plotQA_PMT_TimeCuts(const int runID = 182)
   plotTopLegend((char*)str_sig.c_str(),0.35,0.55,0.06,1,0.0,42,1,1);
   plotTopLegend((char*)str_sigma.c_str(),0.3,0.45,0.06,1,0.0,42,1,1);
 
-  string c_timecut = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/c_TimeCuts_PMT_%d.eps",runID);
+  string c_timecut = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_TimeCuts_PMT_%d.eps",mode.c_str(),runID);
   c_TimeCut->SaveAs(c_timecut.c_str());
 
   TH2F *h_mTimeCuts = new TH2F("h_mTimeCuts","h_mTimeCuts",3,-0.5,2.5,800,-0.5,799.5);
@@ -276,7 +277,7 @@ void plotQA_PMT_TimeCuts(const int runID = 182)
   h_mTimeCuts->GetYaxis()->SetTitleSize(0.06);
   // cout << "mean_tdc_Start = " << mean_tdc_Start << ", floor = " << floor(mean_tdc_Start) << ", mean_tdc_Stop = " << mean_tdc_Stop << ", ceil = " << ceil(mean_tdc_Stop) << endl;
 
-  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/richTimeCuts_run%d.root",runID);
+  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/%s/richTimeCuts_run%d.root",mode.c_str(),runID);
   TFile *File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
   h_mTimeCuts->Write();

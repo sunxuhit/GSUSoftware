@@ -7,6 +7,7 @@
 
 void plotQA_PMT_TDC(const int runID = 182)
 {
+  const string mode = "Calibration";
   float tdc_Start = 2000.0;
   float tdc_Stop  = 2050.0;
 
@@ -25,7 +26,7 @@ void plotQA_PMT_TDC(const int runID = 182)
   }
 
   int const NumOfPixel = 33;
-  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/richTDC_run%d.root",runID);
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/%s/richTDC_run%d.root",mode.c_str(),runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TH2F *h_mRingImage = (TH2F*)File_InPut->Get("h_mRingImage")->Clone();
@@ -54,7 +55,7 @@ void plotQA_PMT_TDC(const int runID = 182)
   h_mRingImage->GetYaxis()->SetTitle("pixel ID");
   h_mRingImage->GetYaxis()->CenterTitle();
   h_mRingImage->Draw("colz");
-  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/c_RingImage_PMT_%d.eps",runID);
+  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_RingImage_PMT_%d.eps",mode.c_str(),runID);
   c_RingImage->SaveAs(c_ringimage.c_str());
   /* c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/c_RingImage_PMT_%d.png",runID); */
   /* c_RingImage->SaveAs(c_ringimage.c_str()); */
@@ -85,7 +86,7 @@ void plotQA_PMT_TDC(const int runID = 182)
       h_mTDC[i_pixel_x][i_pixel_y]->Draw();
     }
   }
-  string c_tdc = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/c_TDC_PMT_%d.eps",runID);
+  string c_tdc = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_TDC_PMT_%d.eps",mode.c_str(),runID);
   c_TDC->SaveAs(c_tdc.c_str());
   /* c_tdc = Form("../../figures/BeamTest_QA/c_TDC_PMT_%d.png",runID); */
   /* c_TDC->SaveAs(c_tdc.c_str()); */

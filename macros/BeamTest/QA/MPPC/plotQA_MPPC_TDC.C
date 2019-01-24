@@ -7,6 +7,7 @@
 
 void plotQA_MPPC_TDC(const int runID = 649)
 {
+  const string mode = "Calibration";
   float tdc_Start = 490.0;
   float tdc_Stop  = 590.0;
 
@@ -18,7 +19,7 @@ void plotQA_MPPC_TDC(const int runID = 649)
   if(runID == 697) ratio_cut = 0.3;
 
   int const NumOfPixel = 33;
-  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run%d.root",runID);
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTDC_run%d.root",mode.c_str(),runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TH2F *h_mRingImage = (TH2F*)File_InPut->Get("h_mRingImage")->Clone();
@@ -46,10 +47,10 @@ void plotQA_MPPC_TDC(const int runID = 649)
   h_mRingImage->GetYaxis()->SetTitle("pixel ID");
   h_mRingImage->GetYaxis()->CenterTitle();
   h_mRingImage->Draw("colz");
-  string c_ringimage = Form("../../figures/BeamTest_QA/c_RingImage_MPPC_%d.eps",runID);
+  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_RingImage_MPPC_%d.eps",mode.c_str(),runID);
   c_RingImage->SaveAs(c_ringimage.c_str());
-  c_ringimage = Form("../../figures/BeamTest_QA/c_RingImage_MPPC_%d.png",runID);
-  c_RingImage->SaveAs(c_ringimage.c_str());
+  /* string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_RingImage_MPPC_%d.png",mode.c_str(),runID); */
+  /* c_RingImage->SaveAs(c_ringimage.c_str()); */
 
   // TCanvas *c_TDC = new TCanvas("c_TDC","c_TDC",10,10,NumOfPixel*100,NumOfPixel*100);
   TCanvas *c_TDC = new TCanvas("c_TDC","c_TDC",10,10,NumOfPixel*30,NumOfPixel*30);
@@ -77,8 +78,8 @@ void plotQA_MPPC_TDC(const int runID = 649)
       h_mTDC[i_pixel_x][i_pixel_y]->Draw();
     }
   }
-  string c_tdc = Form("../../figures/BeamTest_QA/c_TDC_MPPC_%d.eps",runID);
+  string c_tdc = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_TDC_MPPC_%d.eps",mode.c_str(),runID);
   c_TDC->SaveAs(c_tdc.c_str());
-  c_tdc = Form("../../figures/BeamTest_QA/c_TDC_MPPC_%d.png",runID);
-  c_TDC->SaveAs(c_tdc.c_str());
+  /* string c_tdc = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_TDC_MPPC_%d.png",mode.c_str(),runID); */
+  /* c_TDC->SaveAs(c_tdc.c_str()); */
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include "./Calibration.h"
 
 ClassImp(Calibration)
@@ -37,6 +38,8 @@ int Calibration::Init()
 
   InitChain();
 
+  InitTdcCut();
+
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
@@ -47,8 +50,14 @@ int Calibration::Init()
     }
   }
   h_mRingImage = new TH2F("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  h_mRingImage_DisPlay = new TH2F("h_mRingImage_DisPlay","h_mRingImage_DisPlay",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  h_mRingImage_DisPlay_beam = new TH2F("h_mRingImage_DisPlay_beam","h_mRingImage_DisPlay_beam",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
 
-  cout << "Initialized QA histograms: " << endl;
+  cout << "Initialized QA histograms. " << endl;
+
+  p_mNumOfPhotons = new TProfile("p_mNumOfPhotons","p_mNumOfPhotons",1,-0.5,0.5);
+
+  cout << "Initialized TProfile for Number of Photons. " << endl;
 
   return 0;
 }
@@ -105,22 +114,58 @@ int Calibration::InitChain()
  return 0;
 }
 
+int Calibration::InitTdcCut()
+{
+  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/%s/Calibration/",mHome.c_str(),mDet.c_str());
+  string inputfile;
+  if( is_pmt )
+  {
+    inputfile = inputdir + "richTimeCuts.root";
+  }
+  if( !is_pmt )
+  {
+    inputfile = inputdir + "sipmTimeCuts.root";
+  }
+
+  float NumOfRuns = 0.0;
+  float SumTdcStart = 0.0;
+  float SumTdcStop  = 0.0;
+
+  TFile *File_mTDC = TFile::Open(inputfile.c_str());
+  TH2F *h_mTimeCuts = (TH2F*)File_mTDC->Get("h_mTimeCuts")->Clone();
+  TH1F *h_mTdcStart = (TH1F*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
+  TH1F *h_mTdcStop  = (TH1F*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
+  TH1F *h_mRunId    = (TH1F*)h_mTimeCuts->ProjectionY("h_mRunId",3,3)->Clone();
+  for(int i_bin = 1; i_bin < h_mRunId->GetNbinsX(); ++i_bin)
+  {
+    float runId     = h_mRunId->GetBinContent(i_bin);
+    float tdc_start = h_mTdcStart->GetBinContent(i_bin);
+    float tdc_stop  = h_mTdcStop->GetBinContent(i_bin);
+    if(runId > 0)
+    {
+      NumOfRuns++;
+      SumTdcStart += tdc_start;
+      SumTdcStop  += tdc_stop;
+      cout << "runId = " << runId << ", tdc_start = " << tdc_start << ", tdc_stop = " << tdc_stop << ", NumOfRuns = " << NumOfRuns << endl;
+    }
+  }
+  File_mTDC->Close();
+
+  mTdc_Start = floor(SumTdcStart/NumOfRuns);
+  mTdc_Stop  = ceil(SumTdcStop/NumOfRuns);
+
+  cout << "mean_tdc_Start = " << SumTdcStart/NumOfRuns << ", mean_tdc_Stop = " << SumTdcStop/NumOfRuns << endl;
+  cout << "mTdc_Start set to " << mTdc_Start << " and mTdc_Stop set to " << mTdc_Stop << endl;
+
+  return 0;
+}
+
 int Calibration::Make()
 {
   cout << " this is Calibration::Make" << endl;
-  if( is_pmt)
-  {
-    mTdc_Start = 2000.0;
-    mTdc_Stop  = 2050.0;
-  }
-  if( !is_pmt)
-  {
-    mTdc_Start = 490.0;
-    mTdc_Stop  = 590.0;
-  }
 
   // long NumOfEvents = (long)mChainInPut->GetEntries();
-  long NumOfEvents = 100;
+  long NumOfEvents = 5000;
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
@@ -133,8 +178,7 @@ int Calibration::Make()
       continue;
     }
 
-    cout << "i_event = " << i_event << ", tNedge = " << tNedge << endl;
-
+    int NumOfPhotons = 0;
     for(unsigned int i_photon = 0; i_photon < tNedge; ++i_photon)
     {
       int slot = tSlot[i_photon];
@@ -145,6 +189,12 @@ int Calibration::Make()
 
       int pixel_x = -1;
       int pixel_y = -1;
+
+      if(asic == 0) 
+      {
+	// corresponding to empty MPPC 
+	continue;
+      }
 
       if(tSlot[i_photon] < 3 || tSlot[i_photon] > 7)
       {
@@ -166,31 +216,40 @@ int Calibration::Make()
       {
 	pixel_x = pixel_map->get_Pixel_x_PMT(slot, fiber, asic, pin);
 	pixel_y = pixel_map->get_Pixel_y_PMT(slot, fiber, asic, pin);
-	// cout << "pmt: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
       }
       if( !is_pmt ) 
       {
-	// cout << endl;
 	pixel_x = pixel_map->get_Pixel_x_MPPC(slot, fiber, asic, pin);
 	pixel_y = pixel_map->get_Pixel_y_MPPC(slot, fiber, asic, pin);
-	// cout << "mppc: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
       }
 
       if(pixel_x < 0 || pixel_y < 0) return -1;
 
       if(tPolarity[i_photon] == MAROCPOLARITY) 
       {
-	// cout << "in h_mTDC: pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << endl;
 	h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
-	// cout << "filled h_mTDC " << endl;
       }
 
       if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start && tTime[i_photon] < mTdc_Stop)
       {
 	h_mRingImage->Fill(pixel_x,pixel_y);
-	// cout << "filled h_mRingImage" << endl;
+	if(i_event > 1024 && i_event < 1124)
+	{
+	  h_mRingImage_DisPlay_beam->Fill(pixel_x,pixel_y);
+	}
+	bool is_beam = (pixel_x > 12 && pixel_x < 20) && (pixel_y > 12 && pixel_y < 20);
+	if( !is_beam ) // exclude beam spot
+	{
+	  if(i_event > 1024 && i_event < 1124)
+	  {
+	    h_mRingImage_DisPlay->Fill(pixel_x,pixel_y);
+	  }
+	  NumOfPhotons++;
+	}
       }
     }
+    // cout << "NumOfPhotons = " << NumOfPhotons << endl;
+    p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
   }
   printf("Processed events %ld\n",NumOfEvents);
 
@@ -209,6 +268,9 @@ int Calibration::Finish()
     }
   }
   h_mRingImage->Write();
+  h_mRingImage_DisPlay->Write();
+  h_mRingImage_DisPlay_beam->Write();
+  p_mNumOfPhotons->Write();
   mFile_OutPut->Close();
 
   return 0;

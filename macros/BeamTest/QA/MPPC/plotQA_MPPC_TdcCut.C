@@ -3,11 +3,12 @@
 #include "TH2F.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "../draw.h"
+#include "../../../draw.h"
 
 void plotQA_MPPC_TdcCut()
 {
-  string inputfile = "/home/xusun/Data/mRICH/BeamTest/QA/MPPC/sipmTimeCuts.root";
+  const string mode = "Calibration";
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTimeCuts.root",mode.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TH2F *h_mTimeCuts = (TH2F*)File_InPut->Get("h_mTimeCuts")->Clone();
@@ -57,5 +58,6 @@ void plotQA_MPPC_TdcCut()
   h_mTdcStop->GetYaxis()->SetRangeUser(490,590);
   h_mTdcStop->DrawCopy("p");
 
-  c_TimeCuts->SaveAs("../../figures/BeamTest_QA/c_TdcCuts_MPPC.eps");
+  string c_timecut = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_TdcCuts_MPPC.eps",mode.c_str());
+  c_TimeCuts->SaveAs(c_timecut.c_str());
 }

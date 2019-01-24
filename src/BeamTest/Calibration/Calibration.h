@@ -9,6 +9,7 @@
 #include "TChain.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TProfile.h"
 
 #include "../PixelMap/PixelMap.h"
 
@@ -33,6 +34,7 @@ class Calibration : public TObject
 
     int Init();
     int InitChain();
+    int InitTdcCut();
 
     int Make();
     int Finish();
@@ -51,6 +53,9 @@ class Calibration : public TObject
     float mTdc_Stop;
     TH1F *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
     TH2F *h_mRingImage;
+    TH2F *h_mRingImage_DisPlay;
+    TH2F *h_mRingImage_DisPlay_beam;
+    TProfile *p_mNumOfPhotons;
 
     static const int MAXEDGE = 100000;
     const int MAROCPOLARITY = 1; // 1 falling, 0 rising
