@@ -5,11 +5,11 @@ AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = libRecoEventPlane.la
 
-AM_LDFLAGS = -L$(libdir) `root-config --evelibs` -L${OFFLINE_MAIN}/lib
+AM_LDFLAGS = -L$(libdir) `root-config --evelibs` -L${OFFLINE_MAIN}/lib -L${MYINSTALL}/lib
 
 AM_CXXFLAGS = `root-config --cflags`
 
-INCLUDES = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/include
+INCLUDES = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/include -I$(MYINSTALL)/include
 
 ##############################################
 # please add new classes in alphabetical order
@@ -52,5 +52,5 @@ clean-local:
 
 RecoEventPlaneDict.C: \
 	RecoEventPlane.h \
-  RecoEventPlaneLinkDef.h
+	RecoEventPlaneLinkDef.h
 	rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^

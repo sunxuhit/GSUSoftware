@@ -4,8 +4,12 @@
 #include "SubsysReco.h"
 
 class PHCompositeNode;
+class BbcCalib;
+class BbcGeo;
+
 class TTree;
 class TFile;
+class TH1F;
 
 class RecoEventPlane: public SubsysReco {
 public:
@@ -42,6 +46,11 @@ private:
 	TFile* _fout;
 	TTree* _T;
 	float _mass;
+
+	BbcCalib *bbccalib;
+	BbcGeo *bbcgeo;
+	TH1F *h_mEP_BbcSouth;
+	TH1F *h_mEP_BbcNorth;
 };
 
 #endif //__H_RecoEventPlane_H__

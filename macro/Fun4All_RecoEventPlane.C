@@ -1,5 +1,5 @@
 void Fun4All_RecoEventPlane(
-		int nEvents = 100, //
+		int nEvents = 10000, //
 		char *input_file = "AuAu14.list" //
 		)
 {
@@ -13,8 +13,8 @@ void Fun4All_RecoEventPlane(
 	se->registerSubsystem(ana);
 
 	Fun4AllDstInputManager *in = new Fun4AllDstInputManager("DSTin");
-	//in->fileopen(input_file);
-	in->AddListFile(input_file);
+	in->fileopen("/direct/phenix+u/xusun/WorkSpace/PHENIX/Fun4All_Test/picodstobject.root");
+	// in->AddListFile(input_file);
 	se->registerInputManager(in);
 
 	se->run(nEvents);
