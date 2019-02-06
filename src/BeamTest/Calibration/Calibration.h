@@ -13,8 +13,6 @@
 
 #include "../PixelMap/PixelMap.h"
 
-using namespace std;
-
 class Calibration : public TObject
 {
   public:

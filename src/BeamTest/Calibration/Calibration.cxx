@@ -3,6 +3,8 @@
 #include <cmath>
 #include "./Calibration.h"
 
+using namespace std;
+
 ClassImp(Calibration)
 
 // Calibration::Calibration(string outputfile)
@@ -20,7 +22,7 @@ Calibration::~Calibration()
 
 int Calibration::Init()
 {
-  mOutPutFile = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/%s/BeamTest_Calibration.root",mHome.c_str(),mDet.c_str());
+  mOutPutFile = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/BeamTest/%s/BeamTest_Calibration.root",mHome.c_str(),mDet.c_str());
   cout << "Calibration::Init(), create output file: "<< mOutPutFile.c_str() <<endl;
   mFile_OutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
 
@@ -64,54 +66,54 @@ int Calibration::Init()
 
 int Calibration::InitChain()
 {
- string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/",mHome.c_str());
- string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
+  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/",mHome.c_str());
+  string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/BeamTest/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
 
- mChainInPut = new TChain("data");
+  mChainInPut = new TChain("data");
 
- if (!InPutList.empty())   // if input file is ok
- {
-   cout << "Open input probability file list" << endl;
-   ifstream in(InPutList.c_str());  // input stream
-   if(in)
-   {
-     cout << "input file probability list is ok" << endl;
-     char str[255];       // char array for each file name
-     Long64_t entries_save = 0;
-     while(in)
-     {
-       in.getline(str,255);  // take the lines of the file list
-       if(str[0] != 0)
-       {
-	 string addfile;
-	 addfile = str;
-	 addfile = inputdir + addfile + "/sspRich.root";
-	 mChainInPut->AddFile(addfile.c_str(),-1,"data");
-	 Long64_t file_entries = mChainInPut->GetEntries();
-	 cout << "File added to data chain: " << addfile.c_str() << " with " << (file_entries-entries_save) << " entries" << endl;
-	 entries_save = file_entries;
-       }
-     }
-   }
-   else
-   {
-     cout << "WARNING: input probability file input is problemtic" << endl;
-   }
- }
+  if (!InPutList.empty())   // if input file is ok
+  {
+    cout << "Open input probability file list" << endl;
+    ifstream in(InPutList.c_str());  // input stream
+    if(in)
+    {
+      cout << "input file probability list is ok" << endl;
+      char str[255];       // char array for each file name
+      Long64_t entries_save = 0;
+      while(in)
+      {
+	in.getline(str,255);  // take the lines of the file list
+	if(str[0] != 0)
+	{
+	  string addfile;
+	  addfile = str;
+	  addfile = inputdir + addfile + "/sspRich.root";
+	  mChainInPut->AddFile(addfile.c_str(),-1,"data");
+	  Long64_t file_entries = mChainInPut->GetEntries();
+	  cout << "File added to data chain: " << addfile.c_str() << " with " << (file_entries-entries_save) << " entries" << endl;
+	  entries_save = file_entries;
+	}
+      }
+    }
+    else
+    {
+      cout << "WARNING: input probability file input is problemtic" << endl;
+    }
+  }
 
- mChainInPut->SetBranchAddress("evt",&tTrigNum);
- mChainInPut->SetBranchAddress("trigtime",&tTrigTime);
- mChainInPut->SetBranchAddress("nedge",&tNedge);
- mChainInPut->SetBranchAddress("slot",tSlot);
- mChainInPut->SetBranchAddress("fiber",tFiber);
- mChainInPut->SetBranchAddress("ch",tChannel);
- mChainInPut->SetBranchAddress("pol",tPolarity);
- mChainInPut->SetBranchAddress("time",tTime);
+  mChainInPut->SetBranchAddress("evt",&tTrigNum);
+  mChainInPut->SetBranchAddress("trigtime",&tTrigTime);
+  mChainInPut->SetBranchAddress("nedge",&tNedge);
+  mChainInPut->SetBranchAddress("slot",tSlot);
+  mChainInPut->SetBranchAddress("fiber",tFiber);
+  mChainInPut->SetBranchAddress("ch",tChannel);
+  mChainInPut->SetBranchAddress("pol",tPolarity);
+  mChainInPut->SetBranchAddress("time",tTime);
 
- long NumOfEvents = (long)mChainInPut->GetEntries();
- cout << "total number of events: " << NumOfEvents << endl;
+  long NumOfEvents = (long)mChainInPut->GetEntries();
+  cout << "total number of events: " << NumOfEvents << endl;
 
- return 0;
+  return 0;
 }
 
 int Calibration::InitTdcCut()

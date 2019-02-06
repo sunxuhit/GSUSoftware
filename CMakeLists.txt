@@ -28,13 +28,21 @@ find_package(ROOT REQUIRED COMPONENTS RIO Net)
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
 
-# include Pixel Map
+# include Pixel Map in BeamTest
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
 add_subdirectory(src/BeamTest/PixelMap)
 
-# include Calibration
+# include Calibration in BeamTest
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/Calibration")
 add_subdirectory(src/BeamTest/Calibration)
+
+# include material in Simulation
+include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Material")
+add_subdirectory(src/Simulation/Material)
+
+# include gemc Calibration in Simulation
+include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Calibration")
+add_subdirectory(src/Simulation/Calibration)
 
 # add the executable
 # add_executable(BeamTest_mRICH ${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap/PixelMap.cxx)

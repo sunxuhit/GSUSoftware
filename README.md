@@ -12,7 +12,7 @@
 
 ---------------
 
-#### src && include
+#### src
 
 ##### BeamTest
 - PixelMap
@@ -20,9 +20,17 @@
 - Calibration
 > calculate `number of photons`, `radius` and `angels`
 >
-> configure `quantum efficiency`, `noise level`, `transmisson of glass window` and `mirrir geometry`
+> configure `quantum efficiency`, `noise level`, `transmisson of glass window` and `mirror geometry`
 
 ##### Simulation
+- Material
+> quantum efficiency for PMT & MPPC
+>
+> pixelized histogram for detected photons
+- Calibration
+> calculate `number of photons`, `radius` and `angels`
+>
+> configure `quantum efficiency`, `noise level`, `transmisson of glass window` and `mirror geometry`
 
 ---------------
 
@@ -30,5 +38,5 @@
 - mkdir build
 - cd ./build
 - cmake ..
-- cmake --build .
-- a shared lib can be found at ${PROJECT\_SOURCE\_DIR}/build/src/BeamTest/PROJECT\_NAME
+- make install 
+- a shared lib can be found at ${PROJECT\_SOURCE\_DIR}/lib
