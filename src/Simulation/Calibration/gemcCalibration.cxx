@@ -155,6 +155,8 @@ int gemcCalibration::initHistograms()
 
   h_mPhotonGenerated = new TH2D("h_mPhotonGenerated","h_mPhotonGenerated",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
+  h_mWaveLength = new TH1D("h_mWaveLength","h_mWaveLength",5000,-0.5,4999.5);
+
   p_mNumOfPhotons = new TProfile("p_mNumOfPhotons","p_mNumOfPhotons",1,-0.5,0.5);
 
   return 0;
@@ -219,6 +221,8 @@ int gemcCalibration::Make()
 
 	double photonE = trk_trackE->at(i_track);   /// in MeV (GEANT4 default)
 	double wavelength = 1240./(photonE*1.e6);  /// MeV->eV,wavelength in "nm"
+	h_mWaveLength->Fill(wavelength);
+
 	double quantumEff = 0.0;
 	if(is_pmt) quantumEff = mMat->extrapQE_PMT(wavelength); // extract quantum efficiency for PMT
 	if(!is_pmt) quantumEff = mMat->extrapQE_MPPC(wavelength); // extrat quantum efficiency for MPPC
@@ -267,6 +271,7 @@ int gemcCalibration::writeHistograms()
   h_mNumOfEvents->Write();
   h_mPhotonDist->Write();
   h_mPhotonGenerated->Write();
+  h_mWaveLength->Write();
   p_mNumOfPhotons->Write();
 
   return 0;

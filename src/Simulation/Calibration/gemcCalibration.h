@@ -64,6 +64,7 @@ class gemcCalibration : public TObject
     TH1D *h_mNumOfEvents;
     TH2D *h_mPhotonDist;
     TH2D *h_mPhotonGenerated;
+    TH1D *h_mWaveLength;
     TProfile *p_mNumOfPhotons;
 
     TF1 *f_mGaus;
