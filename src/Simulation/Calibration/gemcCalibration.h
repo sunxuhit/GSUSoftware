@@ -13,8 +13,10 @@
 #include <TTree.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TH3D.h>
 #include <TProfile.h>
 #include <TF1.h>
+#include <TVector2.h>
 
 class Material;
 
@@ -53,6 +55,17 @@ class gemcCalibration : public TObject
     double GausSmearing(TF1 *f_gaus);
     bool isInSensorPlane(double out_x, double out_y);
 
+    // ring finder
+    int initRingFinder();
+    int writeRingFinder();
+    int clearRingFinder(); 
+    int HoughTransform(TH1D *h_NumOfPhotons, TH2D *h_PhotonDist, std::vector<int> xPixel, std::vector<int> yPixel);
+    bool findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov);
+    bool isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
+    bool isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
+    bool isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform);
+
+
   private:
     std::string mDet, mHome;
     bool is_pmt;
@@ -65,11 +78,24 @@ class gemcCalibration : public TObject
     TH2D *h_mPhotonDist;
     TH2D *h_mPhotonGenerated;
     TH1D *h_mWaveLength;
+    TH1D *h_mNumOfPhotonsDist;
     TProfile *p_mNumOfPhotons;
 
     TF1 *f_mGaus;
     TH2D *h_mXGausSmearing;
     TH2D *h_mYGausSmearing;
+
+    // ring finder
+    std::vector<int> mXPixelMap; // corresponding binX number for each photon hit
+    std::vector<int> mYPixelMap; // corresponding binY number for each photon hit
+
+    TH1D *h_mNumOfPhotons; // number of total photons in each event 
+    TH2D *h_mRingFinder; // x: photon out_x | y: photon out_y with detector effect
+    TH3D *h_mHoughTransform; // x | y | R
+    TH3D *h_mQA_HT; // QA for hough transform
+
+    TH3D *h_mCherenkovRing; // x | y | R
+    TH2D *h_mNumOfCherenkovPhotons; // 
 
     // chain for generated protons
     TChain *mChainInPut_Events;

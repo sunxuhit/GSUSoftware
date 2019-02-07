@@ -46,6 +46,7 @@ int gemcCalibration::Init()
   initChain();
   initHistograms();
   initGausSmearing();
+  initRingFinder();
 
   return 0;
 }
@@ -157,6 +158,8 @@ int gemcCalibration::initHistograms()
 
   h_mWaveLength = new TH1D("h_mWaveLength","h_mWaveLength",5000,-0.5,4999.5);
 
+  h_mNumOfPhotonsDist = new TH1D("h_mNumOfPhotonsDist","h_mNumOfPhotonsDist",50,-0.5,49.5);
+
   p_mNumOfPhotons = new TProfile("p_mNumOfPhotons","p_mNumOfPhotons",1,-0.5,0.5);
 
   return 0;
@@ -240,13 +243,28 @@ int gemcCalibration::Make()
 	  {
 	    h_mPhotonDist->Fill(out_x,out_y);
 	    NumOfPhotons++;
+
+	    // ring finder
+	    h_mNumOfPhotons->Fill(0);
+	    h_mRingFinder->Fill(out_x,out_y); // single event distribution => reset for each event
+	    int binX = h_mRingFinder->GetXaxis()->FindBin(out_x);
+	    int binY = h_mRingFinder->GetYaxis()->FindBin(out_y);
+	    mXPixelMap.push_back(binX);
+	    mYPixelMap.push_back(binY);
 	  }
 	  h_mXGausSmearing->Fill(out_x_input,out_x);
 	  h_mYGausSmearing->Fill(out_y_input,out_y);
 	}
       }
     }
+
+    // Number of Photons
+    h_mNumOfPhotonsDist->Fill(NumOfPhotons);
     p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
+
+    // ring finder
+    HoughTransform(h_mNumOfPhotons,h_mRingFinder, mXPixelMap, mYPixelMap);
+    clearRingFinder();
   }
 
   return 0;
@@ -261,6 +279,7 @@ int gemcCalibration::Finish()
     File_mOutPut->cd();
     writeHistograms();
     writeGausSmearing();
+    writeRingFinder();
     File_mOutPut->Close();
   }
   return 0;
@@ -272,6 +291,7 @@ int gemcCalibration::writeHistograms()
   h_mPhotonDist->Write();
   h_mPhotonGenerated->Write();
   h_mWaveLength->Write();
+  h_mNumOfPhotonsDist->Write();
   p_mNumOfPhotons->Write();
 
   return 0;
@@ -322,3 +342,177 @@ bool gemcCalibration::isInSensorPlane(double out_x, double out_y)
   return true;
 }
 
+//-----------------------------------------------------------------
+
+int gemcCalibration::initRingFinder()
+{
+  h_mNumOfPhotons = new TH1D("h_mNumOfPhotons","h_mNumOfPhotons",1,-0.5,0.5);
+  h_mRingFinder = new TH2D("h_mRingFinder","h_mRingFinder",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
+  h_mHoughTransform = new TH3D("h_mHoughTransform","h_mHoughTransform",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,1.0*mRICH::mHalfWidth);
+
+  clearRingFinder();
+
+  h_mQA_HT = new TH3D("h_mQA_HT","h_mQA_HT",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
+  h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
+  h_mNumOfCherenkovPhotons = new TH2D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",100,-0.5,99.5,100,-0.5,99.5);
+
+  return 1;
+}
+
+int gemcCalibration::clearRingFinder()
+{
+  h_mNumOfPhotons->Reset();
+  h_mRingFinder->Reset();
+  mXPixelMap.clear();
+  mYPixelMap.clear();
+
+  h_mHoughTransform->Reset();
+
+  return 1;
+}
+
+int gemcCalibration::writeRingFinder()
+{
+  h_mQA_HT->Write();
+  h_mCherenkovRing->Write();
+  h_mNumOfCherenkovPhotons->Write();
+
+  return 1;
+}
+
+
+bool gemcCalibration::findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov)
+{
+  // check if 3 hit points are at same position or collinear
+  if(isSamePosition(firstHit,secondHit,thirdHit) || isCollinear(firstHit,secondHit,thirdHit) ) return false;
+
+  double a = firstHit.X() - secondHit.X(); // a = x1 - x2
+  double b = firstHit.Y() - secondHit.Y(); // b = y1 - y2
+  double c = firstHit.X() - thirdHit.X();  // c = x1 - x3
+  double d = firstHit.Y() - thirdHit.Y();  // d = y1 - y3
+  double e = ((firstHit.X()*firstHit.X() - secondHit.X()*secondHit.X()) + (firstHit.Y()*firstHit.Y() - secondHit.Y()*secondHit.Y()))/2.0;  //e = ((x1*x1 - x2*x2) + (y1*y1 - y2*y2))/2.0;
+  double f = ((firstHit.X()*firstHit.X() - thirdHit.X()*thirdHit.X()) + (firstHit.Y()*firstHit.Y() - thirdHit.Y()*thirdHit.Y()))/2.0;  //f = ((x1*x1 - x3*x3) + (y1*y1 - y3*y3))/2.0;
+  double det = b*c - a*d;
+
+  x_Cherenkov = -(d*e - b*f)/det;
+  y_Cherenkov = -(a*f - c*e)/det;
+  r_Cherenkov = TMath::Sqrt((x_Cherenkov-firstHit.X())*(x_Cherenkov-firstHit.X())+(y_Cherenkov-firstHit.Y())*(y_Cherenkov-firstHit.Y()));
+
+  return true;
+}
+
+bool gemcCalibration::isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit)
+{
+  if(TMath::Abs(firstHit.X()-secondHit.X()) < 1e-5 && TMath::Abs(firstHit.Y()-secondHit.Y()) < 1e-5) return true;
+  if(TMath::Abs(firstHit.X()-thirdHit.X())  < 1e-5 && TMath::Abs(firstHit.Y()-thirdHit.Y())  < 1e-5) return true;
+  if(TMath::Abs(secondHit.X()-thirdHit.X()) < 1e-5 && TMath::Abs(secondHit.Y()-thirdHit.Y()) < 1e-5) return true;
+  if(firstHit.Mod() > 1000.0 || secondHit.Mod() > 1000.0 || thirdHit.Mod() > 1000.0) return true; // not proper initialized
+
+  return false;
+}
+
+bool gemcCalibration::isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit)
+{
+  if(TMath::Abs(firstHit.X()-secondHit.X()) < 1e-5 && TMath::Abs(firstHit.X()-thirdHit.X()) < 1e-5) return true;
+  if(TMath::Abs(firstHit.Y()-secondHit.Y()) < 1e-5 && TMath::Abs(firstHit.Y()-thirdHit.Y()) < 1e-5) return true;
+
+  double slope12 = (firstHit.Y()-secondHit.Y())/(firstHit.X()-secondHit.X());
+  double slope13 = (firstHit.Y()-thirdHit.Y())/(firstHit.X()-thirdHit.X());
+
+  if(TMath::Abs(slope12-slope13) < 1e-5) return true;
+
+  return false;
+}
+
+bool gemcCalibration::isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform)
+{
+  double x_diff = photonHit.X() - x_HoughTransform;
+  double y_diff = photonHit.Y() - y_HoughTransform;
+  double r_diff = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff) - r_HoughTransform;
+
+  double sigma_x = 1.5;
+  double sigma_y = 1.5;
+  double sigma_r = TMath::Sqrt(sigma_x*sigma_x+sigma_y*sigma_y);
+
+  if( TMath::Abs(r_diff) < sigma_r) return true;
+
+  return false;
+}
+
+int gemcCalibration::HoughTransform(TH1D *h_NumOfPhotons, TH2D *h_RingFinder, std::vector<int> xPixel, std::vector<int> yPixel)
+{
+  int NumOfPhotons = h_NumOfPhotons->GetEntries();
+  if(NumOfPhotons < 3) return 0;
+  float NumOfCombinations = TMath::Factorial(NumOfPhotons)/(TMath::Factorial(3)*TMath::Factorial(NumOfPhotons-3));
+  // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfCombinations = " << NumOfCombinations << endl;
+  for(int i_hit_1st = 0; i_hit_1st < NumOfPhotons-2; ++i_hit_1st)
+  {
+    TVector2 firstHit(-999.9,-999.9);
+    double x_firstHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit_1st]);
+    double y_firstHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit_1st]);
+    firstHit.Set(x_firstHit,y_firstHit);
+    for(int i_hit_2nd = i_hit_1st+1; i_hit_2nd < NumOfPhotons-1; ++i_hit_2nd)
+    {
+      TVector2 secondHit(-999.9,-999.9);
+      double x_secondHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit_2nd]);
+      double y_secondHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit_2nd]);
+      secondHit.Set(x_secondHit,y_secondHit);
+      for(int i_hit_3rd = i_hit_2nd+1; i_hit_3rd < NumOfPhotons; ++i_hit_3rd)
+      {
+	TVector2 thirdHit(-999.9,-999.9);
+	double x_thirdHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit_3rd]);
+	double y_thirdHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit_3rd]);
+	thirdHit.Set(x_thirdHit,y_thirdHit);
+
+	double x_Cherenkov = -999.9;
+	double y_Cherenkov = -999.9;
+	double r_Cherenkov = -999.9;
+
+	bool ringStatus = findRing(firstHit,secondHit,thirdHit, x_Cherenkov, y_Cherenkov, r_Cherenkov);
+	if(ringStatus) 
+	{
+	  h_mQA_HT->Fill(x_Cherenkov,y_Cherenkov,r_Cherenkov);
+	  h_mHoughTransform->Fill(x_Cherenkov,y_Cherenkov,r_Cherenkov);
+	  // cout << "firstHit.x = " << firstHit.X() << ", firstHit.y = " << firstHit.Y() << endl;
+	  // cout << "secondHit.x = " << secondHit.X() << ", secondHit.y = " << secondHit.Y() << endl;
+	  // cout << "thirdHit.x = " << thirdHit.X() << ", thirdHit.y = " << thirdHit.Y() << endl;
+	  // cout << "x_Cherenkov = " << x_Cherenkov << ", y_Cherenkov = " << y_Cherenkov << ", r_Cherenkov = " << r_Cherenkov << endl;
+	  // cout << endl;
+	}
+      }
+    }
+  }
+
+  int hBin_x = -1;
+  int hBin_y = -1;
+  int hBin_r = -1;
+  int NumOfPhotonsOnRing = 0;
+
+  int globalBin = h_mHoughTransform->GetMaximumBin(hBin_x,hBin_y,hBin_r);
+  int maxVote = h_mHoughTransform->GetBinContent(globalBin);
+  if(globalBin > 0)
+  {
+    double x_HoughTransform = h_mHoughTransform->GetXaxis()->GetBinCenter(hBin_x);
+    double y_HoughTransform = h_mHoughTransform->GetYaxis()->GetBinCenter(hBin_y);
+    double r_HoughTransform = h_mHoughTransform->GetZaxis()->GetBinCenter(hBin_r);
+    h_mCherenkovRing->Fill(x_HoughTransform,y_HoughTransform,r_HoughTransform);
+    // cout << "hBin_x = " << hBin_x << ", hBin_y = " << hBin_y << ", hBin_r = " << hBin_r << ", globalBin = " << globalBin << ", with maxVote = " << maxVote << endl;
+    // cout << "x_HoughTransform = " << x_HoughTransform << ", y_HoughTransform = " << y_HoughTransform << ", r_HoughTransform = " << r_HoughTransform << endl;
+
+    for(int i_hit = 0; i_hit < NumOfPhotons; ++i_hit)
+    {
+      TVector2 photonHit;
+      double x_photonHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit]);
+      double y_photonHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit]);
+      photonHit.Set(x_photonHit,y_photonHit);
+      if( isOnRing(photonHit,x_HoughTransform,y_HoughTransform,r_HoughTransform) )
+      {
+	NumOfPhotonsOnRing++;
+      }
+    }
+  }
+  // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfPhotonsOnRing = " << NumOfPhotonsOnRing << endl;
+  h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing);
+
+  return 0;
+}
