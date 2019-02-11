@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <cmath> 
 #include <math.h> 
-#include "TFile.h"
-#include "TF1.h"
-#include "TMath.h"
-#include "TTree.h"
-#include "TChain.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TFile.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TTree.h>
+#include <TChain.h>
+#include <TRandom3.h>
+#include <TString.h>
+
 #include "./gemcCalibration.h"
 #include "../Material/Material.h"
 #include "../Material/mRICH.h"
@@ -154,11 +155,13 @@ int gemcCalibration::initHistograms()
 
   h_mPhotonDist = new TH2D("h_mPhotonDist","h_mPhotonDist",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
+  h_mPhotonDist_SingleEvent = new TH2D("h_mPhotonDist_SingleEvent","h_mPhotonDist_SingleEvent",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
+
   h_mPhotonGenerated = new TH2D("h_mPhotonGenerated","h_mPhotonGenerated",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
   h_mWaveLength = new TH1D("h_mWaveLength","h_mWaveLength",5000,-0.5,4999.5);
 
-  h_mNumOfPhotonsDist = new TH1D("h_mNumOfPhotonsDist","h_mNumOfPhotonsDist",50,-0.5,49.5);
+  h_mNumOfPhotons = new TH1D("h_mNumOfPhotons","h_mNumOfPhotons",50,-0.5,49.5);
 
   p_mNumOfPhotons = new TProfile("p_mNumOfPhotons","p_mNumOfPhotons",1,-0.5,0.5);
 
@@ -180,15 +183,15 @@ int gemcCalibration::initGausSmearing()
 
 int gemcCalibration::Make()
 {
-  long NumOfEvents = (long)mChainInPut_Events->GetEntries();
+  // long NumOfEvents = (long)mChainInPut_Events->GetEntries();
+  long NumOfEvents = 5000;
 
   mChainInPut_Events->GetEntry(0);
   mChainInPut_Tracks->GetEntry(0);
 
-  for(int i_event = 0; i_event < 1024; ++i_event) // test event loop
-    // for(int i_event = 0; i_event < NumOfEvents; ++i_event) // event loop
+  for(int i_event = 0; i_event < NumOfEvents; ++i_event) // event loop
   { 
-    if(i_event%1000==0) cout << "processing event:  " << i_event << " ;"<<endl;
+    if(i_event%100==0) cout << "processing events:  " << i_event << "/" << NumOfEvents << endl;
 
     mChainInPut_Events->GetEntry(i_event);  
     mChainInPut_Tracks->GetEntry(i_event);
@@ -244,8 +247,9 @@ int gemcCalibration::Make()
 	    h_mPhotonDist->Fill(out_x,out_y);
 	    NumOfPhotons++;
 
+	    if(i_event == 1024) h_mPhotonDist_SingleEvent->Fill(out_x,out_y);
+
 	    // ring finder
-	    h_mNumOfPhotons->Fill(0);
 	    h_mRingFinder->Fill(out_x,out_y); // single event distribution => reset for each event
 	    int binX = h_mRingFinder->GetXaxis()->FindBin(out_x);
 	    int binY = h_mRingFinder->GetYaxis()->FindBin(out_y);
@@ -259,13 +263,14 @@ int gemcCalibration::Make()
     }
 
     // Number of Photons
-    h_mNumOfPhotonsDist->Fill(NumOfPhotons);
+    h_mNumOfPhotons->Fill(NumOfPhotons);
     p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
 
     // ring finder
-    HoughTransform(h_mNumOfPhotons,h_mRingFinder, mXPixelMap, mYPixelMap);
+    HoughTransform(NumOfPhotons,h_mRingFinder, mXPixelMap, mYPixelMap);
     clearRingFinder();
   }
+  cout << "processed events:  " << NumOfEvents << "/" << NumOfEvents << endl;
 
   return 0;
 }
@@ -289,9 +294,10 @@ int gemcCalibration::writeHistograms()
 {
   h_mNumOfEvents->Write();
   h_mPhotonDist->Write();
+  h_mPhotonDist_SingleEvent->Write();
   h_mPhotonGenerated->Write();
   h_mWaveLength->Write();
-  h_mNumOfPhotonsDist->Write();
+  h_mNumOfPhotons->Write();
   p_mNumOfPhotons->Write();
 
   return 0;
@@ -346,7 +352,6 @@ bool gemcCalibration::isInSensorPlane(double out_x, double out_y)
 
 int gemcCalibration::initRingFinder()
 {
-  h_mNumOfPhotons = new TH1D("h_mNumOfPhotons","h_mNumOfPhotons",1,-0.5,0.5);
   h_mRingFinder = new TH2D("h_mRingFinder","h_mRingFinder",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
   h_mHoughTransform = new TH3D("h_mHoughTransform","h_mHoughTransform",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,1.0*mRICH::mHalfWidth);
 
@@ -361,7 +366,6 @@ int gemcCalibration::initRingFinder()
 
 int gemcCalibration::clearRingFinder()
 {
-  h_mNumOfPhotons->Reset();
   h_mRingFinder->Reset();
   mXPixelMap.clear();
   mYPixelMap.clear();
@@ -379,7 +383,6 @@ int gemcCalibration::writeRingFinder()
 
   return 1;
 }
-
 
 bool gemcCalibration::findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov)
 {
@@ -439,9 +442,9 @@ bool gemcCalibration::isOnRing(TVector2 photonHit, double x_HoughTransform, doub
   return false;
 }
 
-int gemcCalibration::HoughTransform(TH1D *h_NumOfPhotons, TH2D *h_RingFinder, std::vector<int> xPixel, std::vector<int> yPixel)
+int gemcCalibration::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector<int> xPixel, std::vector<int> yPixel)
 {
-  int NumOfPhotons = h_NumOfPhotons->GetEntries();
+  int NumOfPhotons = numOfPhotons;
   if(NumOfPhotons < 3) return 0;
   float NumOfCombinations = TMath::Factorial(NumOfPhotons)/(TMath::Factorial(3)*TMath::Factorial(NumOfPhotons-3));
   // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfCombinations = " << NumOfCombinations << endl;

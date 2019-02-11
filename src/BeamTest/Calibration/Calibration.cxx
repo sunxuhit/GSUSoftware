@@ -1,7 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <TMath.h>
+
 #include "./Calibration.h"
+#include "../PixelMap/PixelMap.h"
 
 using namespace std;
 
@@ -38,33 +41,37 @@ int Calibration::Init()
     pixel_map->Init_PixelMap_MPPC();
   }
 
-  InitChain();
+  initChain();
 
-  InitTdcCut();
+  initTdcCut();
 
-  for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
+  for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
   {
-    for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
+    for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
     {
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
       // cout << HistName.c_str() << endl;
-      h_mTDC[i_pixel_x][i_pixel_y] = new TH1F(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
+      h_mTDC[i_pixel_x][i_pixel_y] = new TH1D(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
     }
   }
-  h_mRingImage = new TH2F("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  h_mRingImage_DisPlay = new TH2F("h_mRingImage_DisPlay","h_mRingImage_DisPlay",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  h_mRingImage_DisPlay_beam = new TH2F("h_mRingImage_DisPlay_beam","h_mRingImage_DisPlay_beam",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
+  h_mRingImage_DisPlay = new TH2D("h_mRingImage_DisPlay","h_mRingImage_DisPlay",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
+  h_mRingImage_DisPlay_beam = new TH2D("h_mRingImage_DisPlay_beam","h_mRingImage_DisPlay_beam",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
 
   cout << "Initialized QA histograms. " << endl;
+
+  h_mNumOfPhotons = new TH1D("h_mNumOfPhotons","h_mNumOfPhotons",50,-0.5,49.5);
 
   p_mNumOfPhotons = new TProfile("p_mNumOfPhotons","p_mNumOfPhotons",1,-0.5,0.5);
 
   cout << "Initialized TProfile for Number of Photons. " << endl;
 
+  initRingFinder();
+
   return 0;
 }
 
-int Calibration::InitChain()
+int Calibration::initChain()
 {
   string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/",mHome.c_str());
   string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/BeamTest/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
@@ -116,7 +123,7 @@ int Calibration::InitChain()
   return 0;
 }
 
-int Calibration::InitTdcCut()
+int Calibration::initTdcCut()
 {
   string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/%s/Calibration/",mHome.c_str(),mDet.c_str());
   string inputfile;
@@ -134,10 +141,10 @@ int Calibration::InitTdcCut()
   float SumTdcStop  = 0.0;
 
   TFile *File_mTDC = TFile::Open(inputfile.c_str());
-  TH2F *h_mTimeCuts = (TH2F*)File_mTDC->Get("h_mTimeCuts")->Clone();
-  TH1F *h_mTdcStart = (TH1F*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
-  TH1F *h_mTdcStop  = (TH1F*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
-  TH1F *h_mRunId    = (TH1F*)h_mTimeCuts->ProjectionY("h_mRunId",3,3)->Clone();
+  TH2D *h_mTimeCuts = (TH2D*)File_mTDC->Get("h_mTimeCuts")->Clone();
+  TH1D *h_mTdcStart = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
+  TH1D *h_mTdcStop  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
+  TH1D *h_mRunId    = (TH1D*)h_mTimeCuts->ProjectionY("h_mRunId",3,3)->Clone();
   for(int i_bin = 1; i_bin < h_mRunId->GetNbinsX(); ++i_bin)
   {
     float runId     = h_mRunId->GetBinContent(i_bin);
@@ -171,7 +178,7 @@ int Calibration::Make()
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
-    if(NumOfEvents>20)if(i_event%(NumOfEvents/100)==0)printf("Processing Event %6d\n",i_event);
+    if(i_event%100==0) cout << "processing events:  " << i_event << "/" << NumOfEvents << endl;
     ResetEventData();
     mChainInPut->GetEntry(i_event);
 
@@ -235,25 +242,43 @@ int Calibration::Make()
       if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start && tTime[i_photon] < mTdc_Stop)
       {
 	h_mRingImage->Fill(pixel_x,pixel_y);
-	if(i_event > 1024 && i_event < 1124)
+	// if(i_event > 1024 && i_event < 1025)
+	if(i_event == 1024)
 	{
 	  h_mRingImage_DisPlay_beam->Fill(pixel_x,pixel_y);
 	}
 	bool is_beam = (pixel_x > 12 && pixel_x < 20) && (pixel_y > 12 && pixel_y < 20);
 	if( !is_beam ) // exclude beam spot
 	{
-	  if(i_event > 1024 && i_event < 1124)
+	  // if(i_event > 1024 && i_event < 1025)
+	  if(i_event == 1024)
 	  {
 	    h_mRingImage_DisPlay->Fill(pixel_x,pixel_y);
 	  }
 	  NumOfPhotons++;
 	}
+
+	// ring finder
+	float out_x = findPixelCoord(pixel_x);
+	float out_y = findPixelCoord(pixel_y);
+	// cout << "out_x = " << out_x << ", pixel_x = " << pixel_x << endl;
+	// cout << "out_y = " << out_y << ", pixel_y = " << pixel_y << endl;
+	h_mRingFinder->Fill(out_x,out_y); // single event distribution => reset for each event
+	h_mRingFinder_Display->Fill(out_x,out_y);
+	if(i_event == 1024) h_mRingFinder_SingleEvent->Fill(out_x,out_y);
+	mXPixelMap.push_back(pixel_x);
+	mYPixelMap.push_back(pixel_y);
       }
     }
     // cout << "NumOfPhotons = " << NumOfPhotons << endl;
+    h_mNumOfPhotons->Fill(NumOfPhotons);
     p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
+
+    // ring finder
+    HoughTransform(NumOfPhotons,h_mRingFinder, mXPixelMap, mYPixelMap);
+    clearRingFinder();
   }
-  printf("Processed events %ld\n",NumOfEvents);
+  cout << "processed events:  " << NumOfEvents << "/" << NumOfEvents << endl;
 
   return 0;
 }
@@ -262,9 +287,9 @@ int Calibration::Finish()
 {
   cout << " this is Calibration::Finish" << endl;
   mFile_OutPut->cd();
-  for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
+  for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
   {
-    for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
+    for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
     {
       h_mTDC[i_pixel_x][i_pixel_y]->Write();
     }
@@ -272,7 +297,11 @@ int Calibration::Finish()
   h_mRingImage->Write();
   h_mRingImage_DisPlay->Write();
   h_mRingImage_DisPlay_beam->Write();
+  h_mNumOfPhotons->Write();
   p_mNumOfPhotons->Write();
+
+  writeRingFinder();
+
   mFile_OutPut->Close();
 
   return 0;
@@ -294,3 +323,192 @@ void Calibration::ResetEventData()
 }
 
 //--------------------------------------------------------------------
+
+int Calibration::initRingFinder()
+{
+  h_mRingFinder = new TH2D("h_mRingFinder","h_mRingFinder",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
+  h_mHoughTransform = new TH3D("h_mHoughTransform","h_mHoughTransform",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,1.0*mRICH::mHalfWidth);
+
+  clearRingFinder();
+
+  h_mQA_HT = new TH3D("h_mQA_HT","h_mQA_HT",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
+  h_mRingFinder_Display = new TH2D("h_mRingFinder_Display","h_mRingFinder_Display",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
+  h_mRingFinder_SingleEvent = new TH2D("h_mRingFinder_SingleEvent","h_mRingFinder_SingleEvent",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
+
+  h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
+  h_mNumOfCherenkovPhotons = new TH2D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",100,-0.5,99.5,100,-0.5,99.5);
+
+  return 1;
+}
+
+int Calibration::clearRingFinder()
+{
+  h_mRingFinder->Reset();
+  mXPixelMap.clear();
+  mYPixelMap.clear();
+
+  h_mHoughTransform->Reset();
+
+  return 1;
+}
+
+int Calibration::writeRingFinder()
+{
+  h_mQA_HT->Write();
+  h_mRingFinder_Display->Write();
+  h_mRingFinder_SingleEvent->Write();
+  h_mCherenkovRing->Write();
+  h_mNumOfCherenkovPhotons->Write();
+
+  return 1;
+}
+
+bool Calibration::findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov)
+{
+  // check if 3 hit points are at same position or collinear
+  if(isSamePosition(firstHit,secondHit,thirdHit) || isCollinear(firstHit,secondHit,thirdHit) ) return false;
+
+  double a = firstHit.X() - secondHit.X(); // a = x1 - x2
+  double b = firstHit.Y() - secondHit.Y(); // b = y1 - y2
+  double c = firstHit.X() - thirdHit.X();  // c = x1 - x3
+  double d = firstHit.Y() - thirdHit.Y();  // d = y1 - y3
+  double e = ((firstHit.X()*firstHit.X() - secondHit.X()*secondHit.X()) + (firstHit.Y()*firstHit.Y() - secondHit.Y()*secondHit.Y()))/2.0;  //e = ((x1*x1 - x2*x2) + (y1*y1 - y2*y2))/2.0;
+  double f = ((firstHit.X()*firstHit.X() - thirdHit.X()*thirdHit.X()) + (firstHit.Y()*firstHit.Y() - thirdHit.Y()*thirdHit.Y()))/2.0;  //f = ((x1*x1 - x3*x3) + (y1*y1 - y3*y3))/2.0;
+  double det = b*c - a*d;
+
+  x_Cherenkov = -(d*e - b*f)/det;
+  y_Cherenkov = -(a*f - c*e)/det;
+  r_Cherenkov = TMath::Sqrt((x_Cherenkov-firstHit.X())*(x_Cherenkov-firstHit.X())+(y_Cherenkov-firstHit.Y())*(y_Cherenkov-firstHit.Y()));
+
+  return true;
+}
+
+bool Calibration::isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit)
+{
+  if(TMath::Abs(firstHit.X()-secondHit.X()) < 1e-5 && TMath::Abs(firstHit.Y()-secondHit.Y()) < 1e-5) return true;
+  if(TMath::Abs(firstHit.X()-thirdHit.X())  < 1e-5 && TMath::Abs(firstHit.Y()-thirdHit.Y())  < 1e-5) return true;
+  if(TMath::Abs(secondHit.X()-thirdHit.X()) < 1e-5 && TMath::Abs(secondHit.Y()-thirdHit.Y()) < 1e-5) return true;
+  if(firstHit.Mod() > 1000.0 || secondHit.Mod() > 1000.0 || thirdHit.Mod() > 1000.0) return true; // not proper initialized
+
+  return false;
+}
+
+bool Calibration::isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit)
+{
+  if(TMath::Abs(firstHit.X()-secondHit.X()) < 1e-5 && TMath::Abs(firstHit.X()-thirdHit.X()) < 1e-5) return true;
+  if(TMath::Abs(firstHit.Y()-secondHit.Y()) < 1e-5 && TMath::Abs(firstHit.Y()-thirdHit.Y()) < 1e-5) return true;
+
+  double slope12 = (firstHit.Y()-secondHit.Y())/(firstHit.X()-secondHit.X());
+  double slope13 = (firstHit.Y()-thirdHit.Y())/(firstHit.X()-thirdHit.X());
+
+  if(TMath::Abs(slope12-slope13) < 1e-5) return true;
+
+  return false;
+}
+
+bool Calibration::isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform)
+{
+  double x_diff = photonHit.X() - x_HoughTransform;
+  double y_diff = photonHit.Y() - y_HoughTransform;
+  double r_diff = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff) - r_HoughTransform;
+
+  double sigma_x = 1.5;
+  double sigma_y = 1.5;
+  double sigma_r = TMath::Sqrt(sigma_x*sigma_x+sigma_y*sigma_y);
+
+  if( TMath::Abs(r_diff) < sigma_r) return true;
+
+  return false;
+}
+
+int Calibration::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector<int> xPixel, std::vector<int> yPixel)
+{
+  int NumOfPhotons = numOfPhotons;
+  if(NumOfPhotons < 3) return 0;
+  float NumOfCombinations = TMath::Factorial(NumOfPhotons)/(TMath::Factorial(3)*TMath::Factorial(NumOfPhotons-3));
+  // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfCombinations = " << NumOfCombinations << endl;
+  for(int i_hit_1st = 0; i_hit_1st < NumOfPhotons-2; ++i_hit_1st)
+  {
+    TVector2 firstHit(-999.9,-999.9);
+    double x_firstHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit_1st]);
+    double y_firstHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit_1st]);
+    firstHit.Set(x_firstHit,y_firstHit);
+    for(int i_hit_2nd = i_hit_1st+1; i_hit_2nd < NumOfPhotons-1; ++i_hit_2nd)
+    {
+      TVector2 secondHit(-999.9,-999.9);
+      double x_secondHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit_2nd]);
+      double y_secondHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit_2nd]);
+      secondHit.Set(x_secondHit,y_secondHit);
+      for(int i_hit_3rd = i_hit_2nd+1; i_hit_3rd < NumOfPhotons; ++i_hit_3rd)
+      {
+	TVector2 thirdHit(-999.9,-999.9);
+	double x_thirdHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit_3rd]);
+	double y_thirdHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit_3rd]);
+	thirdHit.Set(x_thirdHit,y_thirdHit);
+
+	double x_Cherenkov = -999.9;
+	double y_Cherenkov = -999.9;
+	double r_Cherenkov = -999.9;
+
+	bool ringStatus = findRing(firstHit,secondHit,thirdHit, x_Cherenkov, y_Cherenkov, r_Cherenkov);
+	if(ringStatus) 
+	{
+	  h_mQA_HT->Fill(x_Cherenkov,y_Cherenkov,r_Cherenkov);
+	  h_mHoughTransform->Fill(x_Cherenkov,y_Cherenkov,r_Cherenkov);
+	  // cout << "firstHit.x = " << firstHit.X() << ", firstHit.y = " << firstHit.Y() << endl;
+	  // cout << "secondHit.x = " << secondHit.X() << ", secondHit.y = " << secondHit.Y() << endl;
+	  // cout << "thirdHit.x = " << thirdHit.X() << ", thirdHit.y = " << thirdHit.Y() << endl;
+	  // cout << "x_Cherenkov = " << x_Cherenkov << ", y_Cherenkov = " << y_Cherenkov << ", r_Cherenkov = " << r_Cherenkov << endl;
+	  // cout << endl;
+	}
+      }
+    }
+  }
+
+  int hBin_x = -1;
+  int hBin_y = -1;
+  int hBin_r = -1;
+  int NumOfPhotonsOnRing = 0;
+
+  int globalBin = h_mHoughTransform->GetMaximumBin(hBin_x,hBin_y,hBin_r);
+  int maxVote = h_mHoughTransform->GetBinContent(globalBin);
+  if(globalBin > 0)
+  {
+    double x_HoughTransform = h_mHoughTransform->GetXaxis()->GetBinCenter(hBin_x);
+    double y_HoughTransform = h_mHoughTransform->GetYaxis()->GetBinCenter(hBin_y);
+    double r_HoughTransform = h_mHoughTransform->GetZaxis()->GetBinCenter(hBin_r);
+    h_mCherenkovRing->Fill(x_HoughTransform,y_HoughTransform,r_HoughTransform);
+    // cout << "hBin_x = " << hBin_x << ", hBin_y = " << hBin_y << ", hBin_r = " << hBin_r << ", globalBin = " << globalBin << ", with maxVote = " << maxVote << endl;
+    // cout << "x_HoughTransform = " << x_HoughTransform << ", y_HoughTransform = " << y_HoughTransform << ", r_HoughTransform = " << r_HoughTransform << endl;
+
+    for(int i_hit = 0; i_hit < NumOfPhotons; ++i_hit)
+    {
+      TVector2 photonHit;
+      double x_photonHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_hit]);
+      double y_photonHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_hit]);
+      photonHit.Set(x_photonHit,y_photonHit);
+      if( isOnRing(photonHit,x_HoughTransform,y_HoughTransform,r_HoughTransform) )
+      {
+	NumOfPhotonsOnRing++;
+      }
+    }
+  }
+  // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfPhotonsOnRing = " << NumOfPhotonsOnRing << endl;
+  h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing);
+
+  return 0;
+}
+
+float Calibration::findPixelCoord(int pixel)
+{
+  float out_coord = -999.9;
+
+  if(pixel < 0 || pixel > 32) return -999.9; // out of photon sensor
+
+  float out_low = mRICH::mPixels[pixel];
+  float out_high = mRICH::mPixels[pixel+1];
+
+  out_coord = 0.5*(out_low+out_high);
+
+  return out_coord;
+}

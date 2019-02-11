@@ -1,6 +1,6 @@
 #include "string"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
@@ -22,14 +22,14 @@ void plotQA_MPPC_TDC(const int runID = 649)
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTDC_run%d.root",mode.c_str(),runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
-  TH2F *h_mRingImage = (TH2F*)File_InPut->Get("h_mRingImage")->Clone();
-  TH1F *h_mTDC[33][33]; // 0 for x-pixel | 1 for y-pixel
+  TH2D *h_mRingImage = (TH2D*)File_InPut->Get("h_mRingImage")->Clone();
+  TH1D *h_mTDC[33][33]; // 0 for x-pixel | 1 for y-pixel
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
     {
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
-      h_mTDC[i_pixel_x][i_pixel_y] = (TH1F*)File_InPut->Get(HistName.c_str())->Clone();
+      h_mTDC[i_pixel_x][i_pixel_y] = (TH1D*)File_InPut->Get(HistName.c_str())->Clone();
     }
   }
 

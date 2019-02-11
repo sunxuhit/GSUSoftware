@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "TObject.h"
+#include <TObject.h>
 #include <TFile.h>
 #include <TChain.h>
 #include <TTree.h>
@@ -59,7 +59,7 @@ class gemcCalibration : public TObject
     int initRingFinder();
     int writeRingFinder();
     int clearRingFinder(); 
-    int HoughTransform(TH1D *h_NumOfPhotons, TH2D *h_PhotonDist, std::vector<int> xPixel, std::vector<int> yPixel);
+    int HoughTransform(int numOfPhotons, TH2D *h_PhotonDist, std::vector<int> xPixel, std::vector<int> yPixel);
     bool findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov);
     bool isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
     bool isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
@@ -76,9 +76,10 @@ class gemcCalibration : public TObject
 
     TH1D *h_mNumOfEvents;
     TH2D *h_mPhotonDist;
+    TH2D *h_mPhotonDist_SingleEvent; // single event display
     TH2D *h_mPhotonGenerated;
     TH1D *h_mWaveLength;
-    TH1D *h_mNumOfPhotonsDist;
+    TH1D *h_mNumOfPhotons;
     TProfile *p_mNumOfPhotons;
 
     TF1 *f_mGaus;
@@ -89,13 +90,12 @@ class gemcCalibration : public TObject
     std::vector<int> mXPixelMap; // corresponding binX number for each photon hit
     std::vector<int> mYPixelMap; // corresponding binY number for each photon hit
 
-    TH1D *h_mNumOfPhotons; // number of total photons in each event 
     TH2D *h_mRingFinder; // x: photon out_x | y: photon out_y with detector effect
     TH3D *h_mHoughTransform; // x | y | R
     TH3D *h_mQA_HT; // QA for hough transform
 
     TH3D *h_mCherenkovRing; // x | y | R
-    TH2D *h_mNumOfCherenkovPhotons; // 
+    TH2D *h_mNumOfCherenkovPhotons;
 
     // chain for generated protons
     TChain *mChainInPut_Events;

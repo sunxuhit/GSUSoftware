@@ -1,6 +1,6 @@
 #include "string"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
@@ -43,6 +43,7 @@ int GetPixel_mRICH(int fiber, int asic, int maroc_channel);
 void processQA_MPPC_TDC(const int runID = 649)
 {
   int debug = 1;
+  const string mode = "Calibration";
   float tdc_Start = 490;
   float tdc_Stop  = 590;
 
@@ -51,14 +52,14 @@ void processQA_MPPC_TDC(const int runID = 649)
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   InitDisplay_mRICH();
-  TH2F *h_mRingImage = new TH2F("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  TH1F *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
+  TH2D *h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH1D *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
     {
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
-      h_mTDC[i_pixel_x][i_pixel_y] = new TH1F(HistName.c_str(),HistName.c_str(),1500,-0.5,1499.5);
+      h_mTDC[i_pixel_x][i_pixel_y] = new TH1D(HistName.c_str(),HistName.c_str(),1500,-0.5,1499.5);
     }
   }
 
@@ -118,7 +119,7 @@ void processQA_MPPC_TDC(const int runID = 649)
   }
   printf("Processed events %d\n",NumOfEvents);
 
-  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/sipmTDC_run%d.root",runID);
+  string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTDC_run%d.root",mode.c_str(),runID);
   TFile *File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
   h_mRingImage->Write();

@@ -4,7 +4,7 @@
 
 R__LOAD_LIBRARY(/Users/xusun/WorkSpace/EICPID/BeamTest_mRICH/lib/libCalibration.dylib)
 
-int genCalibration(std::string detector = "PMT")
+int genCalibration(std::string detector = "MPPC")
 {
   std::cout << "gSystem::Load <- libCalibration.dylib" << endl;
 

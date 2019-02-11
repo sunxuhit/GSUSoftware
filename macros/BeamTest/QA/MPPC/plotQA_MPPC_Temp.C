@@ -1,8 +1,7 @@
 #include "TFile.h"
 #include "TString.h"
 #include "TTree.h"
-#include "TH2F.h"
-#include "TH1F.h"
+#include "TH1D.h"
 #include "TCanvas.h"
 #include "TLegend.h"
 using namespace std;
@@ -12,27 +11,27 @@ void plotQA_MPPC_Temp()
   string input_30 = "/home/xusun/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run649.root";
   TFile *File_30 = TFile::Open(input_30.c_str());
   assert(File_30);
-  TH1F *h_tdc_30 = (TH1F*)File_30->Get("h_mTDC_pixelX_23_pixelY_7");
+  TH1D *h_tdc_30 = (TH1D*)File_30->Get("h_mTDC_pixelX_23_pixelY_7");
 
   string input_20 = "/home/xusun/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run639.root";
   TFile *File_20 = TFile::Open(input_20.c_str());
   assert(File_20);
-  TH1F *h_tdc_20 = (TH1F*)File_20->Get("h_mTDC_pixelX_23_pixelY_7");
+  TH1D *h_tdc_20 = (TH1D*)File_20->Get("h_mTDC_pixelX_23_pixelY_7");
 
   string input_10 = "/home/xusun/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run674.root";
   TFile *File_10 = TFile::Open(input_10.c_str());
   assert(File_10);
-  TH1F *h_tdc_10 = (TH1F*)File_10->Get("h_mTDC_pixelX_23_pixelY_7");
+  TH1D *h_tdc_10 = (TH1D*)File_10->Get("h_mTDC_pixelX_23_pixelY_7");
 
   string input_0 = "/home/xusun/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run686.root";
   TFile *File_0 = TFile::Open(input_0.c_str());
   assert(File_0);
-  TH1F *h_tdc_0 = (TH1F*)File_0->Get("h_mTDC_pixelX_23_pixelY_7");
+  TH1D *h_tdc_0 = (TH1D*)File_0->Get("h_mTDC_pixelX_23_pixelY_7");
 
   string input_room = "/home/xusun/Data/mRICH/BeamTest/QA/MPPC/sipmTDC_run697.root";
   TFile *File_room  = TFile::Open(input_room.c_str());
   assert(File_room);
-  TH1F *h_tdc_room = (TH1F*)File_room->Get("h_mTDC_pixelX_23_pixelY_7");
+  TH1D *h_tdc_room = (TH1D*)File_room->Get("h_mTDC_pixelX_23_pixelY_7");
 
 
   TCanvas *c_MPPC_temp = new TCanvas("c_MPPC_temp","c_MPPC_temp",10,10,800,800);

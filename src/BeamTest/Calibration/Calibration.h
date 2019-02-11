@@ -2,16 +2,21 @@
 #define Calibration_h
 
 #include <string>
+#include <vector>
 
-#include "TObject.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TChain.h"
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TProfile.h"
+#include <TObject.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TChain.h>
+#include <TH1D.h>
+#include <TH2D.h>
+#include <TH3D.h>
+#include <TProfile.h>
+#include <TVector2.h>
 
-#include "../PixelMap/PixelMap.h"
+#include "../PixelMap/mRICH.h"
+
+class PixelMap;
 
 class Calibration : public TObject
 {
@@ -31,28 +36,40 @@ class Calibration : public TObject
     }
 
     int Init();
-    int InitChain();
-    int InitTdcCut();
+    int initChain();
+    int initTdcCut();
 
     int Make();
     int Finish();
 
+    // ring finder
+    int initRingFinder();
+    int writeRingFinder();
+    int clearRingFinder(); 
+    int HoughTransform(int numOfPhotons, TH2D *h_PhotonDist, std::vector<int> xPixel, std::vector<int> yPixel);
+    bool findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov);
+    bool isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
+    bool isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
+    bool isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform);
+    float findPixelCoord(int pixel); // return correspoding pixel coordinate
+
   private:
     PixelMap *pixel_map;
-    string mDet, mHome;
+    std::string mDet, mHome;
 
     bool is_pmt;
 
-    string mOutPutFile;
+    std::string mOutPutFile;
     TFile *mFile_OutPut;
 
-    static int const NumOfPixel = 33;
+    // static int const mNumOfPixels = 33;
     float mTdc_Start;
     float mTdc_Stop;
-    TH1F *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
-    TH2F *h_mRingImage;
-    TH2F *h_mRingImage_DisPlay;
-    TH2F *h_mRingImage_DisPlay_beam;
+    TH1D *h_mTDC[mRICH::mNumOfPixels][mRICH::mNumOfPixels]; // 0 for x-pixel | 1 for y-pixel
+    TH2D *h_mRingImage;
+    TH2D *h_mRingImage_DisPlay;
+    TH2D *h_mRingImage_DisPlay_beam;
+    TH1D *h_mNumOfPhotons;
     TProfile *p_mNumOfPhotons;
 
     static const int MAXEDGE = 100000;
@@ -71,6 +88,19 @@ class Calibration : public TObject
     unsigned int tFiber[MAXEDGE];
 
     void ResetEventData();
+
+    // ring finder
+    std::vector<int> mXPixelMap; // corresponding binX number for each photon hit
+    std::vector<int> mYPixelMap; // corresponding binY number for each photon hit
+
+    TH2D *h_mRingFinder; // x: photon out_x | y: photon out_y with detector effect
+    TH3D *h_mHoughTransform; // x | y | R
+    TH3D *h_mQA_HT; // QA for hough transform
+    TH2D *h_mRingFinder_Display; // QA for ring finder
+    TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
+
+    TH3D *h_mCherenkovRing; // x | y | R
+    TH2D *h_mNumOfCherenkovPhotons;
 
     ClassDef(Calibration,1)
 };

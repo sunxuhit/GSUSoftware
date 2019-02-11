@@ -1,6 +1,6 @@
 #include "string"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TFile.h"
 #include "TCanvas.h"
 #include "../../../draw.h"
@@ -11,9 +11,9 @@ void plotQA_PMT_TdcCut()
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/%s/richTimeCuts.root",mode.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
-  TH2F *h_mTimeCuts = (TH2F*)File_InPut->Get("h_mTimeCuts")->Clone();
-  TH1F *h_mTdcStart = (TH1F*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
-  TH1F *h_mTdcStop  = (TH1F*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
+  TH2D *h_mTimeCuts = (TH2D*)File_InPut->Get("h_mTimeCuts")->Clone();
+  TH1D *h_mTdcStart = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
+  TH1D *h_mTdcStop  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
 
   TCanvas *c_TimeCuts = new TCanvas("c_TimeCuts","c_TimeCuts",10,10,1200,800);
   c_TimeCuts->Divide(3,2);

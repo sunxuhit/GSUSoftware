@@ -1,6 +1,6 @@
 #include "string"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
@@ -52,16 +52,16 @@ void plotQA_MPPC_TimeCuts(const int runID = 649)
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTDC_run%d.root",mode.c_str(),runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
-  TH2F *h_ratio_all = new TH2F("h_ratio_all","h_ratio_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  TH2F *h_ratio_cut = new TH2F("h_ratio_cut","h_ratio_cut",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_ratio_all = new TH2D("h_ratio_all","h_ratio_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_ratio_cut = new TH2D("h_ratio_cut","h_ratio_cut",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
 
-  TH2F *h_mean_all = new TH2F("h_mean_all","h_mean_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  TH2F *h_mean_cut = new TH2F("h_mean_cut","h_mean_cut",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mean_all = new TH2D("h_mean_all","h_mean_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mean_cut = new TH2D("h_mean_cut","h_mean_cut",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
 
-  TH2F *h_sigma_all = new TH2F("h_sigma_all","h_sigma_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  TH2F *h_sigma_cut = new TH2F("h_sigma_cut","h_sigma_cut",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_sigma_all = new TH2D("h_sigma_all","h_sigma_all",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_sigma_cut = new TH2D("h_sigma_cut","h_sigma_cut",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
 
-  TH1F *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
+  TH1D *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
   float mean_tdc = 0.0;
   float sigma_tdc = 0.0;
   int counter_tdc = 0;
@@ -71,7 +71,7 @@ void plotQA_MPPC_TimeCuts(const int runID = 649)
     {
       // if( !(i_pixel_x > 12 && i_pixel_x < 20 && i_pixel_y > 12 && i_pixel_y < 20) )  continue;
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
-      h_mTDC[i_pixel_x][i_pixel_y] = (TH1F*)File_InPut->Get(HistName.c_str())->Clone();
+      h_mTDC[i_pixel_x][i_pixel_y] = (TH1D*)File_InPut->Get(HistName.c_str())->Clone();
       float counts_tot = h_mTDC[i_pixel_x][i_pixel_y]->Integral();
 
       if(counts_tot < 0.5) continue;
@@ -239,7 +239,7 @@ void plotQA_MPPC_TimeCuts(const int runID = 649)
   string c_timecut = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_TimeCuts_MPPC_%d.eps",mode.c_str(),runID);
   c_TimeCut->SaveAs(c_timecut.c_str());
 
-  TH2F *h_mTimeCuts = new TH2F("h_mTimeCuts","h_mTimeCuts",3,-0.5,2.5,800,-0.5,799.5);
+  TH2D *h_mTimeCuts = new TH2D("h_mTimeCuts","h_mTimeCuts",3,-0.5,2.5,800,-0.5,799.5);
   h_mTimeCuts->SetBinContent(1,runID,floor(mean_tdc_Start));
   h_mTimeCuts->SetBinContent(2,runID,ceil(mean_tdc_Stop));
   h_mTimeCuts->SetBinContent(3,runID,runID);
