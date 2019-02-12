@@ -100,7 +100,7 @@ class Calibration : public TObject
     TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
 
     TH3D *h_mCherenkovRing; // x | y | R
-    TH2D *h_mNumOfCherenkovPhotons;
+    TH3D *h_mNumOfCherenkovPhotons; // number of photons | number of photons on ring | ring radius
 
     ClassDef(Calibration,1)
 };

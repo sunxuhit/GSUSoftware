@@ -6,10 +6,12 @@
 #include "TMath.h"
 #include "TF1.h"
 #include "TCanvas.h"
+#include "TStyle.h"
 #include "../../../draw.h"
 
 void plotQA_PMT_TimeCuts(const int runID = 182)
 {
+  gStyle->SetPalette(kBrownCyan);
   const string mode = "Calibration";
   float tdc_Start = 2000.0;
   float tdc_Stop  = 2050.0;

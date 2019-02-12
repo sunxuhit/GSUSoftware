@@ -95,7 +95,7 @@ class gemcCalibration : public TObject
     TH3D *h_mQA_HT; // QA for hough transform
 
     TH3D *h_mCherenkovRing; // x | y | R
-    TH2D *h_mNumOfCherenkovPhotons;
+    TH3D *h_mNumOfCherenkovPhotons;
 
     // chain for generated protons
     TChain *mChainInPut_Events;

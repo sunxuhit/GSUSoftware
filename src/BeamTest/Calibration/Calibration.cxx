@@ -255,8 +255,8 @@ int Calibration::Make()
 	  {
 	    h_mRingImage_DisPlay->Fill(pixel_x,pixel_y);
 	  }
-	  NumOfPhotons++;
 	}
+	NumOfPhotons++;
 
 	// ring finder
 	float out_x = findPixelCoord(pixel_x);
@@ -336,7 +336,7 @@ int Calibration::initRingFinder()
   h_mRingFinder_SingleEvent = new TH2D("h_mRingFinder_SingleEvent","h_mRingFinder_SingleEvent",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
   h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
-  h_mNumOfCherenkovPhotons = new TH2D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",100,-0.5,99.5,100,-0.5,99.5);
+  h_mNumOfCherenkovPhotons = new TH3D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",50,-0.5,49.5,50,-0.5,49.5,105,0,2.0*mRICH::mHalfWidth);
 
   return 1;
 }
@@ -492,9 +492,9 @@ int Calibration::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vecto
 	NumOfPhotonsOnRing++;
       }
     }
+    // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfPhotonsOnRing = " << NumOfPhotonsOnRing << endl;
+    h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing,r_HoughTransform);
   }
-  // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfPhotonsOnRing = " << NumOfPhotonsOnRing << endl;
-  h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing);
 
   return 0;
 }
