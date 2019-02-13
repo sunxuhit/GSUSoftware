@@ -16,7 +16,7 @@ void plotQA_PMT_TimeCuts(const int runID = 182)
   float tdc_Start = 2000.0;
   float tdc_Stop  = 2050.0;
 
-  float ratio_cut = 1.8; // run dependent
+  float ratio_cut = 1.9; // run dependent
   int x_OnRing = 10;
   int y_OnRing = 5;
   int x_OffRing = 20;
@@ -266,8 +266,11 @@ void plotQA_PMT_TimeCuts(const int runID = 182)
   c_TimeCut->SaveAs(c_timecut.c_str());
 
   TH2D *h_mTimeCuts = new TH2D("h_mTimeCuts","h_mTimeCuts",3,-0.5,2.5,800,-0.5,799.5);
-  h_mTimeCuts->SetBinContent(1,runID,floor(mean_tdc_Start));
-  h_mTimeCuts->SetBinContent(2,runID,ceil(mean_tdc_Stop));
+  /* h_mTimeCuts->SetBinContent(1,runID,floor(mean_tdc_Start)); */
+  /* h_mTimeCuts->SetBinContent(2,runID,ceil(mean_tdc_Stop)); */
+  /* h_mTimeCuts->SetBinContent(3,runID,runID); */
+  h_mTimeCuts->SetBinContent(1,runID,mean_tdc/counter_tdc);
+  h_mTimeCuts->SetBinContent(2,runID,sigma_tdc/counter_tdc);
   h_mTimeCuts->SetBinContent(3,runID,runID);
   h_mTimeCuts->GetXaxis()->SetBinLabel(1,"tdc start");
   h_mTimeCuts->GetXaxis()->SetBinLabel(2,"tdc stop");

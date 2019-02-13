@@ -91,5 +91,5 @@ void plotQA_radius()
 
   cout << "120 GeV proton radiaus is: " << f_radius[2]->Eval(120.0) << endl;
 
-  c_play->SaveAs("../figures/c_radius.eps");
+  c_play->SaveAs("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/c_radius.eps");
 }

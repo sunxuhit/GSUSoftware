@@ -136,34 +136,50 @@ int Calibration::initTdcCut()
     inputfile = inputdir + "sipmTimeCuts.root";
   }
 
-  float NumOfRuns = 0.0;
-  float SumTdcStart = 0.0;
-  float SumTdcStop  = 0.0;
+  float NumOfRuns   = 0.0;
+  float SumTdcMean  = 0.0;
+  float SumTdcSigma = 0.0;
+  // float SumTdcStart = 0.0;
+  // float SumTdcStop  = 0.0;
 
   TFile *File_mTDC = TFile::Open(inputfile.c_str());
   TH2D *h_mTimeCuts = (TH2D*)File_mTDC->Get("h_mTimeCuts")->Clone();
-  TH1D *h_mTdcStart = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
-  TH1D *h_mTdcStop  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
+  TH1D *h_mTdcMean  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcMean",1,1)->Clone();
+  TH1D *h_mTdcSigma = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcSigma",2,2)->Clone();
   TH1D *h_mRunId    = (TH1D*)h_mTimeCuts->ProjectionY("h_mRunId",3,3)->Clone();
+  // TH1D *h_mTdcStart = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
+  // TH1D *h_mTdcStop  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
   for(int i_bin = 1; i_bin < h_mRunId->GetNbinsX(); ++i_bin)
   {
     float runId     = h_mRunId->GetBinContent(i_bin);
-    float tdc_start = h_mTdcStart->GetBinContent(i_bin);
-    float tdc_stop  = h_mTdcStop->GetBinContent(i_bin);
+    float tdc_mean  = h_mTdcMean->GetBinContent(i_bin);
+    float tdc_sigma = h_mTdcSigma->GetBinContent(i_bin);
+    // float tdc_start = h_mTdcStart->GetBinContent(i_bin);
+    // float tdc_stop  = h_mTdcStop->GetBinContent(i_bin);
     if(runId > 0)
     {
       NumOfRuns++;
-      SumTdcStart += tdc_start;
-      SumTdcStop  += tdc_stop;
-      cout << "runId = " << runId << ", tdc_start = " << tdc_start << ", tdc_stop = " << tdc_stop << ", NumOfRuns = " << NumOfRuns << endl;
+      SumTdcMean  += tdc_mean;
+      SumTdcSigma += tdc_sigma;
+      cout << "runId = " << runId << ", tdc_mean = " << tdc_mean << ", tdc_sigma = " << tdc_sigma << ", NumOfRuns = " << NumOfRuns << endl;
+      // SumTdcStart += tdc_start;
+      // SumTdcStop  += tdc_stop;
+      // cout << "runId = " << runId << ", tdc_start = " << tdc_start << ", tdc_stop = " << tdc_stop << ", NumOfRuns = " << NumOfRuns << endl;
     }
   }
   File_mTDC->Close();
 
-  mTdc_Start = floor(SumTdcStart/NumOfRuns);
-  mTdc_Stop  = ceil(SumTdcStop/NumOfRuns);
+  float nSigma = 2.0;
+  float mean_tdc_Start = SumTdcMean/NumOfRuns - nSigma*SumTdcSigma/NumOfRuns; 
+  float mean_tdc_Stop  = SumTdcMean/NumOfRuns + nSigma*SumTdcSigma/NumOfRuns;
 
-  cout << "mean_tdc_Start = " << SumTdcStart/NumOfRuns << ", mean_tdc_Stop = " << SumTdcStop/NumOfRuns << endl;
+  mTdc_Start = floor(mean_tdc_Start);
+  mTdc_Stop  = ceil(mean_tdc_Stop);
+  // mTdc_Start = floor(SumTdcStart/NumOfRuns);
+  // mTdc_Stop  = ceil(SumTdcStop/NumOfRuns);
+
+  cout << "tdc_mean = " << SumTdcMean/NumOfRuns << ", tdc_sigma = " << SumTdcSigma/NumOfRuns << ", nSigma = " << nSigma << endl;
+  cout << "mean_tdc_Start = " << mean_tdc_Start  << ", mean_tdc_Stop = " << mean_tdc_Stop << endl;
   cout << "mTdc_Start set to " << mTdc_Start << " and mTdc_Stop set to " << mTdc_Stop << endl;
 
   return 0;
