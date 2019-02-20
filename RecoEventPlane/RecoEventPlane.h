@@ -10,6 +10,7 @@ class BbcGeo;
 class TTree;
 class TFile;
 class TH1F;
+class TH2F;
 
 class RecoEventPlane: public SubsysReco {
 public:
@@ -44,13 +45,29 @@ private:
 	//! Eval Tree Output
 	std::string _eval_file_name;
 	TFile* _fout;
-	TTree* _T;
-	float _mass;
+
+	// vertex QA
+	TH1F *h_mVtZ;
+	TH2F *h_mVtR;
+	TH1F *h_mVtZ_Bbc;
+	TH1F *h_mVtZ_Zdc;
 
 	BbcCalib *bbccalib;
 	BbcGeo *bbcgeo;
-	TH1F *h_mEP_BbcSouth;
-	TH1F *h_mEP_BbcNorth;
+
+	TH1F *h_mAdc_Bbc[128]; // raw adc distribution
+	TH1F *h_mCharge_Bbc[128]; // (adc-ped)*gain_adc/gain_pmt
+
+	TH2F *h_mGeoXY_BbcSouth; // BBC XY charge map for south
+	TH1F *h_mGeoZ_BbcSouth; // BBC Z distribution map for south
+
+	TH2F *h_mGeoXY_BbcNorth; // BBC 2-D charge map for north 
+	TH1F *h_mGeoZ_BbcNorth; // BBC Z distribution map for south
+
+	TH1F *h_mEP1st_BbcSouth;
+	TH1F *h_mEP1st_BbcNorth;
+	TH1F *h_mEP2nd_BbcSouth;
+	TH1F *h_mEP2nd_BbcNorth;
 };
 
 #endif //__H_RecoEventPlane_H__
