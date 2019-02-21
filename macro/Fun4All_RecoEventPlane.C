@@ -1,5 +1,5 @@
 void Fun4All_RecoEventPlane(
-		int nEvents = 10000, //
+		int mode = 1, int nEvents = 50000, //
 		char *input_file = "AuAu14_BBCEP_test.list" //
 		)
 {
@@ -9,6 +9,9 @@ void Fun4All_RecoEventPlane(
 	se->Verbosity(0);
 
 	RecoEventPlane *ana = new RecoEventPlane();
+	ana->set_ana_mode(mode);
+	if(mode == 0) ana->set_eval_file_name("RawEP.root");
+	if(mode == 1) ana->set_eval_file_name("ReCenterEP.root");
 
 	se->registerSubsystem(ana);
 
