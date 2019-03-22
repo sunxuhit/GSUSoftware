@@ -36,6 +36,9 @@
 #include <TMath.h>
 #include <TString.h>
 
+//Utility Class
+#include "RecoEPHistoManager.h"
+
 using namespace std;
 
 RecoEventPlane::RecoEventPlane(const char*outputfile)
@@ -66,6 +69,8 @@ RecoEventPlane::RecoEventPlane(const char*outputfile)
   mMode = 0;
   File_mOutPut = NULL; // output file
   mOutPutFile = outputfile;
+
+  mRecoEPHistoManager = NULL;
 }
 
 int RecoEventPlane::Init(PHCompositeNode *topNode) 
@@ -93,9 +98,10 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
   File_mOutPut = TFile::Open(mOutPutFile.data(), "recreate");
   if(!File_mOutPut) cout<<"Cann't create " << mOutPutFile.data() <<endl;
 
-  initHistoRunQA();
-
   mNumOfEvents = 0;
+
+  mRecoEPHistoManager = new RecoEPHistoManager();
+  mRecoEPHistoManager->initQA_Global();
 
   return EVENT_OK;
 }
@@ -141,15 +147,12 @@ int RecoEventPlane::process_event(PHCompositeNode *topNode)
   float zdc1 = mPHGlobal->getZdcEnergyN();
   float zdc2 = mPHGlobal->getZdcEnergyS();
   float zdcz = mPHGlobal->getZdcZVertex();
-  h_mVtZ_Zdc->Fill(zdcz);
   bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
   if (!isZDCOK) return DISCARDEVENT;
 
   float bbcz = mPHGlobal->getBbcZVertex();
-  h_mVtZ_Bbc->Fill(bbcz);
-
   float cent = mPHGlobal->getCentrality();
-  h_mCentrality->Fill(cent);
+  mRecoEPHistoManager->fillQA_Global(zdcz,bbcz,cent);
 
   // if ( bbcz >= bbczcut_val || bbcz <= -(bbczcut_val)) return DISCARDEVENT;
 
@@ -330,7 +333,7 @@ int RecoEventPlane::process_event(PHCompositeNode *topNode)
 int RecoEventPlane::End(PHCompositeNode *topNode) 
 {
   File_mOutPut->cd();
-  writeHistoRunQA();
+  mRecoEPHistoManager->writeQA_Global();
   /*
   if(mMode == 0)
   {
@@ -429,162 +432,4 @@ int RecoEventPlane::getNodes(PHCompositeNode *topNode)
   }
 
   return EVENT_OK;
-}
-
-int RecoEventPlane::initHistoRunQA()
-{
-  h_mVtZ_Bbc = new TH1F("h_mVtZ_Bbc","h_mVtZ_Bbc",201,-100.5,100.5);
-  h_mVtZ_Zdc = new TH1F("h_mVtZ_Zdc","h_mVtZ_Zdc",201,-100.5,100.5);
-  h_mCentrality = new TH1F("h_mCentrality","h_mCentrality",101,0.5,100.5);
-
-  return 0;
-
-  /*
-  //-------------------------------------------------------------------------------
-  // BBC QA
-  for(int i_pmt = 0; i_pmt < 128; ++i_pmt)
-  {
-    string HistName;
-
-    HistName = Form("h_mAdc_Bbc_%d",i_pmt);
-    h_mAdc_Bbc[i_pmt] = new TH1F(HistName.c_str(),HistName.c_str(),5000,0,10000);
-
-    HistName = Form("h_mCharge_Bbc_%d",i_pmt);
-    h_mCharge_Bbc[i_pmt] = new TH1F(HistName.c_str(),HistName.c_str(),100,0,50);
-  }
-
-  h_mGeoXY_BbcSouth = new TH2F("h_mGeoXY_BbcSouth","h_mGeoXY_BbcSouth",40,-200.0,200.0,40,-200.0,200.0);
-  h_mGeoZ_BbcSouth  = new TH1F("h_mGeoZ_BbcSouth","h_mGeoZ_BbcSouth",1000,-2000,2000);
-
-  h_mGeoXY_BbcNorth = new TH2F("h_mGeoXY_BbcNorth","h_mGeoXY_BbcNorth",40,-200.0,200.0,40,-200.0,200.0);
-  h_mGeoZ_BbcNorth  = new TH1F("h_mGeoZ_BbcNorth","h_mGeoZ_BbcNorth",1000,-2000,2000);
-  //-------------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------------
-  h_mQx1st_BbcSouth = new TH1F("h_mQx1st_BbcSouth","h_mQx1st_BbcSouth",100,-2.0,2.0); // Q-Vector distribution
-  h_mQy1st_BbcSouth = new TH1F("h_mQy1st_BbcSouth","h_mQy1st_BbcSouth",100,-2.0,2.0);
-  h_mQx1st_BbcNorth = new TH1F("h_mQx1st_BbcNorth","h_mQx1st_BbcNorth",100,-2.0,2.0);
-  h_mQy1st_BbcNorth = new TH1F("h_mQy1st_BbcNorth","h_mQy1st_BbcNorth",100,-2.0,2.0);
-
-  h_mQx2nd_BbcSouth = new TH1F("h_mQx2nd_BbcSouth","h_mQx2nd_BbcSouth",100,-2.0,2.0);
-  h_mQy2nd_BbcSouth = new TH1F("h_mQy2nd_BbcSouth","h_mQy2nd_BbcSouth",100,-2.0,2.0);
-  h_mQx2nd_BbcNorth = new TH1F("h_mQx2nd_BbcNorth","h_mQx2nd_BbcNorth",100,-2.0,2.0);
-  h_mQy2nd_BbcNorth = new TH1F("h_mQy2nd_BbcNorth","h_mQy2nd_BbcNorth",100,-2.0,2.0);
-
-  h_mEP1st_BbcSouth = new TH1F("h_mEP1st_BbcSouth","h_mEP1st_BbcSouth",360,-TMath::Pi(),TMath::Pi());
-  h_mEP1st_BbcNorth = new TH1F("h_mEP1st_BbcNorth","h_mEP1st_BbcNorth",360,-TMath::Pi(),TMath::Pi());
-  h_mEP1st_Correlation = new TH2F("h_mEP1st_Correlation","h_mEP1st_Correlation",360,-TMath::Pi(),TMath::Pi(),360,-TMath::Pi(),TMath::Pi());
-
-  h_mEP2nd_BbcSouth = new TH1F("h_mEP2nd_BbcSouth","h_mEP2nd_BbcSouth",360,-TMath::Pi(),TMath::Pi());
-  h_mEP2nd_BbcNorth = new TH1F("h_mEP2nd_BbcNorth","h_mEP2nd_BbcNorth",360,-TMath::Pi(),TMath::Pi());
-  h_mEP2nd_Correlation = new TH2F("h_mEP2nd_Correlation","h_mEP2nd_Correlation",360,-TMath::Pi(),TMath::Pi(),360,-TMath::Pi(),TMath::Pi());
-  //-------------------------------------------------------------------------------
-
-  // initialize Re-Center TProfile2D
-  const string mVertex[2] = {"pos","neg"};
-  if(mMode == 0)
-  {
-    for(int i_vertex = 0; i_vertex < 2; ++i_vertex)
-    {
-      string ProName;
-
-      //-------------------------------------------------------------------------------
-      // Re-Center Correction factor for 1st EP: x-axis is runId | y-axis is centrality
-      ProName = Form("p_mQx1st_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQx1st_BbcSouth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-
-      ProName = Form("p_mQy1st_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQy1st_BbcSouth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-
-      ProName = Form("p_mQx1st_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQx1st_BbcNorth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-
-      ProName = Form("p_mQy1st_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQy1st_BbcNorth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-      //-------------------------------------------------------------------------------
-
-      //-------------------------------------------------------------------------------
-      // Re-Center Correction factor for 2nd EP: x-axis is runId | y-axis is centrality
-      ProName = Form("p_mQx2nd_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQx2nd_BbcSouth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-
-      ProName = Form("p_mQy2nd_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQy2nd_BbcSouth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-
-      ProName = Form("p_mQx2nd_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQx2nd_BbcNorth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-
-      ProName = Form("p_mQy2nd_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQy2nd_BbcNorth[i_vertex] = new TProfile2D(ProName.c_str(),ProName.c_str(),1000,-0.5,999.5,9,-0.5,8.5);
-      //-------------------------------------------------------------------------------
-    }
-  }
-
-  // BBC Re-Centered EP
-  if(mMode == 1)
-  {
-    File_mInput = TFile::Open("/direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/macro/RawEP.root");
-
-    for(int i_vertex = 0; i_vertex < 2; ++i_vertex)
-    {
-      string ProName;
-
-      //-------------------------------------------------------------------------------
-      // Re-Center Correction factor for 1st EP: x-axis is runId | y-axis is centrality
-      ProName = Form("p_mQx1st_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQx1st_BbcSouth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-
-      ProName = Form("p_mQy1st_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQy1st_BbcSouth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-
-      ProName = Form("p_mQx1st_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQx1st_BbcNorth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-
-      ProName = Form("p_mQy1st_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQy1st_BbcNorth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-      //-------------------------------------------------------------------------------
-
-      //-------------------------------------------------------------------------------
-      // Re-Center Correction factor for 2nd EP: x-axis is runId | y-axis is centrality
-      ProName = Form("p_mQx2nd_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQx2nd_BbcSouth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-
-      ProName = Form("p_mQy2nd_vertex_%s_BbcSouth",mVertex[i_vertex].c_str());
-      p_mQy2nd_BbcSouth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-
-      ProName = Form("p_mQx2nd_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQx2nd_BbcNorth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-
-      ProName = Form("p_mQy2nd_vertex_%s_BbcNorth",mVertex[i_vertex].c_str());
-      p_mQy2nd_BbcNorth[i_vertex] = (TProfile2D*)File_mInput->Get(ProName.c_str())->Clone();
-      //-------------------------------------------------------------------------------
-    }
-    h_mQx1st_BbcSouth_ReCenter = new TH1F("h_mQx1st_BbcSouth_ReCenter","h_mQx1st_BbcSouth_ReCenter",100,-2.0,2.0);
-    h_mQy1st_BbcSouth_ReCenter = new TH1F("h_mQy1st_BbcSouth_ReCenter","h_mQy1st_BbcSouth_ReCenter",100,-2.0,2.0);
-    h_mQx1st_BbcNorth_ReCenter = new TH1F("h_mQx1st_BbcNorth_ReCenter","h_mQx1st_BbcNorth_ReCenter",100,-2.0,2.0);
-    h_mQy1st_BbcNorth_ReCenter = new TH1F("h_mQy1st_BbcNorth_ReCenter","h_mQy1st_BbcNorth_ReCenter",100,-2.0,2.0);
-
-    h_mQx2nd_BbcSouth_ReCenter = new TH1F("h_mQx2nd_BbcSouth_ReCenter","h_mQx2nd_BbcSouth_ReCenter",100,-2.0,2.0);
-    h_mQy2nd_BbcSouth_ReCenter = new TH1F("h_mQy2nd_BbcSouth_ReCenter","h_mQy2nd_BbcSouth_ReCenter",100,-2.0,2.0);
-    h_mQx2nd_BbcNorth_ReCenter = new TH1F("h_mQx2nd_BbcNorth_ReCenter","h_mQx2nd_BbcNorth_ReCenter",100,-2.0,2.0);
-    h_mQy2nd_BbcNorth_ReCenter = new TH1F("h_mQy2nd_BbcNorth_ReCenter","h_mQy2nd_BbcNorth_ReCenter",100,-2.0,2.0);
-
-    h_mEP1st_BbcSouth_ReCenter = new TH1F("h_mEP1st_BbcSouth_ReCenter","h_mEP1st_BbcSouth_ReCenter",360,-TMath::Pi(),TMath::Pi());
-    h_mEP1st_BbcNorth_ReCenter = new TH1F("h_mEP1st_BbcNorth_ReCenter","h_mEP1st_BbcNorth_ReCenter",360,-TMath::Pi(),TMath::Pi());
-  h_mEP1st_Correlation_ReCenter = new TH2F("h_mEP1st_Correlation_ReCenter","h_mEP1st_Correlation_ReCenter",360,-TMath::Pi(),TMath::Pi(),360,-TMath::Pi(),TMath::Pi());
-
-    h_mEP2nd_BbcSouth_ReCenter = new TH1F("h_mEP2nd_BbcSouth_ReCenter","h_mEP2nd_BbcSouth_ReCenter",360,-TMath::Pi(),TMath::Pi());
-    h_mEP2nd_BbcNorth_ReCenter = new TH1F("h_mEP2nd_BbcNorth_ReCenter","h_mEP2nd_BbcNorth_ReCenter",360,-TMath::Pi(),TMath::Pi());
-  h_mEP2nd_Correlation_ReCenter = new TH2F("h_mEP2nd_Correlation_ReCenter","h_mEP2nd_Correlation_ReCenter",360,-TMath::Pi(),TMath::Pi(),360,-TMath::Pi(),TMath::Pi());
-  }
-  */
-}
-
-int RecoEventPlane::writeHistoRunQA()
-{
-  h_mVtZ_Bbc->Write();
-  h_mVtZ_Zdc->Write();
-  h_mCentrality->Write();
-
-  return 0;
 }

@@ -1,28 +1,35 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-# List of shared libraries to produce
-
-lib_LTLIBRARIES = libRecoEventPlane.la
-
 AM_LDFLAGS = -L$(libdir) `root-config --evelibs` -L${OFFLINE_MAIN}/lib -L${MYINSTALL}/lib
 
 AM_CXXFLAGS = `root-config --cflags`
 
-INCLUDES = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/include -I$(MYINSTALL)/include
+AM_CPPFLAGS = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/include -I$(MYINSTALL)/include
+
+dist_pkgdata_DATA = BbcRecalConsts.txt
+
+lib_LTLIBRARIES = libRecoEventPlane.la
+
+noinst_HEADERS = \
+RecoEventPlaneLinkDef.h \
+RecoEPHistoManagerLinkDef.h
 
 ##############################################
 # please add new classes in alphabetical order
 
-include_HEADERS = \
-	RecoEventPlane.h
+pkginclude_HEADERS = \
+	RecoEventPlane.h \
+	RecoEPHistoManager.h
 
 ##############################################
 # please add new classes in alphabetical order
 
 libRecoEventPlane_la_SOURCES = \
-  RecoEventPlaneDict.C \
-  RecoEventPlane.cxx
+  RecoEventPlane_Dict.C \
+  RecoEventPlane.cxx \
+  RecoEPHistoManager_Dict.C \
+  RecoEPHistoManager.cxx
 
 ##############################################
 # libraries used in the package
@@ -50,7 +57,12 @@ testexternals.C:
 clean-local:
 	rm -f *Dict* $(BUILT_SOURCES)
 
-RecoEventPlaneDict.C: \
+RecoEventPlane_Dict.C: \
 	RecoEventPlane.h \
 	RecoEventPlaneLinkDef.h
-	rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+RecoEPHistoManager_Dict.C: \
+	RecoEPHistoManager.h \
+	RecoEPHistoManagerLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
