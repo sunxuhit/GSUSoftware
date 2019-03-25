@@ -13,14 +13,16 @@ lib_LTLIBRARIES = libRecoEventPlane.la
 
 noinst_HEADERS = \
 RecoEventPlaneLinkDef.h \
-RecoEPHistoManagerLinkDef.h
+RecoEPHistoManagerLinkDef.h \
+RecoEPUtilityLinkDef.h
 
 ##############################################
 # please add new classes in alphabetical order
 
 pkginclude_HEADERS = \
 	RecoEventPlane.h \
-	RecoEPHistoManager.h
+	RecoEPHistoManager.h \
+	RecoEPUtility.h
 
 ##############################################
 # please add new classes in alphabetical order
@@ -29,12 +31,17 @@ libRecoEventPlane_la_SOURCES = \
   RecoEventPlane_Dict.C \
   RecoEventPlane.cxx \
   RecoEPHistoManager_Dict.C \
-  RecoEPHistoManager.cxx
+  RecoEPHistoManager.cxx \
+  RecoEPUtility_Dict.C \
+  RecoEPUtility.cxx
 
 ##############################################
 # libraries used in the package
 
 libRecoEventPlane_la_LIBADD = \
+  -L$(libdir) \
+  -L$(OFFLINE_MAIN)/lib \
+  -lTOAD \
   -lphool \
   -lpicodst_object
 
@@ -66,3 +73,9 @@ RecoEPHistoManager_Dict.C: \
 	RecoEPHistoManager.h \
 	RecoEPHistoManagerLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+RecoEPUtility_Dict.C: \
+	RecoEPUtility.h \
+	RecoEPUtilityLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+

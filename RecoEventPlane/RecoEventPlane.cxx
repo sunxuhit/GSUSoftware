@@ -38,6 +38,7 @@
 
 //Utility Class
 #include "RecoEPHistoManager.h"
+#include "RecoEPUtility.h"
 
 using namespace std;
 
@@ -90,7 +91,7 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
   if(mRunSelection == 14 && mSystemSelection == 0) cout << "Au+Au" << endl;
   cout << "BBCZ cut value is " << mBbczCut_val << endl;
 
-  cout << "BBC phi bin correction status is: "<<std::endl;
+  cout << "BBC phi bin correction status is: " << mEPCalib <<std::endl;
   if(mBbcPmt_flag == 0) cout << "do nothing" << endl;
   if(mBbcPmt_flag > 0)  cout << "hot/cold (20\% off average) phi bin removed" << endl;
 
@@ -102,6 +103,9 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
 
   mRecoEPHistoManager = new RecoEPHistoManager();
   mRecoEPHistoManager->initQA_Global();
+
+  mRecoEPUtility = new RecoEPUtility();
+  mRecoEPUtility->read_in_recal_consts();
 
   return EVENT_OK;
 }

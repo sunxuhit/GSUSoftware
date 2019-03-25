@@ -1,7 +1,10 @@
-AC_INIT(RecoEventPlane, [1.00])
+AC_INIT
 AC_CONFIG_SRCDIR([configure.ac])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE(RecoEventPlane, [1.00])
+PACKAGE_INCLUDE_DIR=RecoEventPlane
+AC_SUBST(PACKAGE_INCLUDE_DIR)
+
 AC_PROG_CXX(CC g++)
 LT_INIT([disable-static])
 

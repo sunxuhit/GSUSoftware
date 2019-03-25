@@ -23,6 +23,7 @@ class TH2F;
 class TProfile2D;
 
 class RecoEPHistoManager;
+class RecoEPUtility;
 
 class RecoEventPlane: public SubsysReco {
   public:
@@ -71,9 +72,11 @@ class RecoEventPlane: public SubsysReco {
     TFile* File_mOutPut;
     std::string mOutPutFile;
 
+    // utilities
     int getNodes(PHCompositeNode *topNode); // extract nodes needed for analysis
 
     RecoEPHistoManager *mRecoEPHistoManager;
+    RecoEPUtility *mRecoEPUtility;
 };
 
 #endif //__H_RecoEventPlane_H__
