@@ -38,6 +38,7 @@ bool RecoEPUtility::read_in_recal_consts()
   {
     const_pedestal[_pmt][_rungrp] = _ped;
     const_mip[_pmt][_rungrp] = _mip;
+    // std::cout << "i_pmt = " << _pmt << ", run group = " << _rungrp << ", ped = " << _ped << ", mip = " << _mip << std::endl;
   }
   read_consts.close();
 
@@ -46,22 +47,22 @@ bool RecoEPUtility::read_in_recal_consts()
 
 int RecoEPUtility::get_recal_group(int run_num)
 {
-  if (run_num <= runno_grp1[nrun_grp1-1]) return 1;
-  else if (run_num <= runno_grp2[nrun_grp2-1]) return 2;
-  else if (run_num <= runno_grp3[nrun_grp3-1]) return 3;
-  else if (run_num <= runno_grp4[nrun_grp4-1]) return 4;
-  else if (run_num <= runno_grp5[nrun_grp5-1]) return 5;
-  else if (run_num <= runno_grp6[nrun_grp6-1]) return 6;
-  else if (run_num <= runno_grp7[nrun_grp7-1]) return 7;
-  else if (run_num <= runno_grp8[nrun_grp8-1]) return 8;
-  else if (run_num <= runno_grp9[nrun_grp9-1]) return 9;
-  else if (run_num <= runno_grp10[nrun_grp10-1]) return 10;
-  else if (run_num <= runno_grp11[nrun_grp11-1]) return 11;
-  else if (run_num <= runno_grp12[nrun_grp12-1]) return 12;
-  else if (run_num <= runno_grp13[nrun_grp13-1]) return 13;
-  else if (run_num <= runno_grp14[nrun_grp14-1]) return 14;
-  else if (run_num <= runno_grp15[nrun_grp15-1]) return 15;
-  else if (run_num <= runno_grp16[nrun_grp16-1]) return 16;
+  if (run_num <= GoodRunList::runno_grp1[GoodRunList::nrun_grp1-1]) return 1;
+  else if (run_num <= GoodRunList::runno_grp2[GoodRunList::nrun_grp2-1]) return 2;
+  else if (run_num <= GoodRunList::runno_grp3[GoodRunList::nrun_grp3-1]) return 3;
+  else if (run_num <= GoodRunList::runno_grp4[GoodRunList::nrun_grp4-1]) return 4;
+  else if (run_num <= GoodRunList::runno_grp5[GoodRunList::nrun_grp5-1]) return 5;
+  else if (run_num <= GoodRunList::runno_grp6[GoodRunList::nrun_grp6-1]) return 6;
+  else if (run_num <= GoodRunList::runno_grp7[GoodRunList::nrun_grp7-1]) return 7;
+  else if (run_num <= GoodRunList::runno_grp8[GoodRunList::nrun_grp8-1]) return 8;
+  else if (run_num <= GoodRunList::runno_grp9[GoodRunList::nrun_grp9-1]) return 9;
+  else if (run_num <= GoodRunList::runno_grp10[GoodRunList::nrun_grp10-1]) return 10;
+  else if (run_num <= GoodRunList::runno_grp11[GoodRunList::nrun_grp11-1]) return 11;
+  else if (run_num <= GoodRunList::runno_grp12[GoodRunList::nrun_grp12-1]) return 12;
+  else if (run_num <= GoodRunList::runno_grp13[GoodRunList::nrun_grp13-1]) return 13;
+  else if (run_num <= GoodRunList::runno_grp14[GoodRunList::nrun_grp14-1]) return 14;
+  else if (run_num <= GoodRunList::runno_grp15[GoodRunList::nrun_grp15-1]) return 15;
+  else if (run_num <= GoodRunList::runno_grp16[GoodRunList::nrun_grp16-1]) return 16;
 
   return 0; // no match
 }

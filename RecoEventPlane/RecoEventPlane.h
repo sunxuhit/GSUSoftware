@@ -46,10 +46,10 @@ class RecoEventPlane: public SubsysReco {
     // RC flags
     int mRunSelection;
     int mSystemSelection;
-    int mEPCalib;
-    double mBbczCut_val;
     int mDebug;
+    double mBbczCut_val;
     int mBbcPmt_flag;
+    int mEPCalib;
 
     PHGlobal* mPHGlobal;
     int mCentrality;

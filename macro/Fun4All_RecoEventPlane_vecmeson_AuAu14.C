@@ -1,5 +1,5 @@
 void Fun4All_RecoEventPlane_vecmeson_AuAu14(
-    int mode = 1, int nEvents = 10, //
+    int mode = 1, int nEvents = 500000, //
     char *input_file = "AuAu14_BBCEP_test.list" //
     )
 {
@@ -7,6 +7,14 @@ void Fun4All_RecoEventPlane_vecmeson_AuAu14(
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
+
+  recoConsts *rc =  recoConsts::instance();
+  rc->set_IntFlag("RD_RUN_SELECTION", 14);
+  rc->set_IntFlag("RD_SYSTEM_SELECTION", 0);
+  rc->get_IntFlag("EP_DEBUG", 0);
+  rc->get_IntFlag("EP_CALIB", 0);
+  rc->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
+  rc->get_IntFlag("EP_BBC", 0);
 
   RecoEventPlane *ana = new RecoEventPlane();
   ana->set_ana_mode(mode);

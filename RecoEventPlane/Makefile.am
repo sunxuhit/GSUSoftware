@@ -22,6 +22,7 @@ RecoEPUtilityLinkDef.h
 pkginclude_HEADERS = \
 	RecoEventPlane.h \
 	RecoEPHistoManager.h \
+	Run14AuAuList.h \
 	RecoEPUtility.h
 
 ##############################################
@@ -75,6 +76,7 @@ RecoEPHistoManager_Dict.C: \
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 RecoEPUtility_Dict.C: \
+	Run14AuAuList.h \
 	RecoEPUtility.h \
 	RecoEPUtilityLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^

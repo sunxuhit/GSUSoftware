@@ -82,10 +82,10 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
   mRC              = recoConsts::instance();
   mRunSelection    = mRC->get_IntFlag("RD_RUN_SELECTION", 0);
   mSystemSelection = mRC->get_IntFlag("RD_SYSTEM_SELECTION", 0);
-  mBbczCut_val     = mRC->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
-  mEPCalib         = mRC->get_IntFlag("EP_CALIB", 0);
   mDebug           = mRC->get_IntFlag("EP_DEBUG", 0);
+  mBbczCut_val     = mRC->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
   mBbcPmt_flag     = mRC->get_IntFlag("EP_BBC", 0);
+  mEPCalib         = mRC->get_IntFlag("EP_CALIB", 0);
 
   cout << "run " << mRunSelection << " @ system ";
   if(mRunSelection == 14 && mSystemSelection == 0) cout << "Au+Au" << endl;
@@ -101,9 +101,16 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
 
   mNumOfEvents = 0;
 
+  // initialize histograms
   mRecoEPHistoManager = new RecoEPHistoManager();
+  mRecoEPHistoManager->set_debug(mDebug);
   mRecoEPHistoManager->initQA_Global();
+  if(mDebug == 1) mRecoEPHistoManager->initQA_BbcAdc();
+  mRecoEPHistoManager->initQA_BbcCharge();
+  mRecoEPHistoManager->initQA_BbcChargeReCalib();
+  if(mEPCalib == 0) mRecoEPHistoManager->initHist_BbcRawEP();
 
+  // initialize utilities
   mRecoEPUtility = new RecoEPUtility();
   mRecoEPUtility->read_in_recal_consts();
 
@@ -156,180 +163,64 @@ int RecoEventPlane::process_event(PHCompositeNode *topNode)
 
   float bbcz = mPHGlobal->getBbcZVertex();
   float cent = mPHGlobal->getCentrality();
+
+  if ( bbcz >= mBbczCut_val || bbcz <= -(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
   mRecoEPHistoManager->fillQA_Global(zdcz,bbcz,cent);
 
-  // if ( bbcz >= bbczcut_val || bbcz <= -(bbczcut_val)) return DISCARDEVENT;
-
-  // cout << "centrality = " << cent << endl;
-  // cout << "BBC_z = " << bbcz << endl;
-  // cout << "ZDC_z = " << zdcz << endl;
-  // cout << endl;
-
-  /*
   float Q1x_South = 0.0;
   float Q1y_South = 0.0;
-
   float Q1x_North = 0.0;
   float Q1y_North = 0.0;
 
-  float Q2x_South = 0.0;
-  float Q2y_South = 0.0;
-  float Qw_South = 0.0;
-
-  float Q2x_North = 0.0;
-  float Q2y_North = 0.0;
-  float Qw_North = 0.0;
+  const float BBCs_xoff = -0.5;
+  const float BBCs_yoff = 0.0;
+  const float BBCn_xoff = 7.0;
+  const float BBCn_yoff = 0.0;
 
   for (int i_pmt=0; i_pmt<128; i_pmt++) 
   {
     short adc = mBbcRaw->get_Adc(i_pmt);
     short tdc = mBbcRaw->get_Tdc0(i_pmt);
-    float time0 = bbccalib->getHitTime0(i_pmt, tdc, adc);
-    float charge = bbccalib->getCharge(i_pmt, adc);
-    float bbcx= bbcgeo->getX(i_pmt);
-    float bbcy= bbcgeo->getY(i_pmt);
-    float bbcz= bbcgeo->getZ(i_pmt);
+    float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
+    float charge = mBbcCalib->getCharge(i_pmt, adc);
+    float bbcx = mBbcGeo->getX(i_pmt);
+    float bbcy = mBbcGeo->getY(i_pmt);
+    float bbcz = mBbcGeo->getZ(i_pmt);
 
-    if (time0 > 0 && charge > 0 && bbcz < 0) // south
+    if(time0 > 0 && charge > 0)
     {
-      h_mAdc_Bbc[i_pmt]->Fill(adc);
-      h_mCharge_Bbc[i_pmt]->Fill(charge);
-      h_mGeoXY_BbcSouth->Fill(bbcx,bbcy,charge);
-      h_mGeoZ_BbcSouth->Fill(bbcz);
+      if(mDebug == 1) mRecoEPHistoManager->fillQA_BbcAdc(i_pmt,adc); // fill Adc QA
+      mRecoEPHistoManager->fillQA_BbcCharge(i_pmt,bbcx,bbcy,bbcz,charge);
 
-      float phi=atan2(bbcy,bbcx);
-      float weight = charge;
+      float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
+      mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
 
-      Q1x_South += weight*cos(1.0*phi);
-      Q1y_South += weight*sin(1.0*phi);
-
-      Q2x_South += weight*cos(2.0*phi);
-      Q2y_South += weight*sin(2.0*phi);
-
-      Qw_South += weight;
-      // cout << "i_pmt = " << i_pmt << ", phi = " << phi << ", bbcz = " << bbcz << ", charge = " << charge << endl;
-    }
-    if (time0 > 0 && charge > 0 && bbcz > 0)  // north
-    {
-      h_mAdc_Bbc[i_pmt]->Fill(adc);
-      h_mCharge_Bbc[i_pmt]->Fill(charge);
-      h_mGeoXY_BbcNorth->Fill(bbcx,bbcy,charge);
-      h_mGeoZ_BbcNorth->Fill(bbcz);
-
-      float phi=atan2(bbcy,bbcx);
-      float weight = charge;
-
-
-      Q1x_North += weight*cos(1.0*phi);
-      Q1y_North += weight*sin(1.0*phi);
-
-      Q2x_North += weight*cos(2.0*phi);
-      Q2y_North += weight*sin(2.0*phi);
-
-      Qw_North += weight;
-      // cout << "i_pmt = " << i_pmt << ", phi = " << phi << ", bbcz = " << bbcz << ", charge = " << charge << endl;
+      if(mEPCalib == 0)
+      { // calculate Raw Qvector
+	if(i_pmt < 64)
+	{ // south
+	  float phi = atan2(bbcy-BBCs_yoff,bbcx-BBCs_xoff);
+	  float weight = charge_recalib;
+	  Q1x_South += weight*cos(phi);
+	  Q1y_South += weight*sin(phi);
+	}
+	if(i_pmt >= 64)
+	{ // north
+	  float phi = atan2(bbcy-BBCn_yoff,bbcx-BBCn_xoff);
+	  float weight = charge_recalib;
+	  Q1x_North += weight*cos(phi);
+	  Q1y_North += weight*sin(phi);
+	}
+      }
     }
   }
 
-  h_mQx1st_BbcSouth->Fill(Q1x_South/Qw_South);
-  h_mQy1st_BbcSouth->Fill(Q1y_South/Qw_South);
-  h_mQx1st_BbcNorth->Fill(Q1x_North/Qw_South);
-  h_mQy1st_BbcNorth->Fill(Q1y_North/Qw_South);
-
-  h_mQx2nd_BbcSouth->Fill(Q2x_South/Qw_South);
-  h_mQy2nd_BbcSouth->Fill(Q2y_South/Qw_South);
-  h_mQx2nd_BbcNorth->Fill(Q2x_North/Qw_South);
-  h_mQy2nd_BbcNorth->Fill(Q2y_North/Qw_South);
-
-
-  float Psi_1st_South = atan2(Q1y_South/Qw_South,Q1x_South/Qw_South);
-  h_mEP1st_BbcSouth->Fill(Psi_1st_South);
-
-  float Psi_1st_North = atan2(Q1y_North/Qw_North,Q1x_North/Qw_North);
-  h_mEP1st_BbcNorth->Fill(Psi_1st_North);
-  h_mEP1st_Correlation->Fill(Psi_1st_South,Psi_1st_North);
-
-  float Psi_2nd_South = atan2(Q2y_South/Qw_South,Q2x_South/Qw_South)/2.0;
-  h_mEP2nd_BbcSouth->Fill(Psi_2nd_South);
-
-  float Psi_2nd_North = atan2(Q2y_North/Qw_North,Q2x_North/Qw_North)/2.0;
-  h_mEP2nd_BbcNorth->Fill(Psi_2nd_North);
-  h_mEP2nd_Correlation->Fill(Psi_2nd_South,Psi_2nd_North);
-
-  // fill Re-Center correction
-  int vz_sign = 0;
-  if(BBC_vtx_Z > 0.0) vz_sign = 0;
-  if(BBC_vtx_Z <= 0.0) vz_sign = 1;
-
-  if(mMode == 0) // fill Re-Center Correction factors
+  if(mEPCalib == 0 && cent > 20 && cent < 30)
   {
-    p_mQx1st_BbcSouth[vz_sign]->Fill(123.0,5.0,Q1x_South/Qw_South);
-    p_mQy1st_BbcSouth[vz_sign]->Fill(123.0,5.0,Q1y_South/Qw_South);
-    p_mQx1st_BbcNorth[vz_sign]->Fill(123.0,5.0,Q1x_North/Qw_South);
-    p_mQy1st_BbcNorth[vz_sign]->Fill(123.0,5.0,Q1y_North/Qw_South);
-
-    p_mQx2nd_BbcSouth[vz_sign]->Fill(123.0,5.0,Q2x_South/Qw_South);
-    p_mQy2nd_BbcSouth[vz_sign]->Fill(123.0,5.0,Q2y_South/Qw_South);
-    p_mQx2nd_BbcNorth[vz_sign]->Fill(123.0,5.0,Q2x_North/Qw_South);
-    p_mQy2nd_BbcNorth[vz_sign]->Fill(123.0,5.0,Q2y_North/Qw_South);
+    float Psi1st_BbcSouth = atan2(Q1y_South,Q1x_South);
+    float Psi1st_BbcNorth = atan2(Q1y_North,Q1x_North);
+    mRecoEPHistoManager->fillHist_BbcRawEP(Psi1st_BbcSouth,Psi1st_BbcNorth,Psi1st_BbcSouth,Psi1st_BbcNorth,Psi1st_BbcSouth,Psi1st_BbcNorth);
   }
-  if(mMode == 1) // apply Re-Center Correction and fill Shift Correction
-  {
-    int bin_Q1x_South = p_mQx1st_BbcSouth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q1x_South = p_mQx1st_BbcSouth[vz_sign]->GetBinContent(bin_Q1x_South);
-    float Q1x_South_ReCenter = Q1x_South/Qw_South - mean_Q1x_South;
-    h_mQx1st_BbcSouth_ReCenter->Fill(Q1x_South_ReCenter);
-
-    int bin_Q1y_South = p_mQy1st_BbcSouth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q1y_South = p_mQy1st_BbcSouth[vz_sign]->GetBinContent(bin_Q1y_South);
-    float Q1y_South_ReCenter = Q1y_South/Qw_South - mean_Q1y_South;
-    h_mQy1st_BbcSouth_ReCenter->Fill(Q1y_South_ReCenter);
-
-    float Psi_1st_South_ReCenter = atan2(Q1y_South_ReCenter,Q1x_South_ReCenter);
-    h_mEP1st_BbcSouth_ReCenter->Fill(Psi_1st_South_ReCenter);
-
-    int bin_Q1x_North = p_mQx1st_BbcNorth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q1x_North = p_mQx1st_BbcNorth[vz_sign]->GetBinContent(bin_Q1x_North);
-    float Q1x_North_ReCenter = Q1x_North/Qw_North - mean_Q1x_North;
-    h_mQx1st_BbcNorth_ReCenter->Fill(Q1x_North_ReCenter);
-
-    int bin_Q1y_North = p_mQy1st_BbcNorth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q1y_North = p_mQy1st_BbcNorth[vz_sign]->GetBinContent(bin_Q1y_North);
-    float Q1y_North_ReCenter = Q1y_North/Qw_North - mean_Q1y_North;
-    h_mQy1st_BbcNorth_ReCenter->Fill(Q1y_North_ReCenter);
-
-    float Psi_1st_North_ReCenter = atan2(Q1y_North_ReCenter,Q1x_North_ReCenter);
-    h_mEP1st_BbcNorth_ReCenter->Fill(Psi_1st_North_ReCenter);
-    h_mEP1st_Correlation_ReCenter->Fill(Psi_1st_South_ReCenter,Psi_1st_North_ReCenter);
-
-    int bin_Q2x_South = p_mQx2nd_BbcSouth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q2x_South = p_mQx2nd_BbcSouth[vz_sign]->GetBinContent(bin_Q2x_South);
-    float Q2x_South_ReCenter = Q2x_South/Qw_South - mean_Q2x_South;
-    h_mQx2nd_BbcSouth_ReCenter->Fill(Q2x_South_ReCenter);
-
-    int bin_Q2y_South = p_mQy2nd_BbcSouth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q2y_South = p_mQy2nd_BbcSouth[vz_sign]->GetBinContent(bin_Q2y_South);
-    float Q2y_South_ReCenter = Q2y_South/Qw_South - mean_Q2y_South;
-    h_mQy2nd_BbcSouth_ReCenter->Fill(Q2y_South_ReCenter);
-
-    float Psi_2nd_South_ReCenter = atan2(Q2y_South_ReCenter,Q2x_South_ReCenter)/2.0;
-    h_mEP2nd_BbcSouth_ReCenter->Fill(Psi_2nd_South_ReCenter);
-
-    int bin_Q2x_North = p_mQx2nd_BbcNorth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q2x_North = p_mQx2nd_BbcNorth[vz_sign]->GetBinContent(bin_Q2x_North);
-    float Q2x_North_ReCenter = Q2x_North/Qw_North - mean_Q2x_North;
-    h_mQx2nd_BbcNorth_ReCenter->Fill(Q2x_North_ReCenter);
-
-    int bin_Q2y_North = p_mQy2nd_BbcNorth[vz_sign]->FindBin(123.0,5.0);
-    float mean_Q2y_North = p_mQy2nd_BbcNorth[vz_sign]->GetBinContent(bin_Q2y_North);
-    float Q2y_North_ReCenter = Q2y_North/Qw_North - mean_Q2y_North;
-    h_mQy2nd_BbcNorth_ReCenter->Fill(Q2y_North_ReCenter);
-
-    float Psi_2nd_North_ReCenter = atan2(Q2y_North_ReCenter,Q2x_North_ReCenter)/2.0;
-    h_mEP2nd_BbcNorth_ReCenter->Fill(Psi_2nd_North_ReCenter);
-    h_mEP2nd_Correlation_ReCenter->Fill(Psi_2nd_South_ReCenter,Psi_2nd_North_ReCenter);
-  }
-  */
 
   return EVENT_OK;
 }
@@ -338,74 +229,10 @@ int RecoEventPlane::End(PHCompositeNode *topNode)
 {
   File_mOutPut->cd();
   mRecoEPHistoManager->writeQA_Global();
-  /*
-  if(mMode == 0)
-  {
-    for(int i_pmt = 0; i_pmt < 128; ++i_pmt)
-    {
-      h_mAdc_Bbc[i_pmt]->Write();
-      h_mCharge_Bbc[i_pmt]->Write();
-    }
-
-    h_mGeoXY_BbcSouth->Write();
-    h_mGeoZ_BbcSouth->Write();
-
-    h_mGeoXY_BbcNorth->Write();
-    h_mGeoZ_BbcNorth->Write();
-
-    h_mQx1st_BbcSouth->Write();
-    h_mQy1st_BbcSouth->Write();
-    h_mQx1st_BbcNorth->Write();
-    h_mQy1st_BbcNorth->Write();
-
-    h_mQx2nd_BbcSouth->Write();
-    h_mQy2nd_BbcSouth->Write();
-    h_mQx2nd_BbcNorth->Write();
-    h_mQy2nd_BbcNorth->Write();
-
-    h_mEP1st_BbcSouth->Write();
-    h_mEP1st_BbcNorth->Write();
-    h_mEP1st_Correlation->Write();
-
-    h_mEP2nd_BbcSouth->Write();
-    h_mEP2nd_BbcNorth->Write();
-    h_mEP2nd_Correlation->Write();
-
-    for(int i_vertex = 0; i_vertex < 2; ++i_vertex)
-    {
-      p_mQx1st_BbcSouth[i_vertex]->Write();
-      p_mQy1st_BbcSouth[i_vertex]->Write();
-      p_mQx1st_BbcNorth[i_vertex]->Write();
-      p_mQy1st_BbcNorth[i_vertex]->Write();
-
-      p_mQx2nd_BbcSouth[i_vertex]->Write();
-      p_mQy2nd_BbcSouth[i_vertex]->Write();
-      p_mQx2nd_BbcNorth[i_vertex]->Write();
-      p_mQy2nd_BbcNorth[i_vertex]->Write();
-    }
-  }
-
-  if(mMode == 1)
-  {
-    h_mQx1st_BbcSouth_ReCenter->Write();
-    h_mQy1st_BbcSouth_ReCenter->Write();
-    h_mQx1st_BbcNorth_ReCenter->Write();
-    h_mQy1st_BbcNorth_ReCenter->Write();
-
-    h_mQx2nd_BbcSouth_ReCenter->Write();
-    h_mQy2nd_BbcSouth_ReCenter->Write();
-    h_mQx2nd_BbcNorth_ReCenter->Write();
-    h_mQy2nd_BbcNorth_ReCenter->Write();
-
-    h_mEP1st_BbcSouth_ReCenter->Write();
-    h_mEP1st_BbcNorth_ReCenter->Write();
-    h_mEP1st_Correlation_ReCenter->Write();
-
-    h_mEP2nd_BbcSouth_ReCenter->Write();
-    h_mEP2nd_BbcNorth_ReCenter->Write();
-    h_mEP2nd_Correlation_ReCenter->Write();
-  }
-  */
+  if(mDebug == 1) mRecoEPHistoManager->writeQA_BbcAdc();
+  mRecoEPHistoManager->writeQA_BbcCharge();
+  mRecoEPHistoManager->writeQA_BbcChargeReCalib();
+  if(mEPCalib == 0) mRecoEPHistoManager->writeHist_BbcRawEP();
 
   File_mOutPut->Close();
 
@@ -418,21 +245,21 @@ int RecoEventPlane::getNodes(PHCompositeNode *topNode)
   if( !mPHGlobal )
   {
     std::cout<<"can't find PHGlobal "<<std::endl;
-    return DISCARDEVENT;//exit(1);
+    return DISCARDEVENT;
   }
 
   mBbcRaw = findNode::getClass<BbcRaw>(topNode,"BbcRaw");
   if (!mBbcRaw)
   {
     std::cout << PHWHERE << "Could not find BbcRaw !" << std::endl;
-    return EVENT_OK;
+    return DISCARDEVENT;
   }
 
   mVtxOut = findNode::getClass<VtxOut>(topNode,"VtxOut");
   if( !mVtxOut )
   {
     std::cout<<"can't find VtxOut "<<std::endl;
-    return DISCARDEVENT;//exit(1);
+    return DISCARDEVENT;
   }
 
   return EVENT_OK;
