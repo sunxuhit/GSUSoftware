@@ -1,5 +1,5 @@
 //local
-#include "RecoEventPlane.h"
+#include "PhVecMesonMaker.h"
 
 //PHENIX
 #include <Fun4AllServer.h>
@@ -39,10 +39,11 @@
 //Utility Class
 #include "RecoEPHistoManager.h"
 #include "RecoEPUtility.h"
+#include "RecoEventPlane.h"
 
 using namespace std;
 
-RecoEventPlane::RecoEventPlane(const char*outputfile)
+PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
 {
   mRC = NULL;
   // RC flags
@@ -72,11 +73,13 @@ RecoEventPlane::RecoEventPlane(const char*outputfile)
   mOutPutFile = outputfile;
 
   mRecoEPHistoManager = NULL;
+  mRecoEPUtility = NULL;
+  mRecoEventPlane = NULL;
 }
 
-int RecoEventPlane::Init(PHCompositeNode *topNode) 
+int PhVecMesonMaker::Init(PHCompositeNode *topNode) 
 {
-  cout << "RecoEventPlane::Init => " << endl;
+  cout << "PhVecMesonMaker::Init => " << endl;
 
   cout << "Setting Module Flags: " << endl;
   mRC              = recoConsts::instance();
@@ -91,7 +94,7 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
   if(mRunSelection == 14 && mSystemSelection == 0) cout << "Au+Au" << endl;
   cout << "BBCZ cut value is " << mBbczCut_val << endl;
 
-  cout << "BBC phi bin correction status is: " << mEPCalib <<std::endl;
+  cout << "BBC phi bin correction status is: " << mBbcPmt_flag << endl;
   if(mBbcPmt_flag == 0) cout << "do nothing" << endl;
   if(mBbcPmt_flag > 0)  cout << "hot/cold (20\% off average) phi bin removed" << endl;
 
@@ -114,12 +117,16 @@ int RecoEventPlane::Init(PHCompositeNode *topNode)
   mRecoEPUtility = new RecoEPUtility();
   mRecoEPUtility->read_in_recal_consts();
 
+  // initialize utilities
+  mRecoEventPlane = new RecoEventPlane();
+  mRecoEventPlane->initRawBbcEventPlane();
+
   return EVENT_OK;
 }
 
-int RecoEventPlane::InitRun(PHCompositeNode *topNode) 
+int PhVecMesonMaker::InitRun(PHCompositeNode *topNode) 
 {
-  cout << "RecoEventPlane::InitRun => " << endl;
+  cout << "PhVecMesonMaker::InitRun => " << endl;
   cout << "get run header info" << endl;
   mRunHeader = findNode::getClass<RunHeader>(topNode,"RunHeader");
   if( !mRunHeader )
@@ -147,7 +154,7 @@ int RecoEventPlane::InitRun(PHCompositeNode *topNode)
   return EVENT_OK;
 }
 
-int RecoEventPlane::process_event(PHCompositeNode *topNode) 
+int PhVecMesonMaker::process_event(PHCompositeNode *topNode) 
 {
   if( getNodes(topNode) == DISCARDEVENT ) return DISCARDEVENT;
 
@@ -167,16 +174,6 @@ int RecoEventPlane::process_event(PHCompositeNode *topNode)
   if ( bbcz >= mBbczCut_val || bbcz <= -(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
   mRecoEPHistoManager->fillQA_Global(zdcz,bbcz,cent);
 
-  float Q1x_South = 0.0;
-  float Q1y_South = 0.0;
-  float Q1x_North = 0.0;
-  float Q1y_North = 0.0;
-
-  const float BBCs_xoff = -0.5;
-  const float BBCs_yoff = 0.0;
-  const float BBCn_xoff = 7.0;
-  const float BBCn_yoff = 0.0;
-
   for (int i_pmt=0; i_pmt<128; i_pmt++) 
   {
     short adc = mBbcRaw->get_Adc(i_pmt);
@@ -194,38 +191,13 @@ int RecoEventPlane::process_event(PHCompositeNode *topNode)
 
       float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
       mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
-
-      if(mEPCalib == 0)
-      { // calculate Raw Qvector
-	if(i_pmt < 64)
-	{ // south
-	  float phi = atan2(bbcy-BBCs_yoff,bbcx-BBCs_xoff);
-	  float weight = charge_recalib;
-	  Q1x_South += weight*cos(phi);
-	  Q1y_South += weight*sin(phi);
-	}
-	if(i_pmt >= 64)
-	{ // north
-	  float phi = atan2(bbcy-BBCn_yoff,bbcx-BBCn_xoff);
-	  float weight = charge_recalib;
-	  Q1x_North += weight*cos(phi);
-	  Q1y_North += weight*sin(phi);
-	}
-      }
     }
-  }
-
-  if(mEPCalib == 0 && cent > 20 && cent < 30)
-  {
-    float Psi1st_BbcSouth = atan2(Q1y_South,Q1x_South);
-    float Psi1st_BbcNorth = atan2(Q1y_North,Q1x_North);
-    mRecoEPHistoManager->fillHist_BbcRawEP(Psi1st_BbcSouth,Psi1st_BbcNorth,Psi1st_BbcSouth,Psi1st_BbcNorth,Psi1st_BbcSouth,Psi1st_BbcNorth);
   }
 
   return EVENT_OK;
 }
 
-int RecoEventPlane::End(PHCompositeNode *topNode) 
+int PhVecMesonMaker::End(PHCompositeNode *topNode) 
 {
   File_mOutPut->cd();
   mRecoEPHistoManager->writeQA_Global();
@@ -239,7 +211,7 @@ int RecoEventPlane::End(PHCompositeNode *topNode)
   return EVENT_OK;
 }
 
-int RecoEventPlane::getNodes(PHCompositeNode *topNode)
+int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
 {
   mPHGlobal = findNode::getClass<PHGlobal>(topNode,"PHGlobal");
   if( !mPHGlobal )

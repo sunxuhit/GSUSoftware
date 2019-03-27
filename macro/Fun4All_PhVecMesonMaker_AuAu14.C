@@ -1,9 +1,9 @@
-void Fun4All_RecoEventPlane_vecmeson_AuAu14(
-    int mode = 1, int nEvents = 500000, //
+void Fun4All_PhVecMesonMaker_AuAu14(
+    int mode = 1, int nEvents = 5, //
     char *input_file = "AuAu14_BBCEP_test.list" //
     )
 {
-  gSystem->Load("../../install/lib/libRecoEventPlane.so");
+  gSystem->Load("../../install/lib/libPhVecMesonMaker.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
@@ -16,7 +16,7 @@ void Fun4All_RecoEventPlane_vecmeson_AuAu14(
   rc->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
   rc->get_IntFlag("EP_BBC", 0);
 
-  RecoEventPlane *ana = new RecoEventPlane();
+  PhVecMesonMaker *ana = new PhVecMesonMaker();
   ana->set_ana_mode(mode);
   // if(mode == 0) ana->set_eval_file_name("RawEP.root");
   // if(mode == 1) ana->set_eval_file_name("ReCenterEP.root");

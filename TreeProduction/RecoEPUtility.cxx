@@ -20,9 +20,8 @@ RecoEPUtility::~RecoEPUtility()
 
 bool RecoEPUtility::read_in_recal_consts()
 {
-  TOAD toad_loader("RecoEventPlane");
+  TOAD toad_loader("PhVecMesonMaker");
   std::string fname = toad_loader.location("BbcRecalConsts.txt");
-  // std::string fname = "/direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/RecoEventPlane/BbcRecalConsts.txt";
   std::cout << "fname = " << fname.c_str() << std::endl;
   std::ifstream read_consts( fname.c_str() );
   if ( !read_consts.is_open() )

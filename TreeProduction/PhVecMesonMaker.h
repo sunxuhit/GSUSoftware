@@ -1,5 +1,5 @@
-#ifndef __RecoEventPlane_H__
-#define __RecoEventPlane_H__
+#ifndef PhVecMesonMaker_h
+#define PhVecMesonMaker_h
 
 #include "SubsysReco.h"
 
@@ -24,10 +24,11 @@ class TProfile2D;
 
 class RecoEPHistoManager;
 class RecoEPUtility;
+class RecoEventPlane;
 
-class RecoEventPlane: public SubsysReco {
+class PhVecMesonMaker: public SubsysReco {
   public:
-    RecoEventPlane(const char *outputfile = "test.root");
+    PhVecMesonMaker(const char *outputfile = "test.root");
 
     int Init(PHCompositeNode *topNode);
     int InitRun(PHCompositeNode *topNode);
@@ -77,6 +78,7 @@ class RecoEventPlane: public SubsysReco {
 
     RecoEPHistoManager *mRecoEPHistoManager;
     RecoEPUtility *mRecoEPUtility;
+    RecoEventPlane *mRecoEventPlane;
 };
 
-#endif //__H_RecoEventPlane_H__
+#endif
