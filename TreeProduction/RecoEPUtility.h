@@ -13,6 +13,10 @@ class RecoEPUtility : public TObject
     RecoEPUtility();
     virtual ~RecoEPUtility();
 
+    int getCentralityBin(int centrality);
+
+    //------------BBC Event Plane---------------
+    void initBBC();
     bool read_in_recal_consts();
     int get_recal_group(int run_num);
     float get_recal_charge(int PmtIndx, int run_num, int ADC);
@@ -20,6 +24,7 @@ class RecoEPUtility : public TObject
     float get_mip(int PmtIndx, int run_num);
     bool isSaturatePMT(int PmtIndx);
     bool isBadPMT(int PmtIndx, int run_num);
+    //------------BBC Event Plane---------------
 
   private:
 

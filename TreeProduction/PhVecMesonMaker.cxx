@@ -49,32 +49,28 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   // RC flags
   mRunSelection    = 0;
   mSystemSelection = 0;
-  mEPCalib         = 0;
   mBbczCut_val     = 10.0;
-  mDebug           = 0;
   mBbcPmt_flag     = 0;
+  mMode            = 0;
+  mDebug_Bbc       = 0;
+  mQA_Bbc          = 0;
 
-  mPHGlobal = NULL;
-  mCentrality = -999;
-
+  // PH class
+  mPHGlobal  = NULL;
   mRunHeader = NULL;
-  mRunId = -999;
-
-  mVtxOut = NULL; // vertex
-
-  mBbcRaw = NULL; // BBC
-  mBbcCalib = NULL;
-  mBbcGeo = NULL;
+  mRunId     = -999;
+  mVtxOut    = NULL; // vertex
+  mBbcRaw    = NULL; // BBC
+  mBbcCalib  = NULL;
+  mBbcGeo    = NULL;
 
 
-  mNumOfEvents = 0; // number of events
-  mMode = 0;
+  mOutPutFile  = outputfile;
   File_mOutPut = NULL; // output file
-  mOutPutFile = outputfile;
 
   mRecoEPHistoManager = NULL;
-  mRecoEPUtility = NULL;
-  mRecoEventPlane = NULL;
+  mRecoEPUtility      = NULL;
+  mRecoEventPlane     = NULL;
 }
 
 int PhVecMesonMaker::Init(PHCompositeNode *topNode) 
@@ -83,43 +79,49 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
 
   cout << "Setting Module Flags: " << endl;
   mRC              = recoConsts::instance();
-  mRunSelection    = mRC->get_IntFlag("RD_RUN_SELECTION", 0);
-  mSystemSelection = mRC->get_IntFlag("RD_SYSTEM_SELECTION", 0);
-  mDebug           = mRC->get_IntFlag("EP_DEBUG", 0);
-  mBbczCut_val     = mRC->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
+  mRunSelection    = mRC->get_IntFlag("RUN_SELECTION", 0);
+  mSystemSelection = mRC->get_IntFlag("SYSTEM_SELECTION", 0);
+  mBbczCut_val     = mRC->get_DoubleFlag("BBCZCUT_VAL", 10);
   mBbcPmt_flag     = mRC->get_IntFlag("EP_BBC", 0);
-  mEPCalib         = mRC->get_IntFlag("EP_CALIB", 0);
+  mMode            = mRC->get_IntFlag("ANA_MODE", 0);
+  mQA_Bbc          = mRC->get_IntFlag("QA_BBC", 1);
+  mDebug_Bbc       = mRC->get_IntFlag("DEBUG_BBC", 0);
 
   cout << "run " << mRunSelection << " @ system ";
   if(mRunSelection == 14 && mSystemSelection == 0) cout << "Au+Au" << endl;
   cout << "BBCZ cut value is " << mBbczCut_val << endl;
 
-  cout << "BBC phi bin correction status is: " << mBbcPmt_flag << endl;
-  if(mBbcPmt_flag == 0) cout << "do nothing" << endl;
-  if(mBbcPmt_flag > 0)  cout << "hot/cold (20\% off average) phi bin removed" << endl;
-
   // init output structure
-  File_mOutPut = TFile::Open(mOutPutFile.data(), "recreate");
+  File_mOutPut = new TFile(mOutPutFile.data(), "recreate");
   if(!File_mOutPut) cout<<"Cann't create " << mOutPutFile.data() <<endl;
 
-  mNumOfEvents = 0;
+  mNumOfEvents = 0; // number of events
 
-  // initialize histograms
-  mRecoEPHistoManager = new RecoEPHistoManager();
-  mRecoEPHistoManager->set_debug(mDebug);
+  mRecoEPUtility      = new RecoEPUtility(); // initialize utilities
+  mRecoEventPlane     = new RecoEventPlane(); // initialize utilities
+  mRecoEPHistoManager = new RecoEPHistoManager(); // initialize histograms
   mRecoEPHistoManager->initQA_Global();
-  if(mDebug == 1) mRecoEPHistoManager->initQA_BbcAdc();
-  mRecoEPHistoManager->initQA_BbcCharge();
-  mRecoEPHistoManager->initQA_BbcChargeReCalib();
-  if(mEPCalib == 0) mRecoEPHistoManager->initHist_BbcRawEP();
 
-  // initialize utilities
-  mRecoEPUtility = new RecoEPUtility();
-  mRecoEPUtility->read_in_recal_consts();
+  mRecoEPUtility->initBBC();
 
-  // initialize utilities
-  mRecoEventPlane = new RecoEventPlane();
-  mRecoEventPlane->initRawBbcEventPlane();
+  if(mMode == 0) // fill re-center & raw event plane
+  {
+    cout << "fill re-center & raw event plane!" << endl;
+    mRecoEventPlane->initRawBbcEventPlane();
+    mRecoEPHistoManager->initHist_BbcRawEP();
+    if(mQA_Bbc == 1)
+    {
+      cout << "fill QA for BBC!" << endl;
+      mRecoEPHistoManager->set_debug(mDebug_Bbc);
+      mRecoEPHistoManager->initQA_BbcCharge();
+      mRecoEPHistoManager->initQA_BbcChargeReCalib();
+      if(mDebug_Bbc == 1) 
+      {
+	cout << "Start debugging for BBC!" << endl;
+	mRecoEPHistoManager->initQA_BbcAdc();
+      }
+    }
+  }
 
   return EVENT_OK;
 }
@@ -168,30 +170,60 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
   if (!isZDCOK) return DISCARDEVENT;
 
-  float bbcz = mPHGlobal->getBbcZVertex();
-  float cent = mPHGlobal->getCentrality();
+  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  float centrality = mPHGlobal->getCentrality();
+  mRecoEPHistoManager->fillQA_Global_nocuts(zdcz,vtx_bbcz,centrality);
 
-  if ( bbcz >= mBbczCut_val || bbcz <= -(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
-  mRecoEPHistoManager->fillQA_Global(zdcz,bbcz,cent);
+  if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
+  mRecoEPHistoManager->fillQA_Global(zdcz,vtx_bbcz,centrality);
+  // cout << "centrality = " << centrality << ", centralitybin = " << mRecoEPUtility->getCentralityBin(centrality) << endl;
 
-  for (int i_pmt=0; i_pmt<128; i_pmt++) 
+  if(mMode == 0)  // fill re-center & raw event plane
   {
-    short adc = mBbcRaw->get_Adc(i_pmt);
-    short tdc = mBbcRaw->get_Tdc0(i_pmt);
-    float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
-    float charge = mBbcCalib->getCharge(i_pmt, adc);
-    float bbcx = mBbcGeo->getX(i_pmt);
-    float bbcy = mBbcGeo->getY(i_pmt);
-    float bbcz = mBbcGeo->getZ(i_pmt);
-
-    if(time0 > 0 && charge > 0)
+    for (int i_pmt=0; i_pmt<128; i_pmt++) 
     {
-      if(mDebug == 1) mRecoEPHistoManager->fillQA_BbcAdc(i_pmt,adc); // fill Adc QA
-      mRecoEPHistoManager->fillQA_BbcCharge(i_pmt,bbcx,bbcy,bbcz,charge);
+      short adc = mBbcRaw->get_Adc(i_pmt);
+      short tdc = mBbcRaw->get_Tdc0(i_pmt);
+      float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
+      float charge = mBbcCalib->getCharge(i_pmt, adc);
+      float bbcx = mBbcGeo->getX(i_pmt);
+      float bbcy = mBbcGeo->getY(i_pmt);
+      float bbcz = mBbcGeo->getZ(i_pmt);
 
-      float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
-      mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
+      if(time0 > 0 && charge > 0)
+      {
+	const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
+
+	for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
+	{
+	  if(i_pmt < 64)
+	  { // south
+	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge_recalib,i_order);
+	  }
+	  else
+	  { // north
+	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge_recalib,i_order);
+	  }
+	}
+	if(mQA_Bbc == 1)
+	{
+	  if(mDebug_Bbc == 1) mRecoEPHistoManager->fillQA_BbcAdc(i_pmt,adc); // fill Adc QA
+	  mRecoEPHistoManager->fillQA_BbcCharge(i_pmt,bbcx,bbcy,bbcz,charge);
+	  mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
+	}
+      }
     }
+    const int cent20 = mRecoEPUtility->getCentralityBin(centrality);
+    for(int i_order = 0; i_order < 3; ++i_order)
+    {
+      float PsiRaw_BbcSouth = mRecoEventPlane->calPsiRaw_BbcSouth(i_order);
+      float PsiRaw_BbcNorth = mRecoEventPlane->calPsiRaw_BbcNorth(i_order);
+      mRecoEPHistoManager->fillHist_BbcRawEP(PsiRaw_BbcSouth,PsiRaw_BbcNorth,i_order,cent20);
+    }
+    // mRecoEventPlane->printRawBbcEventPlane(0);
+    // mRecoEventPlane->printRawBbcEventPlane(1);
+    // mRecoEventPlane->printRawBbcEventPlane(2);
+    mRecoEventPlane->clearRawBbcEventPlane();
   }
 
   return EVENT_OK;
@@ -201,10 +233,18 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
 {
   File_mOutPut->cd();
   mRecoEPHistoManager->writeQA_Global();
-  if(mDebug == 1) mRecoEPHistoManager->writeQA_BbcAdc();
-  mRecoEPHistoManager->writeQA_BbcCharge();
-  mRecoEPHistoManager->writeQA_BbcChargeReCalib();
-  if(mEPCalib == 0) mRecoEPHistoManager->writeHist_BbcRawEP();
+
+  if(mMode == 0)
+  {
+    mRecoEPHistoManager->writeHist_BbcRawEP();
+
+    if(mQA_Bbc == 1)
+    {
+      if(mDebug_Bbc == 1) mRecoEPHistoManager->writeQA_BbcAdc();
+      mRecoEPHistoManager->writeQA_BbcCharge();
+      mRecoEPHistoManager->writeQA_BbcChargeReCalib();
+    }
+  }
 
   File_mOutPut->Close();
 

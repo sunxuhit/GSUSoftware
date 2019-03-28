@@ -3,7 +3,7 @@
 #include <fstream>
 using namespace std;
 
-void Run_PhVecMesonMaker_AuAu14(const char *outFile = "picodstobject.root")
+void Run_PhVecMesonMaker_AuAu14(const char *outFile = "test.root")
 {
   gSystem->Load("libfvtx_subsysreco.so");
   gSystem->Load("libfun4all.so");
@@ -25,12 +25,12 @@ void Run_PhVecMesonMaker_AuAu14(const char *outFile = "picodstobject.root")
   se->Verbosity(0);
 
   recoConsts *rc =  recoConsts::instance();
-  rc->set_IntFlag("RD_RUN_SELECTION", 14);
-  rc->set_IntFlag("RD_SYSTEM_SELECTION", 0);
-  rc->get_IntFlag("EP_DEBUG", 0);
-  rc->get_IntFlag("EP_CALIB", 0);
-  rc->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
-  rc->get_IntFlag("EP_BBC", 0);
+  rc->set_IntFlag("RUN_SELECTION", 14);
+  rc->set_IntFlag("SYSTEM_SELECTION", 0);
+  rc->set_DoubleFlag("BBCZCUT_VAL", 10);
+  rc->set_IntFlag("ANA_MODE",0); // fill re-center & raw event plane
+  rc->set_IntFlag("QA_BBC",0);
+  rc->set_IntFlag("DEBUG_BBC",0);
 
   PhVecMesonMaker *ana = new PhVecMesonMaker(outFile);
   se->registerSubsystem(ana);

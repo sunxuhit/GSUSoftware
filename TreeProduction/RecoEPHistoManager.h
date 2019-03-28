@@ -2,6 +2,7 @@
 #define RecoEPHistoManager_h
 
 #include <TObject.h>
+#include "PhVecMesonCons.h"
 
 class TH1F;
 class TH2F;
@@ -13,6 +14,7 @@ class RecoEPHistoManager : public TObject
     virtual ~RecoEPHistoManager();
 
     void initQA_Global();
+    void fillQA_Global_nocuts(float vtx_zdc, float vtx_bbc, float centrality);
     void fillQA_Global(float vtx_zdc, float vtx_bbc, float centrality);
     void writeQA_Global();
 
@@ -31,13 +33,19 @@ class RecoEPHistoManager : public TObject
     void writeQA_BbcChargeReCalib();
 
     void initHist_BbcRawEP();
-    void fillHist_BbcRawEP(float Psi1st_BbcSouth, float Psi1st_BbcNorth, float Psi2nd_BbcSouth, float Psi2nd_BbcNorth, float Psi3rd_BbcSouth, float Psi3rd_BbcNorth);
+    void fillHist_BbcRawEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
     void writeHist_BbcRawEP();
 
   private:
 
     // vertex QA
+    TH1F *h_mVtZ_Bbc_nocuts;
+    TH2F *h_mVtR_Bbc_nocuts;
+    TH1F *h_mVtZ_Zdc_nocuts;
+    TH1F *h_mCentrality_nocuts;
+
     TH1F *h_mVtZ_Bbc;
+    TH2F *h_mVtR_Bbc;
     TH1F *h_mVtZ_Zdc;
     TH1F *h_mCentrality;
 
@@ -60,49 +68,11 @@ class RecoEPHistoManager : public TObject
 
 
     // BBC Raw EP
-    TH1F *h_mEP1st_BbcSouth;
-    TH1F *h_mEP1st_BbcNorth;
-    TH2F *h_mEP1st_Correlation;
+    TH1F *h_mEPRaw_BbcSouth[3][vecMesonFlow::mNumOfCentralities];
+    TH1F *h_mEPRaw_BbcNorth[3][vecMesonFlow::mNumOfCentralities];
+    // TH1F *h_mEPRaw_BbcSN[3][vecMesonFlow::mNumOfCentralities];
+    TH2F *h_mEPRaw_Correlation[3][vecMesonFlow::mNumOfCentralities];
 
-    TH1F *h_mEP2nd_BbcSouth;
-    TH1F *h_mEP2nd_BbcNorth;
-    TH2F *h_mEP2nd_Correlation;
-
-    TH1F *h_mEP3rd_BbcSouth;
-    TH1F *h_mEP3rd_BbcNorth;
-    TH2F *h_mEP3rd_Correlation;
-
-    /*
-    // BBC re-center parameters
-    TProfile2D *p_mQx1st_BbcSouth[2]; // 0: vertex pos/neg | 1st: runID & 2nd centrality
-    TProfile2D *p_mQy1st_BbcSouth[2];
-    TProfile2D *p_mQx1st_BbcNorth[2];
-    TProfile2D *p_mQy1st_BbcNorth[2];
-
-    TProfile2D *p_mQx2nd_BbcSouth[2]; // 0: vertex pos/neg | 1st: runID & 2nd centrality
-    TProfile2D *p_mQy2nd_BbcSouth[2];
-    TProfile2D *p_mQx2nd_BbcNorth[2];
-    TProfile2D *p_mQy2nd_BbcNorth[2];
-
-    // BBC Re-Centered EP
-    TH1F *h_mQx1st_BbcSouth_ReCenter;
-    TH1F *h_mQy1st_BbcSouth_ReCenter;
-    TH1F *h_mQx1st_BbcNorth_ReCenter;
-    TH1F *h_mQy1st_BbcNorth_ReCenter;
-
-    TH1F *h_mQx2nd_BbcSouth_ReCenter;
-    TH1F *h_mQy2nd_BbcSouth_ReCenter;
-    TH1F *h_mQx2nd_BbcNorth_ReCenter;
-    TH1F *h_mQy2nd_BbcNorth_ReCenter;
-
-    TH1F *h_mEP1st_BbcSouth_ReCenter;
-    TH1F *h_mEP1st_BbcNorth_ReCenter;
-    TH2F *h_mEP1st_Correlation_ReCenter;
-
-    TH1F *h_mEP2nd_BbcSouth_ReCenter;
-    TH1F *h_mEP2nd_BbcNorth_ReCenter;
-    TH2F *h_mEP2nd_Correlation_ReCenter;
-    */
     ClassDef(RecoEPHistoManager,1)
 };
 #endif

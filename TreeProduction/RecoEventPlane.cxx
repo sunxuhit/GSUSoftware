@@ -51,8 +51,8 @@ TVector2 RecoEventPlane::calqVector_BbcSouth(float bbcx, float bbcy, int order)
   const float qy = TMath::Sin(harmonic[order]*phi);
   qVector.Set(qx,qy);
 
-  // std::cout << "this is calqVector_BbcSouth: input bbcx = " << bbcx << ", bbcy = " << bbcy << "order = " << order << endl;
-  // std::cout << "this is calqVector_BbcSouth: output qx = " << qVector.X() << ", qy = " << qVector.Y() << " harmonic = " << harmonic[order] << endl;
+  // std::cout << "this is calqVector_BbcSouth: input bbcx = " << bbcx << ", bbcy = " << bbcy << ", phi = " << phi << ", order = " << order << std::endl;
+  // std::cout << "this is calqVector_BbcSouth: output qx = " << qVector.X() << ", qy = " << qVector.Y() << ", harmonic = " << harmonic[order] << std::endl;
 
   return qVector;
 }
@@ -67,8 +67,8 @@ TVector2 RecoEventPlane::calqVector_BbcNorth(float bbcx, float bbcy, int order)
   const float qy = TMath::Sin(harmonic[order]*phi);
   qVector.Set(qx,qy);
 
-  // std::cout << "this is calqVector_BbcNorth : input bbcx = " << bbcx << ", bbcy = " << bbcy << "order = " << order << endl;
-  // std::cout << "this is calqVector_BbcNorth: output qx = " << qVector.X() << ", qy = " << qVector.Y() << " harmonic = " << harmonic[order] << endl;
+  // std::cout << "this is calqVector_BbcNorth: input bbcx = " << bbcx << ", bbcy = " << bbcy << ", phi = " << phi  << ", order = " << order << std::endl;
+  // std::cout << "this is calqVector_BbcNorth: output qx = " << qVector.X() << ", qy = " << qVector.Y() << ", harmonic = " << harmonic[order] << std::endl;
 
   return qVector;
 }
@@ -79,9 +79,9 @@ void RecoEventPlane::initRawBbcEventPlane()
 {
   std::cout << "initialize Raw BBC Event Plane!" << std::endl;
   clearRawBbcEventPlane();
-  printRawBbcEventPlane(0); // print information of 1st EP
-  printRawBbcEventPlane(1);
-  printRawBbcEventPlane(2);
+  // printRawBbcEventPlane(0); // print information of 1st EP
+  // printRawBbcEventPlane(1);
+  // printRawBbcEventPlane(2);
 }
 
 void RecoEventPlane::clearRawBbcEventPlane()
@@ -171,22 +171,24 @@ unsigned int RecoEventPlane::getNumOfPmts_BbcNorth(int order)
 // calculate raw Psi
 float RecoEventPlane::calPsiRaw_BbcSouth(int order)
 {
+  const float harmonic[3] = {1.0,2.0,3.0};
   TVector2 QVector = getQVectorRaw_BbcSouth(order);
   float weight = getQWeight_BbcSouth(order);
   float Qx = QVector.X()/weight;
   float Qy = QVector.Y()/weight;
-  float Psi = TMath::ATan2(Qy,Qx);
+  float Psi = TMath::ATan2(Qy,Qx)/harmonic[order];
 
   return Psi;
 }
 
 float RecoEventPlane::calPsiRaw_BbcNorth(int order)
 {
+  const float harmonic[3] = {1.0,2.0,3.0};
   TVector2 QVector = getQVectorRaw_BbcNorth(order);
   float weight = getQWeight_BbcNorth(order);
   float Qx = QVector.X()/weight;
   float Qy = QVector.Y()/weight;
-  float Psi = TMath::ATan2(Qy,Qx);
+  float Psi = TMath::ATan2(Qy,Qx)/harmonic[order];
 
   return Psi;
 }

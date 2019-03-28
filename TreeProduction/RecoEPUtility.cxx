@@ -1,4 +1,6 @@
 #include "RecoEPUtility.h"
+#include "PhVecMesonCons.h"
+
 #include <TOAD.h>
 
 #include <iostream>
@@ -17,6 +19,27 @@ RecoEPUtility::~RecoEPUtility()
 {
 }
 //------------------------------------------------------------
+
+int RecoEPUtility::getCentralityBin(int centrality)
+{
+  // 0: (0%,5%], 1: (5%-10%], 2: (10%,15%], ......, 18: (90%,95%], 19: (95%,100%]
+  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentralities; ++i_cent)
+  {
+    if(centrality > vecMesonFlow::mCentStart[i_cent] && centrality <= vecMesonFlow::mCentStop[i_cent])
+    {
+      return vecMesonFlow::mCentrality[i_cent];
+    }
+  }
+
+  return -1;
+}
+
+//------------BBC Event Plane---------------
+void RecoEPUtility::initBBC()
+{
+  bool bbc_status = read_in_recal_consts();
+  if(bbc_status) std::cout << "BBC recalibration constants read in!" << std::endl;
+}
 
 bool RecoEPUtility::read_in_recal_consts()
 {
@@ -136,3 +159,4 @@ bool RecoEPUtility::isBadPMT(int PmtIndx, int run_num)
 
   return false;
 }
+//------------BBC Event Plane---------------

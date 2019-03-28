@@ -25,20 +25,35 @@ RecoEPHistoManager::~RecoEPHistoManager()
 void RecoEPHistoManager::initQA_Global()
 {
   std::cout << "initialize Global QA!" << std::endl;
-  h_mVtZ_Zdc = new TH1F("h_mVtZ_Zdc","h_mVtZ_Zdc",201,-100.5,100.5);
+  h_mVtZ_Bbc_nocuts = new TH1F("h_mVtZ_Bbc_nocuts","h_mVtZ_Bbc_nocuts",201,-100.5,100.5);
+  h_mVtZ_Zdc_nocuts = new TH1F("h_mVtZ_Zdc_nocuts","h_mVtZ_Zdc_nocuts",201,-100.5,100.5);
+  h_mCentrality_nocuts = new TH1F("h_mCentrality_nocuts","h_mCentrality_nocuts",101,-0.5,100.5);
+
   h_mVtZ_Bbc = new TH1F("h_mVtZ_Bbc","h_mVtZ_Bbc",201,-100.5,100.5);
+  h_mVtZ_Zdc = new TH1F("h_mVtZ_Zdc","h_mVtZ_Zdc",201,-100.5,100.5);
   h_mCentrality = new TH1F("h_mCentrality","h_mCentrality",101,-0.5,100.5);
+}
+
+void RecoEPHistoManager::fillQA_Global_nocuts(float vtx_zdc, float vtx_bbc, float centrality)
+{
+  h_mVtZ_Bbc_nocuts->Fill(vtx_bbc);
+  h_mVtZ_Zdc_nocuts->Fill(vtx_zdc);
+  h_mCentrality_nocuts->Fill(centrality);
 }
 
 void RecoEPHistoManager::fillQA_Global(float vtx_zdc, float vtx_bbc, float centrality)
 {
-  h_mVtZ_Zdc->Fill(vtx_zdc);
   h_mVtZ_Bbc->Fill(vtx_bbc);
+  h_mVtZ_Zdc->Fill(vtx_zdc);
   h_mCentrality->Fill(centrality);
 }
 
 void RecoEPHistoManager::writeQA_Global()
 {
+  h_mVtZ_Bbc_nocuts->Write();
+  h_mVtZ_Zdc_nocuts->Write();
+  h_mCentrality_nocuts->Write();
+
   h_mVtZ_Bbc->Write();
   h_mVtZ_Zdc->Write();
   h_mCentrality->Write();
@@ -183,47 +198,47 @@ void RecoEPHistoManager::writeQA_BbcChargeReCalib()
 
 void RecoEPHistoManager::initHist_BbcRawEP()
 {
-  h_mEP1st_BbcSouth = new TH1F("h_mEP1st_BbcSouth","h_mEP1st_BbcSouth",360,-TMath::Pi(),TMath::Pi());
-  h_mEP1st_BbcNorth = new TH1F("h_mEP1st_BbcNorth","h_mEP1st_BbcNorth",360,-TMath::Pi(),TMath::Pi());
-  h_mEP1st_Correlation = new TH2F("h_mEP1st_Correlation","h_mEP1st_Correlation",100,-TMath::Pi(),TMath::Pi(),100,-TMath::Pi(),TMath::Pi());
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentralities; ++i_cent)
+    {
+      std::string HistName;
+      HistName = Form("h_mEPRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
 
-  h_mEP2nd_BbcSouth = new TH1F("h_mEP2nd_BbcSouth","h_mEP2nd_BbcSouth",360,-TMath::Pi(),TMath::Pi());;
-  h_mEP2nd_BbcNorth = new TH1F("h_mEP2nd_BbcNorth","h_mEP2nd_BbcNorth",360,-TMath::Pi(),TMath::Pi());;
-  h_mEP2nd_Correlation = new TH2F("h_mEP2nd_Correlation","h_mEP2nd_Correlation",60,-TMath::Pi(),TMath::Pi(),60,-TMath::Pi(),TMath::Pi());
+      HistName = Form("h_mEPRaw_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
 
-  h_mEP3rd_BbcSouth = new TH1F("h_mEP3rd_BbcSouth","h_mEP3rd_BbcSouth",360,-TMath::Pi(),TMath::Pi());;
-  h_mEP3rd_BbcNorth = new TH1F("h_mEP3rd_BbcNorth","h_mEP3rd_BbcNorth",360,-TMath::Pi(),TMath::Pi());;
-  h_mEP3rd_Correlation = new TH2F("h_mEP3rd_Correlation","h_mEP3rd_Correlation",360,-TMath::Pi(),TMath::Pi(),360,-TMath::Pi(),TMath::Pi());
+      // HistName = Form("h_mEPRaw_BbcSN_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      // h_mEPRaw_BbcSN[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+
+      HistName = Form("h_mEPRaw_Correlation_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPRaw_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),100,-TMath::Pi(),TMath::Pi(),100,-TMath::Pi(),TMath::Pi());
+    }
+  }
 }
 
-void RecoEPHistoManager::fillHist_BbcRawEP(float Psi1st_BbcSouth, float Psi1st_BbcNorth, float Psi2nd_BbcSouth, float Psi2nd_BbcNorth, float Psi3rd_BbcSouth, float Psi3rd_BbcNorth)
+void RecoEPHistoManager::fillHist_BbcRawEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent)
 {
-  h_mEP1st_BbcSouth->Fill(Psi1st_BbcSouth);
-  h_mEP1st_BbcNorth->Fill(Psi1st_BbcNorth);
-  h_mEP1st_Correlation->Fill(Psi1st_BbcSouth,Psi1st_BbcNorth);
-
-  h_mEP2nd_BbcSouth->Fill(Psi2nd_BbcSouth);
-  h_mEP2nd_BbcNorth->Fill(Psi2nd_BbcNorth);
-  h_mEP2nd_Correlation->Fill(Psi2nd_BbcSouth,Psi2nd_BbcNorth);
-
-  h_mEP3rd_BbcSouth->Fill(Psi3rd_BbcSouth);
-  h_mEP3rd_BbcNorth->Fill(Psi3rd_BbcNorth);
-  h_mEP3rd_Correlation->Fill(Psi3rd_BbcSouth,Psi3rd_BbcNorth);
+  h_mEPRaw_BbcSouth[order][cent]->Fill(Psi_BbcSouth);
+  h_mEPRaw_BbcNorth[order][cent]->Fill(Psi_BbcNorth);
+  // h_mEPRaw_BbcSN[order][cent]->Fill(Psi_BbcSouth-Psi_BbcNorth);
+  h_mEPRaw_Correlation[order][cent]->Fill(Psi_BbcSouth,Psi_BbcNorth);
 }
 
 void RecoEPHistoManager::writeHist_BbcRawEP()
 {
-  h_mEP1st_BbcSouth->Write();
-  h_mEP1st_BbcNorth->Write();
-  h_mEP1st_Correlation->Write();
-
-  h_mEP2nd_BbcSouth->Write();
-  h_mEP2nd_BbcNorth->Write();
-  h_mEP2nd_Correlation->Write();
-
-  h_mEP3rd_BbcSouth->Write();
-  h_mEP3rd_BbcNorth->Write();
-  h_mEP3rd_Correlation->Write();
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentralities; ++i_cent)
+    {
+      h_mEPRaw_BbcSouth[i_order][i_cent]->Write();
+      h_mEPRaw_BbcNorth[i_order][i_cent]->Write();
+      // h_mEPRaw_BbcSN[i_order][i_cent]->Write();
+      h_mEPRaw_Correlation[i_order][i_cent]->Write();
+    }
+  }
 }
 
 //------------------------------------------------------------

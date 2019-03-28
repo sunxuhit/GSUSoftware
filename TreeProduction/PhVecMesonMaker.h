@@ -37,23 +37,18 @@ class PhVecMesonMaker: public SubsysReco {
     int Reset(PHCompositeNode *topNode) {return 0;};
     int End(PHCompositeNode *topNode);
 
-    void set_ana_mode(int mode)
-    {
-      mMode = mode;
-    }
-
   private:
     recoConsts *mRC;
     // RC flags
     int mRunSelection;
     int mSystemSelection;
-    int mDebug;
     double mBbczCut_val;
     int mBbcPmt_flag;
-    int mEPCalib;
+    int mMode;
+    int mQA_Bbc;
+    int mDebug_Bbc;
 
     PHGlobal* mPHGlobal;
-    int mCentrality;
 
     RunHeader* mRunHeader;
     int mRunId;
@@ -66,7 +61,6 @@ class PhVecMesonMaker: public SubsysReco {
 
     int mNumOfEvents;
 
-    int mMode; // 0 for re-center | 1 for shift
     TFile* File_mInPut;
 
     //! Eval Tree Output

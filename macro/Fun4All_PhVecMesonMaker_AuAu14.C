@@ -1,5 +1,5 @@
 void Fun4All_PhVecMesonMaker_AuAu14(
-    int mode = 1, int nEvents = 5, //
+    int mode = 1, int nEvents = 50000, //
     char *input_file = "AuAu14_BBCEP_test.list" //
     )
 {
@@ -9,22 +9,19 @@ void Fun4All_PhVecMesonMaker_AuAu14(
   se->Verbosity(0);
 
   recoConsts *rc =  recoConsts::instance();
-  rc->set_IntFlag("RD_RUN_SELECTION", 14);
-  rc->set_IntFlag("RD_SYSTEM_SELECTION", 0);
-  rc->get_IntFlag("EP_DEBUG", 0);
-  rc->get_IntFlag("EP_CALIB", 0);
-  rc->get_DoubleFlag("RD_BBCZCUT_VAL", 10);
-  rc->get_IntFlag("EP_BBC", 0);
+  rc->set_IntFlag("RUN_SELECTION", 14);
+  rc->set_IntFlag("SYSTEM_SELECTION", 0);
+  rc->set_DoubleFlag("BBCZCUT_VAL", 10);
+  rc->set_IntFlag("ANA_MODE",0); // fill re-center & raw event plane
+  rc->set_IntFlag("QA_BBC",0);
+  rc->set_IntFlag("DEBUG_BBC",0);
 
-  PhVecMesonMaker *ana = new PhVecMesonMaker();
-  ana->set_ana_mode(mode);
-  // if(mode == 0) ana->set_eval_file_name("RawEP.root");
-  // if(mode == 1) ana->set_eval_file_name("ReCenterEP.root");
+  std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/test.root";
+  PhVecMesonMaker *ana = new PhVecMesonMaker(outputfile.c_str());
 
   se->registerSubsystem(ana);
 
   Fun4AllDstInputManager *in = new Fun4AllDstInputManager("DSTin");
-  // in->fileopen("/direct/phenix+u/xusun/WorkSpace/PHENIX/Fun4All_Test/picodstobject.root");
   in->AddListFile(input_file);
   se->registerInputManager(in);
 

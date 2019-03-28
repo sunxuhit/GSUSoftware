@@ -24,6 +24,7 @@ pkginclude_HEADERS = \
 	PhVecMesonMaker.h \
 	RecoEPHistoManager.h \
 	Run14AuAuList.h \
+	PhVecMesonCons.h \
 	RecoEPUtility.h \
 	RecoEventPlane.h
 
@@ -75,12 +76,14 @@ PhVecMesonMaker_Dict.C: \
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 RecoEPHistoManager_Dict.C: \
+	PhVecMesonCons.h \
 	RecoEPHistoManager.h \
 	RecoEPHistoManagerLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 RecoEPUtility_Dict.C: \
 	Run14AuAuList.h \
+	PhVecMesonCons.h \
 	RecoEPUtility.h \
 	RecoEPUtilityLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
