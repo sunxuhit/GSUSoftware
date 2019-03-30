@@ -3,6 +3,7 @@
 
 #include <TObject.h>
 #include "PhVecMesonCons.h"
+#include <TVector2.h>
 
 class TH1F;
 class TH2F;
@@ -20,6 +21,7 @@ class RecoEPHistoManager : public TObject
 
     void set_debug(int debug) {mDebug = debug;}
 
+    //-----------------BBC QA---------------------
     void initQA_BbcAdc();
     void fillQA_BbcAdc(int i_pmt, float adc);
     void writeQA_BbcAdc();
@@ -31,10 +33,17 @@ class RecoEPHistoManager : public TObject
     void initQA_BbcChargeReCalib();
     void fillQA_BbcChargeReCalib(int i_pmt, float bbcx, float bbcy, float bbcz, float charge);
     void writeQA_BbcChargeReCalib();
+    //-----------------BBC QA---------------------
 
+    //===============Raw BBC Event Plane=========================
     void initHist_BbcRawEP();
     void fillHist_BbcRawEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
     void writeHist_BbcRawEP();
+
+    void initHist_BbcRawQVector();
+    void fillHist_BbcRawQVector(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int cent);
+    void writeHist_BbcRawQVector();
+    //===============Raw BBC Event Plane=========================
 
   private:
 
@@ -68,10 +77,15 @@ class RecoEPHistoManager : public TObject
 
 
     // BBC Raw EP
-    TH1F *h_mEPRaw_BbcSouth[3][vecMesonFlow::mNumOfCentralities];
-    TH1F *h_mEPRaw_BbcNorth[3][vecMesonFlow::mNumOfCentralities];
-    // TH1F *h_mEPRaw_BbcSN[3][vecMesonFlow::mNumOfCentralities];
-    TH2F *h_mEPRaw_Correlation[3][vecMesonFlow::mNumOfCentralities];
+    TH1F *h_mEPRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mEPRaw_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+    // TH1F *h_mEPRaw_BbcSN[3][vecMesonFlow::mNumOfCentrality20];
+    TH2F *h_mEPRaw_Correlation[3][vecMesonFlow::mNumOfCentrality20];
+
+    TH1F *h_mQxRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mQyRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mQxRaw_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mQyRaw_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
 
     ClassDef(RecoEPHistoManager,1)
 };

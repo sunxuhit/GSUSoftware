@@ -13,7 +13,9 @@ class RecoEPUtility : public TObject
     RecoEPUtility();
     virtual ~RecoEPUtility();
 
-    int getCentralityBin(int centrality);
+    int getCentralityBin20(int centrality);
+    int getCentralityBin10(int centrality);
+    int getCentralityBin4(int centrality);
 
     //------------BBC Event Plane---------------
     void initBBC();

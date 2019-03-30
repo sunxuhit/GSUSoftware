@@ -109,6 +109,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
     cout << "fill re-center & raw event plane!" << endl;
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEPHistoManager->initHist_BbcRawEP();
+    mRecoEPHistoManager->initHist_BbcRawQVector();
     if(mQA_Bbc == 1)
     {
       cout << "fill QA for BBC!" << endl;
@@ -176,7 +177,6 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
   if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
   mRecoEPHistoManager->fillQA_Global(zdcz,vtx_bbcz,centrality);
-  // cout << "centrality = " << centrality << ", centralitybin = " << mRecoEPUtility->getCentralityBin(centrality) << endl;
 
   if(mMode == 0)  // fill re-center & raw event plane
   {
@@ -199,10 +199,12 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 	  if(i_pmt < 64)
 	  { // south
 	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge_recalib,i_order);
+	    // if(bbcz > 0) cout << "something wrong" << endl;
 	  }
 	  else
 	  { // north
 	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge_recalib,i_order);
+	    // if(bbcz < 0) cout << "something wrong" << endl;
 	  }
 	}
 	if(mQA_Bbc == 1)
@@ -213,12 +215,22 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 	}
       }
     }
-    const int cent20 = mRecoEPUtility->getCentralityBin(centrality);
+    const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
+    const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
+    const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
+    cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", cent4 = " << cent4 << endl;
+    // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent9 = " << cent9 << endl;
     for(int i_order = 0; i_order < 3; ++i_order)
     {
       float PsiRaw_BbcSouth = mRecoEventPlane->calPsiRaw_BbcSouth(i_order);
       float PsiRaw_BbcNorth = mRecoEventPlane->calPsiRaw_BbcNorth(i_order);
       mRecoEPHistoManager->fillHist_BbcRawEP(PsiRaw_BbcSouth,PsiRaw_BbcNorth,i_order,cent20);
+
+      TVector2 QVec_BbcSouth = mRecoEventPlane->getQVectorRaw_BbcSouth(i_order);
+      float QWeight_BbcSouth = mRecoEventPlane->getQWeight_BbcSouth(i_order);
+      TVector2 QVec_BbcNorth = mRecoEventPlane->getQVectorRaw_BbcNorth(i_order);
+      float QWeight_BbcNorth = mRecoEventPlane->getQWeight_BbcNorth(i_order);
+      mRecoEPHistoManager->fillHist_BbcRawQVector(QVec_BbcSouth,QWeight_BbcSouth,QVec_BbcNorth,QWeight_BbcNorth,i_order,cent20);
     }
     // mRecoEventPlane->printRawBbcEventPlane(0);
     // mRecoEventPlane->printRawBbcEventPlane(1);
@@ -237,6 +249,7 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
   if(mMode == 0)
   {
     mRecoEPHistoManager->writeHist_BbcRawEP();
+    mRecoEPHistoManager->writeHist_BbcRawQVector();
 
     if(mQA_Bbc == 1)
     {

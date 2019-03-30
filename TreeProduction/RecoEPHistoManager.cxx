@@ -196,12 +196,14 @@ void RecoEPHistoManager::writeQA_BbcChargeReCalib()
 
 //------------------------------------------------------------
 
+//===============Raw BBC Event Plane=========================
 void RecoEPHistoManager::initHist_BbcRawEP()
 {
+  std::cout << "initialize BBC Raw EP Histograms!" << std::endl;
   const std::string Order[3] = {"1st","2nd","3rd"};
   for(int i_order = 0; i_order < 3; ++i_order)
   {
-    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentralities; ++i_cent)
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
     {
       std::string HistName;
       HistName = Form("h_mEPRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
@@ -231,7 +233,7 @@ void RecoEPHistoManager::writeHist_BbcRawEP()
 {
   for(int i_order = 0; i_order < 3; ++i_order)
   {
-    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentralities; ++i_cent)
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
     {
       h_mEPRaw_BbcSouth[i_order][i_cent]->Write();
       h_mEPRaw_BbcNorth[i_order][i_cent]->Write();
@@ -240,5 +242,61 @@ void RecoEPHistoManager::writeHist_BbcRawEP()
     }
   }
 }
+
+void RecoEPHistoManager::initHist_BbcRawQVector()
+{
+  std::cout << "initialize BBC Raw QVector Histograms!" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      std::string HistName;
+      HistName = Form("h_mQxRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQxRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      HistName = Form("h_mQyRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQyRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+
+      HistName = Form("h_mQxRaw_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQxRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      HistName = Form("h_mQyRaw_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQyRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+    }
+  }
+}
+
+void RecoEPHistoManager::fillHist_BbcRawQVector(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int cent)
+{
+  // float Qx_South = QVec_BbcSouth.X()/QWeight_BbcSouth;
+  // float Qy_South = QVec_BbcSouth.Y()/QWeight_BbcSouth;
+  float Qx_South = QVec_BbcSouth.X();
+  float Qy_South = QVec_BbcSouth.Y();
+  h_mQxRaw_BbcSouth[order][cent]->Fill(Qx_South);
+  h_mQyRaw_BbcSouth[order][cent]->Fill(Qy_South);
+
+  // float Qx_North = QVec_BbcNorth.X()/QWeight_BbcNorth;
+  // float Qy_North = QVec_BbcNorth.Y()/QWeight_BbcNorth;
+  float Qx_North = QVec_BbcNorth.X();
+  float Qy_North = QVec_BbcNorth.Y();
+  h_mQxRaw_BbcNorth[order][cent]->Fill(Qx_North);
+  h_mQyRaw_BbcNorth[order][cent]->Fill(Qy_North);
+}
+
+void RecoEPHistoManager::writeHist_BbcRawQVector()
+{
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      h_mQxRaw_BbcSouth[i_order][i_cent]->Write();
+      h_mQyRaw_BbcSouth[i_order][i_cent]->Write();
+
+      h_mQxRaw_BbcNorth[i_order][i_cent]->Write();
+      h_mQyRaw_BbcNorth[i_order][i_cent]->Write();
+    }
+  }
+}
+
+//===============Raw BBC Event Plane=========================
 
 //------------------------------------------------------------

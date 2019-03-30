@@ -20,14 +20,42 @@ RecoEPUtility::~RecoEPUtility()
 }
 //------------------------------------------------------------
 
-int RecoEPUtility::getCentralityBin(int centrality)
+int RecoEPUtility::getCentralityBin20(int centrality)
 {
   // 0: (0%,5%], 1: (5%-10%], 2: (10%,15%], ......, 18: (90%,95%], 19: (95%,100%]
-  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentralities; ++i_cent)
+  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
   {
-    if(centrality > vecMesonFlow::mCentStart[i_cent] && centrality <= vecMesonFlow::mCentStop[i_cent])
+    if(centrality > vecMesonFlow::mCentStart20[i_cent] && centrality <= vecMesonFlow::mCentStop20[i_cent])
     {
-      return vecMesonFlow::mCentrality[i_cent];
+      return vecMesonFlow::mCentrality20[i_cent];
+    }
+  }
+
+  return -1;
+}
+
+int RecoEPUtility::getCentralityBin10(int centrality)
+{
+  // 0: (0%,5%], 1: (5%-10%], 2: (10%,20%], ......, 7: (60%,70%], 8: (70%,80%]
+  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality10; ++i_cent)
+  {
+    if(centrality > vecMesonFlow::mCentStart10[i_cent] && centrality <= vecMesonFlow::mCentStop10[i_cent])
+    {
+      return vecMesonFlow::mCentrality10[i_cent];
+    }
+  }
+
+  return -1;
+}
+
+int RecoEPUtility::getCentralityBin4(int centrality)
+{
+  // 0: (0%,10%], 1: (10%-40%], 2: (40%,80%], 3: (80%,100%]
+  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality4; ++i_cent)
+  {
+    if(centrality > vecMesonFlow::mCentStart4[i_cent] && centrality <= vecMesonFlow::mCentStop4[i_cent])
+    {
+      return vecMesonFlow::mCentrality4[i_cent];
     }
   }
 

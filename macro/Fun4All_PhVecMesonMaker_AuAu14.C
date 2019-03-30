@@ -1,5 +1,5 @@
 void Fun4All_PhVecMesonMaker_AuAu14(
-    int mode = 1, int nEvents = 50000, //
+    int nEvents = 100, //
     char *input_file = "AuAu14_BBCEP_test.list" //
     )
 {
