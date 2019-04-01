@@ -1,5 +1,6 @@
 #include "RecoEPUtility.h"
 #include "PhVecMesonCons.h"
+#include <TMath.h>
 
 #include <TOAD.h>
 
@@ -58,6 +59,21 @@ int RecoEPUtility::getCentralityBin4(int centrality)
       return vecMesonFlow::mCentrality4[i_cent];
     }
   }
+
+  return -1;
+}
+
+int RecoEPUtility::getVertexBin(float vtx_z)
+{
+  // 0: [-10.0,-5.0], 1: (-5.0,0.0], 2: (0.0,5.0], 3: (5.0,10.0]
+  for(int i_vtx = 0; i_vtx < vecMesonFlow::mNumOfVertex; ++i_vtx)
+  {
+    if(vtx_z > vecMesonFlow::mVtxStart[i_vtx] && vtx_z <= vecMesonFlow::mVtxStop[i_vtx])
+    {
+      return vecMesonFlow::mVertex[i_vtx];
+    }
+  }
+  if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStart[0]) < 1e-10) return vecMesonFlow::mVertex[0];
 
   return -1;
 }

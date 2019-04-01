@@ -267,17 +267,13 @@ void RecoEPHistoManager::initHist_BbcRawQVector()
 
 void RecoEPHistoManager::fillHist_BbcRawQVector(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int cent)
 {
-  // float Qx_South = QVec_BbcSouth.X()/QWeight_BbcSouth;
-  // float Qy_South = QVec_BbcSouth.Y()/QWeight_BbcSouth;
-  float Qx_South = QVec_BbcSouth.X();
-  float Qy_South = QVec_BbcSouth.Y();
+  float Qx_South = QVec_BbcSouth.X()/QWeight_BbcSouth;
+  float Qy_South = QVec_BbcSouth.Y()/QWeight_BbcSouth;
   h_mQxRaw_BbcSouth[order][cent]->Fill(Qx_South);
   h_mQyRaw_BbcSouth[order][cent]->Fill(Qy_South);
 
-  // float Qx_North = QVec_BbcNorth.X()/QWeight_BbcNorth;
-  // float Qy_North = QVec_BbcNorth.Y()/QWeight_BbcNorth;
-  float Qx_North = QVec_BbcNorth.X();
-  float Qy_North = QVec_BbcNorth.Y();
+  float Qx_North = QVec_BbcNorth.X()/QWeight_BbcNorth;
+  float Qy_North = QVec_BbcNorth.Y()/QWeight_BbcNorth;
   h_mQxRaw_BbcNorth[order][cent]->Fill(Qx_North);
   h_mQyRaw_BbcNorth[order][cent]->Fill(Qy_North);
 }

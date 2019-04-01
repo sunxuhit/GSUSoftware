@@ -23,6 +23,7 @@ class TH2F;
 class TProfile2D;
 
 class RecoEPHistoManager;
+class RecoEPProManager;
 class RecoEPUtility;
 class RecoEventPlane;
 
@@ -71,6 +72,7 @@ class PhVecMesonMaker: public SubsysReco {
     int getNodes(PHCompositeNode *topNode); // extract nodes needed for analysis
 
     RecoEPHistoManager *mRecoEPHistoManager;
+    RecoEPProManager *mRecoEPProManager;
     RecoEPUtility *mRecoEPUtility;
     RecoEventPlane *mRecoEventPlane;
 };

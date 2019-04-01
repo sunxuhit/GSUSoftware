@@ -14,6 +14,7 @@ lib_LTLIBRARIES = libPhVecMesonMaker.la
 noinst_HEADERS = \
 PhVecMesonMakerLinkDef.h \
 RecoEPHistoManagerLinkDef.h \
+RecoEPProManagerLinkDef.h \
 RecoEPUtilityLinkDef.h \
 RecoEventPlaneLinkDef.h
 
@@ -23,6 +24,7 @@ RecoEventPlaneLinkDef.h
 pkginclude_HEADERS = \
 	PhVecMesonMaker.h \
 	RecoEPHistoManager.h \
+	RecoEPProManager.h \
 	Run14AuAuList.h \
 	PhVecMesonCons.h \
 	RecoEPUtility.h \
@@ -36,6 +38,8 @@ libPhVecMesonMaker_la_SOURCES = \
   PhVecMesonMaker.cxx \
   RecoEPHistoManager_Dict.C \
   RecoEPHistoManager.cxx \
+  RecoEPProManager_Dict.C \
+  RecoEPProManager.cxx \
   RecoEPUtility_Dict.C \
   RecoEPUtility.cxx \
   RecoEventPlane_Dict.C \
@@ -79,6 +83,12 @@ RecoEPHistoManager_Dict.C: \
 	PhVecMesonCons.h \
 	RecoEPHistoManager.h \
 	RecoEPHistoManagerLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+RecoEPProManager_Dict.C: \
+	PhVecMesonCons.h \
+	RecoEPProManager.h \
+	RecoEPProManagerLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 RecoEPUtility_Dict.C: \

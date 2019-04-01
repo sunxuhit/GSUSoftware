@@ -38,6 +38,7 @@
 
 //Utility Class
 #include "RecoEPHistoManager.h"
+#include "RecoEPProManager.h"
 #include "RecoEPUtility.h"
 #include "RecoEventPlane.h"
 
@@ -69,6 +70,7 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   File_mOutPut = NULL; // output file
 
   mRecoEPHistoManager = NULL;
+  mRecoEPProManager   = NULL;
   mRecoEPUtility      = NULL;
   mRecoEventPlane     = NULL;
 }
@@ -101,6 +103,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   mRecoEventPlane     = new RecoEventPlane(); // initialize utilities
   mRecoEPHistoManager = new RecoEPHistoManager(); // initialize histograms
   mRecoEPHistoManager->initQA_Global();
+  mRecoEPProManager   = new RecoEPProManager(); // initialize histograms
 
   mRecoEPUtility->initBBC();
 
@@ -110,6 +113,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEPHistoManager->initHist_BbcRawEP();
     mRecoEPHistoManager->initHist_BbcRawQVector();
+    mRecoEPProManager->initPro_BbcReCenter();
     if(mQA_Bbc == 1)
     {
       cout << "fill QA for BBC!" << endl;
@@ -215,11 +219,11 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 	}
       }
     }
+
     const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
     const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
     const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
     cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", cent4 = " << cent4 << endl;
-    // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent9 = " << cent9 << endl;
     for(int i_order = 0; i_order < 3; ++i_order)
     {
       float PsiRaw_BbcSouth = mRecoEventPlane->calPsiRaw_BbcSouth(i_order);
@@ -250,6 +254,7 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
   {
     mRecoEPHistoManager->writeHist_BbcRawEP();
     mRecoEPHistoManager->writeHist_BbcRawQVector();
+    mRecoEPProManager->writePro_BbcReCenter();
 
     if(mQA_Bbc == 1)
     {

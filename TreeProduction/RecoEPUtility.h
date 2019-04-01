@@ -16,6 +16,7 @@ class RecoEPUtility : public TObject
     int getCentralityBin20(int centrality);
     int getCentralityBin10(int centrality);
     int getCentralityBin4(int centrality);
+    int getVertexBin(float vtx_z);
 
     //------------BBC Event Plane---------------
     void initBBC();
