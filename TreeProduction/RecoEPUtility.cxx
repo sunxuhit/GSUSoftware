@@ -8,6 +8,8 @@
 #include <fstream>
 #include <string>
 #include <stdlib.h>
+#include <algorithm>
+#include <iterator>
 
 ClassImp(RecoEPUtility)
 
@@ -20,6 +22,29 @@ RecoEPUtility::~RecoEPUtility()
 {
 }
 //------------------------------------------------------------
+
+bool RecoEPUtility::isGoodRun(int runId)
+{
+  int grp = get_recal_group(runId);
+  if(grp == 1) return std::find(GoodRunList::runno_grp1,GoodRunList::runno_grp1+GoodRunList::nrun_grp1,runId) != GoodRunList::runno_grp1+GoodRunList::nrun_grp1;
+  if(grp == 2) return std::find(GoodRunList::runno_grp2,GoodRunList::runno_grp2+GoodRunList::nrun_grp2,runId) != GoodRunList::runno_grp2+GoodRunList::nrun_grp2;
+  if(grp == 3) return std::find(GoodRunList::runno_grp3,GoodRunList::runno_grp3+GoodRunList::nrun_grp3,runId) != GoodRunList::runno_grp3+GoodRunList::nrun_grp3;
+  if(grp == 4) return std::find(GoodRunList::runno_grp4,GoodRunList::runno_grp4+GoodRunList::nrun_grp4,runId) != GoodRunList::runno_grp4+GoodRunList::nrun_grp4;
+  if(grp == 5) return std::find(GoodRunList::runno_grp5,GoodRunList::runno_grp5+GoodRunList::nrun_grp5,runId) != GoodRunList::runno_grp5+GoodRunList::nrun_grp5;
+  if(grp == 6) return std::find(GoodRunList::runno_grp6,GoodRunList::runno_grp6+GoodRunList::nrun_grp6,runId) != GoodRunList::runno_grp6+GoodRunList::nrun_grp6;
+  if(grp == 7) return std::find(GoodRunList::runno_grp7,GoodRunList::runno_grp7+GoodRunList::nrun_grp7,runId) != GoodRunList::runno_grp7+GoodRunList::nrun_grp7;
+  if(grp == 8) return std::find(GoodRunList::runno_grp8,GoodRunList::runno_grp8+GoodRunList::nrun_grp8,runId) != GoodRunList::runno_grp8+GoodRunList::nrun_grp8;
+  if(grp == 9) return std::find(GoodRunList::runno_grp9,GoodRunList::runno_grp9+GoodRunList::nrun_grp9,runId) != GoodRunList::runno_grp9+GoodRunList::nrun_grp9;
+  if(grp == 10) return std::find(GoodRunList::runno_grp10,GoodRunList::runno_grp10+GoodRunList::nrun_grp10,runId) != GoodRunList::runno_grp10+GoodRunList::nrun_grp10;
+  if(grp == 11) return std::find(GoodRunList::runno_grp11,GoodRunList::runno_grp11+GoodRunList::nrun_grp11,runId) != GoodRunList::runno_grp11+GoodRunList::nrun_grp11;
+  if(grp == 12) return std::find(GoodRunList::runno_grp12,GoodRunList::runno_grp12+GoodRunList::nrun_grp12,runId) != GoodRunList::runno_grp12+GoodRunList::nrun_grp12;
+  if(grp == 13) return std::find(GoodRunList::runno_grp13,GoodRunList::runno_grp13+GoodRunList::nrun_grp13,runId) != GoodRunList::runno_grp13+GoodRunList::nrun_grp13;
+  if(grp == 14) return std::find(GoodRunList::runno_grp14,GoodRunList::runno_grp14+GoodRunList::nrun_grp14,runId) != GoodRunList::runno_grp14+GoodRunList::nrun_grp14;
+  if(grp == 15) return std::find(GoodRunList::runno_grp15,GoodRunList::runno_grp15+GoodRunList::nrun_grp15,runId) != GoodRunList::runno_grp15+GoodRunList::nrun_grp15;
+  if(grp == 16) return std::find(GoodRunList::runno_grp16,GoodRunList::runno_grp16+GoodRunList::nrun_grp16,runId) != GoodRunList::runno_grp16+GoodRunList::nrun_grp16;
+
+  return false;
+}
 
 int RecoEPUtility::getCentralityBin20(int centrality)
 {

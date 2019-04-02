@@ -13,6 +13,7 @@ class RecoEPUtility : public TObject
     RecoEPUtility();
     virtual ~RecoEPUtility();
 
+    bool isGoodRun(int runId);
     int getCentralityBin20(int centrality);
     int getCentralityBin10(int centrality);
     int getCentralityBin4(int centrality);

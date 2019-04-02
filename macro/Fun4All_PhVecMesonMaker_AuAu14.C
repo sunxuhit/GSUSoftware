@@ -1,5 +1,5 @@
 void Fun4All_PhVecMesonMaker_AuAu14(
-    int nEvents = 10000, //
+    int nEvents = 100000, //
     char *input_file = "AuAu14_BBCEP_test.list" //
     )
 {
@@ -16,7 +16,7 @@ void Fun4All_PhVecMesonMaker_AuAu14(
   rc->set_IntFlag("QA_BBC",0);
   rc->set_IntFlag("DEBUG_BBC",0);
 
-  std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/test.root";
+  std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ReCenter.root";
   PhVecMesonMaker *ana = new PhVecMesonMaker(outputfile.c_str());
 
   se->registerSubsystem(ana);

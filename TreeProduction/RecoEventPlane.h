@@ -3,7 +3,10 @@
 
 #include <TObject.h>
 #include <TVector2.h>
+#include "PhVecMesonCons.h"
 
+class TFile;
+class TProfile2D;
 
 class RecoEventPlane : public TObject
 {
@@ -37,17 +40,48 @@ class RecoEventPlane : public TObject
     float calPsiRaw_BbcNorth(int order);
     //===============Raw BBC Event Plane=========================
 
+    //===============ReCenter BBC Event Plane====================
+    bool readPro_ReCenter(); // read in ReCenter parameters
+    bool closePro_ReCenter(); // close ReCenter parameters
+
+    void initReCenterBbcEventPlane();
+    void clearReCenterBbcEventPlane();
+    void printReCenterBbcEventPlane(int order);
+
+    TVector2 getQVectorReCenter_BbcSouth(int order, int vtx4, int runId, int cent20);
+    TVector2 getQVectorReCenter_BbcNorth(int order, int vtx4, int runId, int cent20);
+
+    float calPsiReCenter_BbcSouth(int order);
+    float calPsiReCenter_BbcNorth(int order);
+
+    //===============ReCenter BBC Event Plane====================
+
     //-----------------BBC Event Plane---------------------
 
   private:
 
     //-----------------BBC Event Plane---------------------
+    //===============Raw BBC Event Plane=========================
     TVector2 mQVectorRaw_BbcSouth[3]; // 0 for 1st, 1 for 2nd, 2 for 3rd
     TVector2 mQVectorRaw_BbcNorth[3];
     float mQWeight_BbcSouth[3]; 
     float mQWeight_BbcNorth[3];
     unsigned int mNumOfPmts_BbcSouth[3];
     unsigned int mNumOfPmts_BbcNorth[3];
+    //===============Raw BBC Event Plane=========================
+
+    //===============ReCenter BBC Event Plane====================
+    TFile *File_mInPutReCenter; // read in re-center parameters
+    TProfile2D *p_mQx_BbcSouth[3][vecMesonFlow::mNumOfVertex]; // 0 is flow harmonic | 1 is vertex bin
+    TProfile2D *p_mQy_BbcSouth[3][vecMesonFlow::mNumOfVertex];
+    TProfile2D *p_mQx_BbcNorth[3][vecMesonFlow::mNumOfVertex];
+    TProfile2D *p_mQy_BbcNorth[3][vecMesonFlow::mNumOfVertex];
+
+    TVector2 mQVectorReCenter_BbcSouth[3]; // 0 for 1st, 1 for 2nd, 2 for 3rd
+    TVector2 mQVectorReCenter_BbcNorth[3];
+
+    //===============ReCenter BBC Event Plane====================
+
     //-----------------BBC Event Plane---------------------
 
     ClassDef(RecoEventPlane,1)

@@ -32,34 +32,34 @@ void RecoEPProManager::initPro_BbcReCenter()
       std::string ProName;
 
       ProName = Form("p_mQx_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfVertex,-0.5,19.5);
+      p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQy_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfVertex,-0.5,19.5);
+      p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQx_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfVertex,-0.5,19.5);
+      p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQy_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfVertex,-0.5,19.5);
+      p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
     }
   }
 }
 
-void RecoEPProManager::fillPro_BbcSouthReCenter(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, int order, int vtx, int runId, int cent20)
+void RecoEPProManager::fillPro_BbcSouthReCenter(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, int order, int vtx4, int runId, int cent20)
 {
   float Qx_South = QVec_BbcSouth.X()/QWeight_BbcSouth;
   float Qy_South = QVec_BbcSouth.Y()/QWeight_BbcSouth;
-  p_mQx_BbcSouth[order][vtx]->Fill((double)runId,(double)cent20,(double)Qx_South);
-  p_mQy_BbcSouth[order][vtx]->Fill((double)runId,(double)cent20,(double)Qy_South);
+  p_mQx_BbcSouth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qx_South);
+  p_mQy_BbcSouth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qy_South);
 }
 
-void RecoEPProManager::fillPro_BbcNorthReCenter(TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int vtx, int runId, int cent20)
+void RecoEPProManager::fillPro_BbcNorthReCenter(TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int vtx4, int runId, int cent20)
 {
   float Qx_North = QVec_BbcNorth.X()/QWeight_BbcNorth;
   float Qy_North = QVec_BbcNorth.Y()/QWeight_BbcNorth;
-  p_mQx_BbcNorth[order][vtx]->Fill((double)runId,(double)cent20,(double)Qx_North);
-  p_mQy_BbcNorth[order][vtx]->Fill((double)runId,(double)cent20,(double)Qy_North);
+  p_mQx_BbcNorth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qx_North);
+  p_mQy_BbcNorth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qy_North);
 }
 
 void RecoEPProManager::writePro_BbcReCenter()

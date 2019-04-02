@@ -105,11 +105,10 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   mRecoEPHistoManager->initQA_Global();
   mRecoEPProManager   = new RecoEPProManager(); // initialize histograms
 
-  mRecoEPUtility->initBBC();
-
-  if(mMode == 0) // fill re-center & raw event plane
+  if(mMode == 0) // fill re-center parameters & raw event plane
   {
-    cout << "fill re-center & raw event plane!" << endl;
+    cout << "fill re-center parameters & raw event plane!" << endl;
+    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEPHistoManager->initHist_BbcRawEP();
     mRecoEPHistoManager->initHist_BbcRawQVector();
@@ -144,6 +143,11 @@ int PhVecMesonMaker::InitRun(PHCompositeNode *topNode)
 
   mRunId = mRunHeader->get_RunNumber();
   cout << "runId is "<< mRunId << endl;
+  if(!mRecoEPUtility->isGoodRun(mRunId)) 
+  {
+    cout << "could not find in good run list! & drop the run!" << endl;
+    return ABORTRUN;
+  }
 
   // set BbcCalib
   mBbcCalib = new BbcCalib();
@@ -222,8 +226,9 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
     const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
     const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
-    const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
-    cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", cent4 = " << cent4 << endl;
+    // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
+    const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
+    // cout << "vertex = " << vtx_bbcz << ", vtx4 = " << vtx4 << ", centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", cent4 = " << cent4 << endl;
     for(int i_order = 0; i_order < 3; ++i_order)
     {
       float PsiRaw_BbcSouth = mRecoEventPlane->calPsiRaw_BbcSouth(i_order);
@@ -232,9 +237,14 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
       TVector2 QVec_BbcSouth = mRecoEventPlane->getQVectorRaw_BbcSouth(i_order);
       float QWeight_BbcSouth = mRecoEventPlane->getQWeight_BbcSouth(i_order);
+      mRecoEPProManager->fillPro_BbcSouthReCenter(QVec_BbcSouth,QWeight_BbcSouth,i_order,vtx4,mRunId,cent20); // fill re-center parameters
+
       TVector2 QVec_BbcNorth = mRecoEventPlane->getQVectorRaw_BbcNorth(i_order);
       float QWeight_BbcNorth = mRecoEventPlane->getQWeight_BbcNorth(i_order);
-      mRecoEPHistoManager->fillHist_BbcRawQVector(QVec_BbcSouth,QWeight_BbcSouth,QVec_BbcNorth,QWeight_BbcNorth,i_order,cent20);
+      mRecoEPProManager->fillPro_BbcNorthReCenter(QVec_BbcNorth,QWeight_BbcNorth,i_order,vtx4,mRunId,cent20); // fill re-center parameters
+
+      // mRecoEPHistoManager->fillHist_BbcRawQVector(QVec_BbcSouth,QWeight_BbcSouth,QVec_BbcNorth,QWeight_BbcNorth,i_order,cent20);
+      mRecoEPHistoManager->fillHist_BbcRawQVector(QVec_BbcSouth,QWeight_BbcSouth,QVec_BbcNorth,QWeight_BbcNorth,i_order,cent10);
     }
     // mRecoEventPlane->printRawBbcEventPlane(0);
     // mRecoEventPlane->printRawBbcEventPlane(1);

@@ -1,6 +1,10 @@
 #include "RecoEventPlane.h"
 
+#include <TFile.h>
+#include <TProfile2D.h>
 #include <TMath.h>
+
+#include <TOAD.h>
 
 #include <iostream>
 #include <cmath>
@@ -11,6 +15,7 @@ ClassImp(RecoEventPlane)
 RecoEventPlane::RecoEventPlane()
 {
   clearRawBbcEventPlane();
+  File_mInPutReCenter = NULL;
 }
 
 RecoEventPlane::~RecoEventPlane()
@@ -194,3 +199,90 @@ float RecoEventPlane::calPsiRaw_BbcNorth(int order)
 }
 //-----------------BBC Event Plane---------------------
 
+
+//===============ReCenter BBC Event Plane====================
+bool RecoEventPlane::readPro_ReCenter()
+{
+  TOAD toad_loader("PhVecMesonMaker");
+  std::string input_recenter = toad_loader.location("file_AuAu200GeV_ReCenter.root");
+  std::cout << "inputfile = " << input_recenter.c_str() << std::endl;
+  File_mInPutReCenter = TFile::Open(input_recenter.c_str());
+  if(!File_mInPutReCenter->IsOpen())
+  {
+    std::cout << "Could NOT find ReCenter Parameters file! & drop the run!" << std::endl;
+    return false;
+  }
+
+  std::cout << "Read in ReCenter Correction Profiles!" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_vtx = 0; i_vtx < vecMesonFlow::mNumOfVertex; ++i_vtx)
+    {
+      std::string ProName;
+
+      ProName = Form("p_mQx_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
+      p_mQx_BbcSouth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+
+      ProName = Form("p_mQy_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
+      p_mQy_BbcSouth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+
+      ProName = Form("p_mQx_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
+      p_mQx_BbcNorth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+
+      ProName = Form("p_mQy_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
+      p_mQy_BbcNorth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+    }
+  }
+
+  return true;
+}
+
+bool RecoEventPlane::closePro_ReCenter()
+{
+  File_mInPutReCenter->Close();
+
+  if(File_mInPutReCenter->IsOpen())
+  {
+    std::cout << "Could NOT find ReCenter Parameters file! & drop the run!" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+// initialize raw Q-vector & weight & number of used pmts
+void RecoEventPlane::initReCenterBbcEventPlane()
+{
+  std::cout << "initialize ReCentered BBC Event Plane!" << std::endl;
+  clearReCenterBbcEventPlane();
+  // printRawBbcEventPlane(0); // print information of 1st EP
+  // printRawBbcEventPlane(1);
+  // printRawBbcEventPlane(2);
+}
+
+void RecoEventPlane::clearReCenterBbcEventPlane()
+{
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    mQVectorReCenter_BbcSouth[i_order].Set(0.0,0.0);
+    mQVectorReCenter_BbcNorth[i_order].Set(0.0,0.0);
+  }
+}
+
+void RecoEventPlane::printReCenterBbcEventPlane(int order)
+{
+  std::string Order[3] = {"1st","2nd","3rd"};
+  std::cout << "print information of " << Order[order] << " Event Plane: " << std::endl;
+
+  std::cout << "mQVectorReCenter_BbcSouth.X =  " << mQVectorReCenter_BbcSouth[order].X() << std::endl;
+  std::cout << "mQVectorReCenter_BbcSouth.Y =  " << mQVectorReCenter_BbcSouth[order].Y() << std::endl;
+
+  std::cout << "mQVectorReCenter_BbcNorth.X =  " << mQVectorReCenter_BbcNorth[order].X() << std::endl;
+  std::cout << "mQVectorReCenter_BbcNorth.Y =  " << mQVectorReCenter_BbcNorth[order].Y() << std::endl;
+
+  std::cout << std::endl;
+}
+
+
+//===============ReCenter BBC Event Plane====================

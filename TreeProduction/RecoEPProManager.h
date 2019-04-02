@@ -2,8 +2,8 @@
 #define RecoEPProManager_h
 
 #include <TObject.h>
-#include "PhVecMesonCons.h"
 #include <TVector2.h>
+#include "PhVecMesonCons.h"
 
 class TProfile2D;
 
@@ -15,8 +15,8 @@ class RecoEPProManager : public TObject
 
     //===============BBC Event Plane ReCenter=========================
     void initPro_BbcReCenter();
-    void fillPro_BbcSouthReCenter(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, int order, int vtx, int runId, int cent20);
-    void fillPro_BbcNorthReCenter(TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int vtx, int runId, int cent20);
+    void fillPro_BbcSouthReCenter(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, int order, int vtx4, int runId, int cent20);
+    void fillPro_BbcNorthReCenter(TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int vtx4, int runId, int cent20);
     void writePro_BbcReCenter();
     //===============BBC Event Plane ReCenter=========================
 
