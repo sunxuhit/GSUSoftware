@@ -126,6 +126,15 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
       }
     }
   }
+  if(mMode == 1) // fill shift parameters & re-centered event plane
+  {
+    cout << "fill shift parameters & re-centered event plane!" << endl;
+    mRecoEPUtility->initBBC();
+    mRecoEventPlane->initRawBbcEventPlane();
+    mRecoEventPlane->initReCenterBbcEventPlane();
+    bool isReCenter = mRecoEventPlane->readPro_ReCenter();
+    if(!isReCenter) return ABORTRUN;
+  }
 
   return EVENT_OK;
 }
@@ -207,12 +216,10 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 	  if(i_pmt < 64)
 	  { // south
 	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge_recalib,i_order);
-	    // if(bbcz > 0) cout << "something wrong" << endl;
 	  }
 	  else
 	  { // north
 	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge_recalib,i_order);
-	    // if(bbcz < 0) cout << "something wrong" << endl;
 	  }
 	}
 	if(mQA_Bbc == 1)
@@ -251,6 +258,62 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
     // mRecoEventPlane->printRawBbcEventPlane(2);
     mRecoEventPlane->clearRawBbcEventPlane();
   }
+  if(mMode == 1)  // fill shift parameters & re-centered event plane
+  {
+    for (int i_pmt=0; i_pmt<128; i_pmt++) 
+    {
+      short adc = mBbcRaw->get_Adc(i_pmt);
+      short tdc = mBbcRaw->get_Tdc0(i_pmt);
+      float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
+      float charge = mBbcCalib->getCharge(i_pmt, adc);
+      float bbcx = mBbcGeo->getX(i_pmt);
+      float bbcy = mBbcGeo->getY(i_pmt);
+
+      if(time0 > 0 && charge > 0)
+      {
+	const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
+
+	for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
+	{
+	  if(i_pmt < 64)
+	  { // south
+	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge_recalib,i_order);
+	  }
+	  else
+	  { // north
+	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge_recalib,i_order);
+	  }
+	}
+      }
+    }
+
+    const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
+    // const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
+    // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
+    const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
+    // cout << "vertex = " << vtx_bbcz << ", vtx4 = " << vtx4 << ", centrality = " << centrality << ", cent20 = " << cent20 << endl;
+    for(int i_order = 0; i_order < 3; ++i_order)
+    {
+      TVector2 QVecReCenter_BbcSouth = mRecoEventPlane->getQVectorReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
+      cout << "QVecReCenter_BbcSouth.X = " << QVecReCenter_BbcSouth.X() << ", QVecReCenter_BbcSouth.Y() = " << QVecReCenter_BbcSouth.Y() << endl;
+      TVector2 QVecReCenter_BbcNorth = mRecoEventPlane->getQVectorReCenter_BbcNorth(i_order,vtx4,mRunId,cent20);
+      cout << "QVecReCenter_BbcNorth.X = " << QVecReCenter_BbcNorth.X() << ", QVecReCenter_BbcNorth.Y() = " << QVecReCenter_BbcNorth.Y() << endl;
+    }
+
+    /*
+    mRecoEventPlane->printRawBbcEventPlane(0);
+    mRecoEventPlane->printReCenterBbcEventPlane(0,vtx4,mRunId,cent20);
+
+    mRecoEventPlane->printRawBbcEventPlane(1);
+    mRecoEventPlane->printReCenterBbcEventPlane(1,vtx4,mRunId,cent20);
+
+    mRecoEventPlane->printReCenterBbcEventPlane(2,vtx4,mRunId,cent20);
+    mRecoEventPlane->printRawBbcEventPlane(2);
+    */
+
+    mRecoEventPlane->clearRawBbcEventPlane();
+    mRecoEventPlane->clearReCenterBbcEventPlane();
+  }
 
   return EVENT_OK;
 }
@@ -272,6 +335,10 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
       mRecoEPHistoManager->writeQA_BbcCharge();
       mRecoEPHistoManager->writeQA_BbcChargeReCalib();
     }
+  }
+  if(mMode == 1)
+  {
+    mRecoEventPlane->closePro_ReCenter();
   }
 
   File_mOutPut->Close();

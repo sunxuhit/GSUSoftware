@@ -46,14 +46,13 @@ class RecoEventPlane : public TObject
 
     void initReCenterBbcEventPlane();
     void clearReCenterBbcEventPlane();
-    void printReCenterBbcEventPlane(int order);
+    void printReCenterBbcEventPlane(int order, int vtx4, int runId, int cent20);
 
     TVector2 getQVectorReCenter_BbcSouth(int order, int vtx4, int runId, int cent20);
     TVector2 getQVectorReCenter_BbcNorth(int order, int vtx4, int runId, int cent20);
 
-    float calPsiReCenter_BbcSouth(int order);
-    float calPsiReCenter_BbcNorth(int order);
-
+    float calPsiReCenter_BbcSouth(int order, int vtx4, int runId, int cent20);
+    float calPsiReCenter_BbcNorth(int order, int vtx4, int runId, int cent20);
     //===============ReCenter BBC Event Plane====================
 
     //-----------------BBC Event Plane---------------------
@@ -79,7 +78,6 @@ class RecoEventPlane : public TObject
 
     TVector2 mQVectorReCenter_BbcSouth[3]; // 0 for 1st, 1 for 2nd, 2 for 3rd
     TVector2 mQVectorReCenter_BbcNorth[3];
-
     //===============ReCenter BBC Event Plane====================
 
     //-----------------BBC Event Plane---------------------

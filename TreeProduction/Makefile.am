@@ -7,7 +7,9 @@ AM_CXXFLAGS = `root-config --cflags`
 
 AM_CPPFLAGS = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/include -I$(MYINSTALL)/include
 
-dist_pkgdata_DATA = BbcRecalConsts.txt
+dist_pkgdata_DATA = \
+BbcRecalConsts.txt \
+file_AuAu200GeV_ReCenter.root
 
 lib_LTLIBRARIES = libPhVecMesonMaker.la
 
@@ -99,6 +101,7 @@ RecoEPUtility_Dict.C: \
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 RecoEventPlane_Dict.C: \
+	PhVecMesonCons.h \
 	RecoEventPlane.h \
 	RecoEventPlaneLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
