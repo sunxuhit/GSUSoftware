@@ -201,22 +201,20 @@ void RecoEPHistoManager::initHist_BbcRawEP()
 {
   std::cout << "initialize BBC Raw EP Histograms!" << std::endl;
   const std::string Order[3] = {"1st","2nd","3rd"};
+  const float harmonic[3] = {1.0,2.0,3.0};
   for(int i_order = 0; i_order < 3; ++i_order)
   {
     for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
     {
       std::string HistName;
       HistName = Form("h_mEPRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mEPRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      h_mEPRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
 
       HistName = Form("h_mEPRaw_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mEPRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
-
-      // HistName = Form("h_mEPRaw_BbcSN_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      // h_mEPRaw_BbcSN[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      h_mEPRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
 
       HistName = Form("h_mEPRaw_Correlation_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mEPRaw_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),100,-TMath::Pi(),TMath::Pi(),100,-TMath::Pi(),TMath::Pi());
+      h_mEPRaw_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
     }
   }
 }
@@ -253,14 +251,14 @@ void RecoEPHistoManager::initHist_BbcRawQVector()
     {
       std::string HistName;
       HistName = Form("h_mQxRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mQxRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      h_mQxRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
       HistName = Form("h_mQyRaw_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mQyRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      h_mQyRaw_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
 
       HistName = Form("h_mQxRaw_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mQxRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      h_mQxRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
       HistName = Form("h_mQyRaw_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mQyRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::Pi(),TMath::Pi());
+      h_mQyRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
     }
   }
 }
@@ -292,7 +290,100 @@ void RecoEPHistoManager::writeHist_BbcRawQVector()
     }
   }
 }
-
 //===============Raw BBC Event Plane=========================
+
+//===============ReCenter BBC Event Plane=========================
+void RecoEPHistoManager::initHist_BbcReCenterEP()
+{
+  std::cout << "initialize BBC ReCenter EP Histograms!" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  const float harmonic[3] = {1.0,2.0,3.0};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      std::string HistName;
+      HistName = Form("h_mEPReCenter_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPReCenter_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+
+      HistName = Form("h_mEPReCenter_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPReCenter_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+
+      HistName = Form("h_mEPReCenter_Correlation_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPReCenter_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+    }
+  }
+}
+
+void RecoEPHistoManager::fillHist_BbcReCenterEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent)
+{
+  h_mEPReCenter_BbcSouth[order][cent]->Fill(Psi_BbcSouth);
+  h_mEPReCenter_BbcNorth[order][cent]->Fill(Psi_BbcNorth);
+  h_mEPReCenter_Correlation[order][cent]->Fill(Psi_BbcSouth,Psi_BbcNorth);
+}
+
+void RecoEPHistoManager::writeHist_BbcReCenterEP()
+{
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      h_mEPReCenter_BbcSouth[i_order][i_cent]->Write();
+      h_mEPReCenter_BbcNorth[i_order][i_cent]->Write();
+      h_mEPReCenter_Correlation[i_order][i_cent]->Write();
+    }
+  }
+}
+
+void RecoEPHistoManager::initHist_BbcReCenterQVector()
+{
+  std::cout << "initialize BBC ReCenter QVector Histograms!" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      std::string HistName;
+      HistName = Form("h_mQxReCenter_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQxReCenter_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
+      HistName = Form("h_mQyReCenter_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQyReCenter_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
+
+      HistName = Form("h_mQxReCenter_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQxReCenter_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
+      HistName = Form("h_mQyReCenter_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mQyReCenter_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),201,-1.005,1.005);
+    }
+  }
+}
+
+void RecoEPHistoManager::fillHist_BbcReCenterQVector(TVector2 QVec_BbcSouth, TVector2 QVec_BbcNorth, int order, int cent)
+{
+  float Qx_South = QVec_BbcSouth.X();
+  float Qy_South = QVec_BbcSouth.Y();
+  h_mQxReCenter_BbcSouth[order][cent]->Fill(Qx_South);
+  h_mQyReCenter_BbcSouth[order][cent]->Fill(Qy_South);
+
+  float Qx_North = QVec_BbcNorth.X();
+  float Qy_North = QVec_BbcNorth.Y();
+  h_mQxReCenter_BbcNorth[order][cent]->Fill(Qx_North);
+  h_mQyReCenter_BbcNorth[order][cent]->Fill(Qy_North);
+}
+
+void RecoEPHistoManager::writeHist_BbcReCenterQVector()
+{
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      h_mQxReCenter_BbcSouth[i_order][i_cent]->Write();
+      h_mQyReCenter_BbcSouth[i_order][i_cent]->Write();
+
+      h_mQxReCenter_BbcNorth[i_order][i_cent]->Write();
+      h_mQyReCenter_BbcNorth[i_order][i_cent]->Write();
+    }
+  }
+}
+//===============ReCenter BBC Event Plane=========================
 
 //------------------------------------------------------------

@@ -204,7 +204,7 @@ float RecoEventPlane::calPsiRaw_BbcNorth(int order)
 bool RecoEventPlane::readPro_ReCenter()
 {
   TOAD toad_loader("PhVecMesonMaker");
-  std::string input_recenter = toad_loader.location("file_AuAu200GeV_ReCenter.root");
+  std::string input_recenter = toad_loader.location("file_AuAu200GeV_ReCenterPar.root");
   std::cout << "inputfile = " << input_recenter.c_str() << std::endl;
   File_mInPutReCenter = TFile::Open(input_recenter.c_str());
   if(!File_mInPutReCenter->IsOpen())
@@ -222,16 +222,16 @@ bool RecoEventPlane::readPro_ReCenter()
       std::string ProName;
 
       ProName = Form("p_mQx_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQx_BbcSouth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+      p_mQx_BbcSouth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str())->Clone();
 
       ProName = Form("p_mQy_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQy_BbcSouth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+      p_mQy_BbcSouth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str())->Clone();
 
       ProName = Form("p_mQx_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQx_BbcNorth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+      p_mQx_BbcNorth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str())->Clone();
 
       ProName = Form("p_mQy_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQy_BbcNorth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str());
+      p_mQy_BbcNorth[i_order][i_vtx] = (TProfile2D*)File_mInPutReCenter->Get(ProName.c_str())->Clone();
     }
   }
 
@@ -244,7 +244,7 @@ bool RecoEventPlane::closePro_ReCenter()
 
   if(File_mInPutReCenter->IsOpen())
   {
-    std::cout << "Could NOT find ReCenter Parameters file! & drop the run!" << std::endl;
+    std::cout << "Could NOT close ReCenter Parameters file! & drop the run!" << std::endl;
     return false;
   }
 
@@ -256,9 +256,6 @@ void RecoEventPlane::initReCenterBbcEventPlane()
 {
   std::cout << "initialize ReCentered BBC Event Plane!" << std::endl;
   clearReCenterBbcEventPlane();
-  // printRawBbcEventPlane(0); // print information of 1st EP
-  // printRawBbcEventPlane(1);
-  // printRawBbcEventPlane(2);
 }
 
 void RecoEventPlane::clearReCenterBbcEventPlane()

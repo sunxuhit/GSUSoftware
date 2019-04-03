@@ -45,6 +45,16 @@ class RecoEPHistoManager : public TObject
     void writeHist_BbcRawQVector();
     //===============Raw BBC Event Plane=========================
 
+    //===============ReCenter BBC Event Plane=========================
+    void initHist_BbcReCenterEP();
+    void fillHist_BbcReCenterEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
+    void writeHist_BbcReCenterEP();
+
+    void initHist_BbcReCenterQVector();
+    void fillHist_BbcReCenterQVector(TVector2 QVec_BbcSouth, TVector2 QVec_BbcNorth, int order, int cent);
+    void writeHist_BbcReCenterQVector();
+    //===============ReCenter BBC Event Plane=========================
+
   private:
 
     // vertex QA
@@ -74,18 +84,25 @@ class RecoEPHistoManager : public TObject
     TH2F *h_mChargeReCalibXY_BbcNorth;
     TH1F *h_mGeoReCalibZ_BbcNorth; 
 
-
-
     // BBC Raw EP
     TH1F *h_mEPRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mEPRaw_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
-    // TH1F *h_mEPRaw_BbcSN[3][vecMesonFlow::mNumOfCentrality20];
     TH2F *h_mEPRaw_Correlation[3][vecMesonFlow::mNumOfCentrality20];
 
     TH1F *h_mQxRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mQyRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mQxRaw_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mQyRaw_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+
+    // BBC ReCenter EP
+    TH1F *h_mEPReCenter_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mEPReCenter_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+    TH2F *h_mEPReCenter_Correlation[3][vecMesonFlow::mNumOfCentrality20];
+
+    TH1F *h_mQxReCenter_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mQyReCenter_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mQxReCenter_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mQyReCenter_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
 
     ClassDef(RecoEPHistoManager,1)
 };

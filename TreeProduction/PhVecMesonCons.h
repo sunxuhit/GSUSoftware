@@ -26,5 +26,18 @@ namespace vecMesonFlow // binning used in flow analysis
   const float mVtxStart[mNumOfVertex] = {-10.0,-5.0,0.0,5.0};
   const float mVtxStop[mNumOfVertex]  = { -5.0, 0.0,5.0,10.0};
   const int mVertex[mNumOfVertex]     = {0, 1, 2, 3};
+
+  // shift correction 20 terms
+  // const int mNumOfShiftOrder = 20; 
+  // const float mShiftOrder[mNumOfShiftOrder] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0};
+
+  // shift correction 10 terms
+  const int mNumOfShiftOrder = 10; 
+  const float mShiftOrder[mNumOfShiftOrder] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0};
+
+  // shift correction 5 terms
+  // const int mNumOfShiftOrder = 5; 
+  // const float mShiftOrder[mNumOfShiftOrder] = {1.0,2.0,3.0,4.0,5.0};
+  const float mHarmonic[3] = {1.0,2.0,3.0};
 }
 #endif
