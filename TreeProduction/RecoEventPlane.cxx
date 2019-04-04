@@ -212,6 +212,7 @@ bool RecoEventPlane::readPro_ReCenter()
     std::cout << "Could NOT find ReCenter Parameters file! & drop the run!" << std::endl;
     return false;
   }
+  File_mInPutReCenter->cd();
 
   std::cout << "Read in ReCenter Correction Profiles!" << std::endl;
   const std::string Order[3] = {"1st","2nd","3rd"};
@@ -240,6 +241,7 @@ bool RecoEventPlane::readPro_ReCenter()
 
 bool RecoEventPlane::closePro_ReCenter()
 {
+  File_mInPutReCenter->cd();
   File_mInPutReCenter->Close();
 
   if(File_mInPutReCenter->IsOpen())
@@ -251,7 +253,6 @@ bool RecoEventPlane::closePro_ReCenter()
   return true;
 }
 
-// initialize raw Q-vector & weight & number of used pmts
 void RecoEventPlane::initReCenterBbcEventPlane()
 {
   std::cout << "initialize ReCentered BBC Event Plane!" << std::endl;
@@ -342,3 +343,125 @@ float RecoEventPlane::calPsiReCenter_BbcNorth(int order, int vtx4, int runId, in
 }
 
 //===============ReCenter BBC Event Plane====================
+
+
+//===============Shift BBC Event Plane====================
+bool RecoEventPlane::readPro_Shift()
+{
+  TOAD toad_loader("PhVecMesonMaker");
+  std::string input_recenter = toad_loader.location("file_AuAu200GeV_ShiftPar.root");
+  std::cout << "inputfile = " << input_recenter.c_str() << std::endl;
+  File_mInPutShift = TFile::Open(input_recenter.c_str());
+  if(!File_mInPutShift->IsOpen())
+  {
+    std::cout << "Could NOT find Shift Parameters file! & drop the run!" << std::endl;
+    return false;
+  }
+  File_mInPutShift->cd();
+
+  std::cout << "Read in Shift Correction Profiles!" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_vtx = 0; i_vtx < vecMesonFlow::mNumOfVertex; ++i_vtx)
+    {
+      for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
+      {
+	std::string ProName;
+
+	ProName = Form("p_mCos_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
+	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = (TProfile2D*)File_mInPutShift->Get(ProName.c_str())->Clone();
+
+	ProName = Form("p_mSin_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
+	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = (TProfile2D*)File_mInPutShift->Get(ProName.c_str())->Clone();
+
+	ProName = Form("p_mCos_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
+	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = (TProfile2D*)File_mInPutShift->Get(ProName.c_str())->Clone();
+
+	ProName = Form("p_mSin_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
+	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = (TProfile2D*)File_mInPutShift->Get(ProName.c_str())->Clone();
+      }
+    }
+  }
+
+  return true;
+}
+
+bool RecoEventPlane::closePro_Shift()
+{
+  File_mInPutShift->cd();
+  File_mInPutShift->Close();
+
+  if(File_mInPutShift->IsOpen())
+  {
+    std::cout << "Could NOT close Shift Parameters file! & drop the run!" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+float RecoEventPlane::shiftAngle(float PsiShift_raw, int order) // shift angle to correct range
+{
+  float PsiShift = PsiShift_raw;
+  const float harmonic[3] = {1.0,2.0,3.0};
+  if(PsiShift_raw > TMath::Pi()/harmonic[order])
+  {
+    PsiShift = PsiShift_raw - TMath::TwoPi()/harmonic[order];
+  }
+  if(PsiShift_raw < -1.0*TMath::Pi()/harmonic[order])
+  {
+    PsiShift = PsiShift_raw + TMath::TwoPi()/harmonic[order];
+  }
+
+  return PsiShift;
+}
+
+float RecoEventPlane::calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order, int vtx4, int runId, int cent20)
+{
+  float delta_Psi = 0.0;
+
+  const float harmonic[3] = {1.0,2.0,3.0};
+  for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
+  {
+    int bin_cos = p_mCos_BbcSouth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    float mean_cos = p_mCos_BbcSouth[order][vtx4][i_shift]->GetBinContent(bin_cos);
+
+    int bin_sin = p_mSin_BbcSouth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    float mean_sin = p_mSin_BbcSouth[order][vtx4][i_shift]->GetBinContent(bin_sin);
+
+    float CosShift = -1.0*mean_sin*TMath::Cos((i_shift+1)*harmonic[order]*PsiReCenter_BbcSouth);
+    float SinShift = mean_cos*TMath::Sin((i_shift+1)*harmonic[order]*PsiReCenter_BbcSouth);
+    delta_Psi += (1.0/harmonic[order])*(2.0/(i_shift+1.0))*(CosShift+SinShift);
+  }
+
+  float PsiShift_BbcSouth_raw = PsiReCenter_BbcSouth + delta_Psi;
+  float PsiShift_BbcSouth = shiftAngle(PsiShift_BbcSouth_raw,order);
+
+  return PsiShift_BbcSouth;
+}
+
+float RecoEventPlane::calPsiShift_BbcNorth(float PsiReCenter_BbcNorth, int order, int vtx4, int runId, int cent20)
+{
+  float delta_Psi = 0.0;
+
+  const float harmonic[3] = {1.0,2.0,3.0};
+  for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
+  {
+    int bin_cos = p_mCos_BbcNorth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    float mean_cos = p_mCos_BbcNorth[order][vtx4][i_shift]->GetBinContent(bin_cos);
+
+    int bin_sin = p_mSin_BbcNorth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    float mean_sin = p_mSin_BbcNorth[order][vtx4][i_shift]->GetBinContent(bin_sin);
+
+    float CosShift = -1.0*mean_sin*TMath::Cos((i_shift+1)*harmonic[order]*PsiReCenter_BbcNorth);
+    float SinShift = mean_cos*TMath::Sin((i_shift+1)*harmonic[order]*PsiReCenter_BbcNorth);
+    delta_Psi += (1.0/harmonic[order])*(2.0/(i_shift+1.0))*(CosShift+SinShift);
+  }
+
+  float PsiShift_BbcNorth_raw = PsiReCenter_BbcNorth + delta_Psi;
+  float PsiShift_BbcNorth = shiftAngle(PsiShift_BbcNorth_raw,order);
+
+  return PsiShift_BbcNorth;
+}
+//===============Shift BBC Event Plane====================

@@ -214,7 +214,7 @@ void RecoEPHistoManager::initHist_BbcRawEP()
       h_mEPRaw_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
 
       HistName = Form("h_mEPRaw_Correlation_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mEPRaw_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+      h_mEPRaw_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
     }
   }
 }
@@ -310,7 +310,7 @@ void RecoEPHistoManager::initHist_BbcReCenterEP()
       h_mEPReCenter_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
 
       HistName = Form("h_mEPReCenter_Correlation_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
-      h_mEPReCenter_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+      h_mEPReCenter_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
     }
   }
 }
@@ -385,5 +385,49 @@ void RecoEPHistoManager::writeHist_BbcReCenterQVector()
   }
 }
 //===============ReCenter BBC Event Plane=========================
+
+//===============Shift BBC Event Plane=========================
+void RecoEPHistoManager::initHist_BbcShiftEP()
+{
+  std::cout << "initialize BBC Shift EP Histograms!" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  const float harmonic[3] = {1.0,2.0,3.0};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      std::string HistName;
+      HistName = Form("h_mEPShift_BbcSouth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPShift_BbcSouth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+
+      HistName = Form("h_mEPShift_BbcNorth_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPShift_BbcNorth[i_order][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),360/harmonic[i_order],-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+
+      HistName = Form("h_mEPShift_Correlation_%s_Centrality_%d",Order[i_order].c_str(),i_cent);
+      h_mEPShift_Correlation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
+    }
+  }
+}
+
+void RecoEPHistoManager::fillHist_BbcShiftEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent)
+{
+  h_mEPShift_BbcSouth[order][cent]->Fill(Psi_BbcSouth);
+  h_mEPShift_BbcNorth[order][cent]->Fill(Psi_BbcNorth);
+  h_mEPShift_Correlation[order][cent]->Fill(Psi_BbcSouth,Psi_BbcNorth);
+}
+
+void RecoEPHistoManager::writeHist_BbcShiftEP()
+{
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      h_mEPShift_BbcSouth[i_order][i_cent]->Write();
+      h_mEPShift_BbcNorth[i_order][i_cent]->Write();
+      h_mEPShift_Correlation[i_order][i_cent]->Write();
+    }
+  }
+}
+//===============Shift BBC Event Plane=========================
 
 //------------------------------------------------------------

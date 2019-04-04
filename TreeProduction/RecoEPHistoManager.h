@@ -35,7 +35,7 @@ class RecoEPHistoManager : public TObject
     void writeQA_BbcChargeReCalib();
     //-----------------BBC QA---------------------
 
-    //===============Raw BBC Event Plane=========================
+    //===============Raw BBC Event Plane==================
     void initHist_BbcRawEP();
     void fillHist_BbcRawEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
     void writeHist_BbcRawEP();
@@ -43,9 +43,9 @@ class RecoEPHistoManager : public TObject
     void initHist_BbcRawQVector();
     void fillHist_BbcRawQVector(TVector2 QVec_BbcSouth, float QWeight_BbcSouth, TVector2 QVec_BbcNorth, float QWeight_BbcNorth, int order, int cent);
     void writeHist_BbcRawQVector();
-    //===============Raw BBC Event Plane=========================
+    //===============Raw BBC Event Plane==================
 
-    //===============ReCenter BBC Event Plane=========================
+    //===============ReCenter BBC Event Plane================
     void initHist_BbcReCenterEP();
     void fillHist_BbcReCenterEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
     void writeHist_BbcReCenterEP();
@@ -53,7 +53,13 @@ class RecoEPHistoManager : public TObject
     void initHist_BbcReCenterQVector();
     void fillHist_BbcReCenterQVector(TVector2 QVec_BbcSouth, TVector2 QVec_BbcNorth, int order, int cent);
     void writeHist_BbcReCenterQVector();
-    //===============ReCenter BBC Event Plane=========================
+    //===============ReCenter BBC Event Plane================
+
+    //===============Shift BBC Event Plane==============
+    void initHist_BbcShiftEP();
+    void fillHist_BbcShiftEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
+    void writeHist_BbcShiftEP();
+    //===============Shift BBC Event Plane==============
 
   private:
 
@@ -103,6 +109,11 @@ class RecoEPHistoManager : public TObject
     TH1F *h_mQyReCenter_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mQxReCenter_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mQyReCenter_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+
+    // BBC Shift EP
+    TH1F *h_mEPShift_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mEPShift_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
+    TH2F *h_mEPShift_Correlation[3][vecMesonFlow::mNumOfCentrality20];
 
     ClassDef(RecoEPHistoManager,1)
 };

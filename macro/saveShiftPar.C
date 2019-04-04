@@ -27,16 +27,16 @@ void saveShiftPar()
 	std::string ProName;
 
 	ProName = Form("p_mCos_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str())->Clone();
+	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str());
 
 	ProName = Form("p_mSin_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str())->Clone();
+	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str());
 
 	ProName = Form("p_mCos_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str())->Clone();
+	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str());
 
 	ProName = Form("p_mSin_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str())->Clone();
+	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = (TProfile2D*)File_InPut->Get(ProName.c_str());
 
 	std::cout << "saving " << ProName.c_str() << "!" << std::endl;
       }

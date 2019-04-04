@@ -55,6 +55,15 @@ class RecoEventPlane : public TObject
     float calPsiReCenter_BbcNorth(int order, int vtx4, int runId, int cent20);
     //===============ReCenter BBC Event Plane====================
 
+    //===============Shift BBC Event Plane====================
+    bool readPro_Shift(); // read in Shift parameters
+    bool closePro_Shift(); // close Shift parameters
+
+    float shiftAngle(float PsiShift_raw, int order); // shift angle to correct range
+    float calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order, int vtx4, int runId, int cent20);
+    float calPsiShift_BbcNorth(float PsiReCenter_BbcNorth, int order, int vtx4, int runId, int cent20);
+    //===============Shift BBC Event Plane====================
+
     //-----------------BBC Event Plane---------------------
 
   private:
@@ -79,6 +88,15 @@ class RecoEventPlane : public TObject
     TVector2 mQVectorReCenter_BbcSouth[3]; // 0 for 1st, 1 for 2nd, 2 for 3rd
     TVector2 mQVectorReCenter_BbcNorth[3];
     //===============ReCenter BBC Event Plane====================
+
+    //===============Shift BBC Event Plane====================
+    TFile *File_mInPutShift; // read in re-center parameters
+    TProfile2D *p_mCos_BbcSouth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];
+    TProfile2D *p_mSin_BbcSouth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];
+    TProfile2D *p_mCos_BbcNorth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];
+    TProfile2D *p_mSin_BbcNorth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];
+
+    //===============Shift BBC Event Plane====================
 
     //-----------------BBC Event Plane---------------------
 

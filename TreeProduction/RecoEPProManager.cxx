@@ -31,16 +31,20 @@ void RecoEPProManager::initPro_BbcReCenter()
       std::string ProName;
 
       ProName = Form("p_mQx_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      // p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQy_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      // p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQx_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      // p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQy_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      // p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
     }
   }
 }
@@ -90,16 +94,20 @@ void RecoEPProManager::initPro_BbcShift()
 	std::string ProName;
 
 	ProName = Form("p_mCos_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	// p_mCos_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
 	ProName = Form("p_mSin_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	// p_mSin_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
 	ProName = Form("p_mCos_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	// p_mCos_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
 	ProName = Form("p_mSin_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	// p_mSin_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
       }
     }
   }

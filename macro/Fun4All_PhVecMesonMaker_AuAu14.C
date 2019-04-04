@@ -1,5 +1,5 @@
 void Fun4All_PhVecMesonMaker_AuAu14(
-    int nEvents = 500000, //
+    int nEvents = 5000000, //
     char *input_file = "AuAu14_BBCEP_test.list" //
     )
 {
@@ -13,12 +13,14 @@ void Fun4All_PhVecMesonMaker_AuAu14(
   rc->set_IntFlag("SYSTEM_SELECTION", 0);
   rc->set_DoubleFlag("BBCZCUT_VAL", 10);
   // rc->set_IntFlag("ANA_MODE",0); // fill re-center parameter & raw event plane
-  rc->set_IntFlag("ANA_MODE",1); // fill shift parameter & re-centered event plane
+  // rc->set_IntFlag("ANA_MODE",1); // fill shift parameter & re-centered event plane
+  rc->set_IntFlag("ANA_MODE",2); // calculate resolution & fill shifted event plane
   rc->set_IntFlag("QA_BBC",0);
   rc->set_IntFlag("DEBUG_BBC",0);
 
   // std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_RawEP_ReCenterPar.root";
-  std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ReCenterEP_ShiftPar.root";
+  // std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ReCenterEP_ShiftPar.root";
+  std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ShiftEP_Resoluiton.root";
   PhVecMesonMaker *ana = new PhVecMesonMaker(outputfile.c_str());
 
   se->registerSubsystem(ana);
