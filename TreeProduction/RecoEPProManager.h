@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 
+class TProfile;
 class TProfile2D;
 
 class RecoEPProManager : public TObject
@@ -30,6 +31,12 @@ class RecoEPProManager : public TObject
     //===============BBC Event Plane Shift=========================
 
 
+    //===============BBC Event Plane Resolution=========================
+    void initPro_BbcResolution();
+    void fillPro_BbcResolution(float PsiReCenter_BbcSouth, float PsiReCenter_BbcNorth, int order, int cent20);
+    void writePro_BbcResolution();
+    //===============BBC Event Plane Resolution=========================
+
   private:
     //===============BBC Event Plane ReCenter=========================
     // ReCenter Correction | x-axis is runId, y-axis is centrality (every 5%)
@@ -48,6 +55,12 @@ class RecoEPProManager : public TObject
     TProfile2D *p_mCos_BbcNorth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];
     TProfile2D *p_mSin_BbcNorth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];
     //===============BBC Event Plane Shift=========================
+
+    //===============BBC Event Plane Resolution=========================
+
+    TProfile *p_mResolution_BbcSub[3]; // PsiShift_BbcNorth - PsiShift_BbcSouth
+
+    //===============BBC Event Plane Resolution=========================
 
     ClassDef(RecoEPProManager,1)
 };

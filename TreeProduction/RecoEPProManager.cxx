@@ -1,6 +1,7 @@
 #include "RecoEPProManager.h"
 #include <TMath.h>
 #include <TString.h>
+#include <TProfile.h>
 #include <TProfile2D.h>
 
 #include <iostream>
@@ -159,3 +160,33 @@ void RecoEPProManager::writePro_BbcShift()
 }
 
 //===============BBC Event Plane Shift=========================
+
+//===============BBC Event Plane Resolution=========================
+void RecoEPProManager::initPro_BbcResolution()
+{
+  std::cout << "initialize BBC sub Event Plane Resolution !" << std::endl;
+  const std::string Order[3] = {"1st","2nd","3rd"};
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    std::string ProName = Form("p_mResolution_BbcSub_%s",Order[i_order].c_str());
+    p_mResolution_BbcSub[i_order] = new TProfile(ProName.c_str(),ProName.c_str(),vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+  }
+}
+
+void RecoEPProManager::fillPro_BbcResolution(float PsiReCenter_BbcSouth, float PsiReCenter_BbcNorth, int order, int cent20)
+{ // PsiShift_BbcNorth - PsiShift_BbcSouth
+  float harmonic = vecMesonFlow::mHarmonic[order];
+  float resolution = TMath::Cos(harmonic*(PsiReCenter_BbcNorth-PsiReCenter_BbcSouth));
+  p_mResolution_BbcSub[order]->Fill(cent20,resolution);
+}
+
+void RecoEPProManager::writePro_BbcResolution()
+{
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    p_mResolution_BbcSub[i_order]->Write();
+  }
+}
+
+//===============BBC Event Plane Resolution=========================
+

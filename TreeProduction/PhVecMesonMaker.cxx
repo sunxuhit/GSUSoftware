@@ -161,6 +161,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
       return ABORTRUN;
     }
     mRecoEPHistoManager->initHist_BbcShiftEP();
+    mRecoEPProManager->initPro_BbcResolution();
   }
 
   return EVENT_OK;
@@ -397,6 +398,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       // cout << "i_order = " << i_order << ", PsiReCenter_BbcNorth = " << PsiReCenter_BbcNorth << ", PsiShift_BbcNorth = " << PsiShift_BbcNorth << endl;
 
       mRecoEPHistoManager->fillHist_BbcShiftEP(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent10);
+      mRecoEPProManager->fillPro_BbcResolution(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent20);
     }
 
     // mRecoEventPlane->printRawBbcEventPlane(1);
@@ -435,6 +437,7 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
   if(mMode == 2)
   {
     mRecoEPHistoManager->writeHist_BbcShiftEP();
+    mRecoEPProManager->writePro_BbcResolution();
   }
 
   File_mOutPut->Close();

@@ -52,7 +52,7 @@ TVector2 RecoEventPlane::calqVector_BbcSouth(float bbcx, float bbcy, int order)
   const float phi = getPhi_BbcSouth(bbcx,bbcy);
   TVector2 qVector(0.0,0.0);
 
-  const float qx = TMath::Cos(harmonic[order]*phi);
+  const float qx = TMath::Cos(harmonic[order]*phi); // need to update for 1st EP
   const float qy = TMath::Sin(harmonic[order]*phi);
   qVector.Set(qx,qy);
 
@@ -436,6 +436,7 @@ float RecoEventPlane::calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order
   }
 
   float PsiShift_BbcSouth_raw = PsiReCenter_BbcSouth + delta_Psi;
+  if(order == 0) PsiShift_BbcSouth_raw = PsiReCenter_BbcSouth + delta_Psi + TMath::Pi(); // Temp fix for 1st EP
   float PsiShift_BbcSouth = shiftAngle(PsiShift_BbcSouth_raw,order);
 
   return PsiShift_BbcSouth;
