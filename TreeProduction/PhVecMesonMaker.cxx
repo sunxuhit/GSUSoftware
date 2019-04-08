@@ -207,7 +207,8 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   if( getNodes(topNode) == DISCARDEVENT ) return DISCARDEVENT;
 
   mNumOfEvents++;
-  if(mNumOfEvents%1000 == 0) cout << "processing events:  " << mNumOfEvents << "/" << 10000 << endl;
+  // if(mNumOfEvents%1000 == 0) cout << "processing events:  " << mNumOfEvents << "/" << 10000 << endl;
+  if(mNumOfEvents%10000 == 0) cout << "processing events:  " << mNumOfEvents << endl;
   // if(mNumOfEvents > 100) return ABORTRUN;
 
   float zdc1 = mPHGlobal->getZdcEnergyN();
