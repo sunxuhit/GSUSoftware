@@ -30,6 +30,7 @@ class RecoEventPlane;
 class PhVecMesonMaker: public SubsysReco {
   public:
     PhVecMesonMaker(const char *outputfile = "test.root");
+    virtual ~PhVecMesonMaker();
 
     int Init(PHCompositeNode *topNode);
     int InitRun(PHCompositeNode *topNode);

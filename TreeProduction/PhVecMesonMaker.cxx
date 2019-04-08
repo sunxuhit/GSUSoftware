@@ -75,6 +75,17 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   mRecoEventPlane     = NULL;
 }
 
+PhVecMesonMaker::~PhVecMesonMaker()
+{
+  delete mBbcCalib;
+  delete mBbcGeo;
+
+  delete mRecoEPUtility; // delete utilities
+  delete mRecoEventPlane; // delete event plane
+  delete mRecoEPHistoManager; // delete histograms manager
+  delete mRecoEPProManager; // delete  profiles manager
+}
+
 int PhVecMesonMaker::Init(PHCompositeNode *topNode) 
 {
   cout << "PhVecMesonMaker::Init => " << endl;

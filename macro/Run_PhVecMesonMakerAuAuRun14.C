@@ -3,7 +3,7 @@
 #include <fstream>
 using namespace std;
 
-void Run_PhVecMesonMaker_AuAu14(const char *outFile = "test.root")
+void Run_PhVecMesonMakerAuAuRun14(const char *outFile = "BbcEventPlane.root")
 {
   gSystem->Load("libfvtx_subsysreco.so");
   gSystem->Load("libfun4all.so");
@@ -19,7 +19,7 @@ void Run_PhVecMesonMaker_AuAu14(const char *outFile = "test.root")
   gSystem->Load("libert");
   gSystem->Load("libbbc.so");
   gSystem->Load("libzdc.so");
-  gSystem->Load("../../install/lib/libPhVecMesonMaker.so");
+  gSystem->Load("/direct/phenix+u/xusun/WorkSpace/PHENIX/install/lib/libPhVecMesonMakerAuAuRun14.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);
