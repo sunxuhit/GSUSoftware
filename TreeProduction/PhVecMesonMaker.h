@@ -63,7 +63,7 @@ class PhVecMesonMaker: public SubsysReco {
 
     int mNumOfEvents;
 
-    TFile* File_mInPut;
+    // TFile* File_mInPut;
 
     //! Eval Tree Output
     TFile* File_mOutPut;

@@ -54,9 +54,13 @@ libPhVecMesonMaker_la_SOURCES = \
 libPhVecMesonMaker_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
+  -lfun4all \
+  -lSubsysReco \
+  -lfun4allfuncs \
+  -lert \
+  -lrecal \
   -lTOAD \
-  -lphool \
-  -lpicodst_object
+  -lphool
 
 noinst_PROGRAMS = \
   testexternals

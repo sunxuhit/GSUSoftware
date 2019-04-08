@@ -65,9 +65,10 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   mBbcCalib  = NULL;
   mBbcGeo    = NULL;
 
-
   mOutPutFile  = outputfile;
   File_mOutPut = NULL; // output file
+
+  mNumOfEvents = 0; // number of events
 
   mRecoEPHistoManager = NULL;
   mRecoEPProManager   = NULL;
