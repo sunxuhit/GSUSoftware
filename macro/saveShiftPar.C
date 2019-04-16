@@ -7,7 +7,7 @@
 
 void saveShiftPar()
 {
-  string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ReCenterEP_ShiftPar.root";
+  string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_ReCenterEP_ShiftPar.root";
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TProfile2D *p_mCos_BbcSouth[3][vecMesonFlow::mNumOfVertex][vecMesonFlow::mNumOfShiftOrder];

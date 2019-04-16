@@ -6,7 +6,8 @@
 
 void saveReCenterPar()
 {
-  string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_RawEP_ReCenterPar.root";
+  // string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_RawEP_ReCenterPar.root";
+  string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_RawEP_ReCenterPar.root";
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TProfile2D *p_mQx_BbcSouth[3][vecMesonFlow::mNumOfVertex]; // 0 is flow harmonic | 1 is vertex bin
