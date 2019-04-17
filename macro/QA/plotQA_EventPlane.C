@@ -6,105 +6,148 @@
 #include <TLegend.h>
 #include <TString.h>
 #include <TCanvas.h>
+#include "/direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/TreeProduction/PhVecMesonCons.h"
 
-void plotQA_EventPlane()
+using namespace std;
+
+void plotQA_EventPlane(int order = 1, int cent10 = 5)
 {
-  string input_rawEP = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_RawEP_ReCenterPar.root";
+  const string mOrder[3] = {"1st","2nd","3rd"};
+  const string mCentrality = Form("%d-%d%%",vecMesonFlow::mCentStart10[cent10],vecMesonFlow::mCentStop10[cent10]);
+
+  string input_rawEP = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_RawEP_ReCenterPar.root";
   TFile *File_InPut_Raw = TFile::Open(input_rawEP.c_str());
-  TH1F *h_mEPRaw_BbcNorth_2nd_Centrality_2 = (TH1F*)File_InPut_Raw->Get("h_mEPRaw_BbcNorth_2nd_Centrality_2");
-  TH2F *h_mEPRaw_Correlation_2nd_Centrality_2 = (TH2F*)File_InPut_Raw->Get("h_mEPRaw_Correlation_2nd_Centrality_2");
+  string HistName_Raw;
+  HistName_Raw  = Form("h_mEPRaw_BbcSouth_%s_Centrality_%d",mOrder[order].c_str(),cent10);
+  TH1F *h_mEPRaw_BbcSouth = (TH1F*)File_InPut_Raw->Get(HistName_Raw.c_str());
+  HistName_Raw  = Form("h_mEPRaw_BbcNorth_%s_Centrality_%d",mOrder[order].c_str(),cent10);
+  TH1F *h_mEPRaw_BbcNorth = (TH1F*)File_InPut_Raw->Get(HistName_Raw.c_str());
 
-  string input_recenterEP = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ReCenterEP_ShiftPar.root";
+  string input_recenterEP = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_ReCenterEP_ShiftPar.root";
   TFile *File_InPut_ReCenter = TFile::Open(input_recenterEP.c_str());
-  TH1F *h_mEPReCenter_BbcNorth_2nd_Centrality_2 = (TH1F*)File_InPut_ReCenter->Get("h_mEPReCenter_BbcNorth_2nd_Centrality_2");
-  TH2F *h_mEPReCenter_Correlation_2nd_Centrality_2 = (TH2F*)File_InPut_ReCenter->Get("h_mEPReCenter_Correlation_2nd_Centrality_2");
+  string HistName_ReCenter;
+  HistName_ReCenter = Form("h_mEPReCenter_BbcSouth_%s_Centrality_%d",mOrder[order].c_str(),cent10);
+  TH1F *h_mEPReCenter_BbcSouth = (TH1F*)File_InPut_ReCenter->Get(HistName_ReCenter.c_str());
+  HistName_ReCenter = Form("h_mEPReCenter_BbcNorth_%s_Centrality_%d",mOrder[order].c_str(),cent10);
+  TH1F *h_mEPReCenter_BbcNorth = (TH1F*)File_InPut_ReCenter->Get(HistName_ReCenter.c_str());
 
-  string input_shiftEP = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_ShiftEP_Resoluiton.root";
+  string input_shiftEP = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_ShiftEP_Resoluiton.root";
   TFile *File_InPut_Shift = TFile::Open(input_shiftEP.c_str());
-  TH1F *h_mEPShift_BbcNorth_2nd_Centrality_2 = (TH1F*)File_InPut_Shift->Get("h_mEPShift_BbcNorth_2nd_Centrality_2");
-  TH2F *h_mEPShift_Correlation_2nd_Centrality_2 = (TH2F*)File_InPut_Shift->Get("h_mEPShift_Correlation_2nd_Centrality_2");
+  string HistName_Shift;
+  HistName_Shift = Form("h_mEPShift_BbcSouth_%s_Centrality_%d",mOrder[order].c_str(),cent10);
+  TH1F *h_mEPShift_BbcSouth = (TH1F*)File_InPut_Shift->Get(HistName_Shift.c_str());
+  HistName_Shift = Form("h_mEPShift_BbcNorth_%s_Centrality_%d",mOrder[order].c_str(),cent10);
+  TH1F *h_mEPShift_BbcNorth = (TH1F*)File_InPut_Shift->Get(HistName_Shift.c_str());
 
-  TCanvas *c_EventPlane = new TCanvas("c_EventPlane","c_EventPlane",10,10,800,800);
-  c_EventPlane->cd();
-  c_EventPlane->cd()->SetLeftMargin(0.15);
-  c_EventPlane->cd()->SetBottomMargin(0.15);
-  c_EventPlane->cd()->SetTicks(1,1);
-  c_EventPlane->cd()->SetGrid(0,0);
-
-  h_mEPRaw_BbcNorth_2nd_Centrality_2->SetStats(0);
-  h_mEPRaw_BbcNorth_2nd_Centrality_2->SetLineColor(1);
-  h_mEPRaw_BbcNorth_2nd_Centrality_2->GetXaxis()->SetTitle("#Psi_{2}^{North}");
-  h_mEPRaw_BbcNorth_2nd_Centrality_2->Draw("hE");
-
-  h_mEPReCenter_BbcNorth_2nd_Centrality_2->SetLineColor(2);
-  h_mEPReCenter_BbcNorth_2nd_Centrality_2->Draw("hE same");
-
-  h_mEPShift_BbcNorth_2nd_Centrality_2->SetLineColor(4);
-  h_mEPShift_BbcNorth_2nd_Centrality_2->Draw("hE same");
-
-  TF1 *f_poly = new TF1("f_poly","pol0",-TMath::Pi()/2.0,TMath::Pi()/2.0);
-  h_mEPShift_BbcNorth_2nd_Centrality_2->Fit(f_poly,"N");
-  f_poly->SetLineColor(4);
-  f_poly->Draw("l same");
-  float chi2 = f_poly->GetChisquare();
-  float ndf = f_poly->GetNDF();
-  string Chi2_NDF = Form("#chi^{2}/ndf = %3.1f/%3.1f",chi2,ndf);
-
-  TLegend *leg = new TLegend(0.4,0.6,0.8,0.8);
-  leg->SetBorderSize(0);
-  leg->SetFillColor(0);
-  leg->AddEntry(h_mEPRaw_BbcNorth_2nd_Centrality_2,"Raw Event Plane","l");
-  leg->AddEntry(h_mEPReCenter_BbcNorth_2nd_Centrality_2,"ReCentered Event Plane","l");
-  leg->AddEntry(h_mEPShift_BbcNorth_2nd_Centrality_2,"Shifted Event Plane","l");
-  leg->AddEntry(f_poly,Chi2_NDF.c_str(),"l");
-  leg->Draw();
-  c_EventPlane->SaveAs("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/c_EventPlane.eps");
-
-
-  TCanvas *c_correlation = new TCanvas("c_correlation","c_correlation",10,10,1500,500);
-  c_correlation->Divide(3,1);
-  for(int i_pad = 0; i_pad < 3; ++i_pad)
+  string title;
+  TCanvas *c_EventPlane = new TCanvas("c_EventPlane","c_EventPlane",10,10,1600,800);
+  c_EventPlane->Divide(2,1);
+  for(int i_pad = 0; i_pad < 2; ++i_pad)
   {
-    c_correlation->cd(i_pad+1);
-    c_correlation->cd(i_pad+1)->SetLeftMargin(0.15);
-    c_correlation->cd(i_pad+1)->SetBottomMargin(0.15);
-    c_correlation->cd(i_pad+1)->SetTicks(1,1);
-    c_correlation->cd(i_pad+1)->SetGrid(0,0);
+    c_EventPlane->cd(i_pad+1);
+    c_EventPlane->cd(i_pad+1)->SetLeftMargin(0.15);
+    c_EventPlane->cd(i_pad+1)->SetBottomMargin(0.15);
+    c_EventPlane->cd(i_pad+1)->SetTicks(1,1);
+    c_EventPlane->cd(i_pad+1)->SetGrid(0,0);
   }
-  
-  c_correlation->cd(1);
-  h_mEPRaw_Correlation_2nd_Centrality_2->SetStats(0);
-  h_mEPRaw_Correlation_2nd_Centrality_2->GetXaxis()->SetTitle("#Psi_{2}^{South}");
-  h_mEPRaw_Correlation_2nd_Centrality_2->GetXaxis()->SetTitleSize(0.06);
-  h_mEPRaw_Correlation_2nd_Centrality_2->GetXaxis()->CenterTitle();
 
-  h_mEPRaw_Correlation_2nd_Centrality_2->GetYaxis()->SetTitle("#Psi_{2}^{North}");
-  h_mEPRaw_Correlation_2nd_Centrality_2->GetYaxis()->SetTitleSize(0.06);
-  h_mEPRaw_Correlation_2nd_Centrality_2->GetYaxis()->CenterTitle();
-  h_mEPRaw_Correlation_2nd_Centrality_2->Draw("colz");
-  
-  c_correlation->cd(2);
-  h_mEPReCenter_Correlation_2nd_Centrality_2->SetStats(0);
-  h_mEPReCenter_Correlation_2nd_Centrality_2->GetXaxis()->SetTitle("#Psi_{2}^{South}");
-  h_mEPReCenter_Correlation_2nd_Centrality_2->GetXaxis()->SetTitleSize(0.06);
-  h_mEPReCenter_Correlation_2nd_Centrality_2->GetXaxis()->CenterTitle();
+  c_EventPlane->cd(1);
 
-  h_mEPReCenter_Correlation_2nd_Centrality_2->GetYaxis()->SetTitle("#Psi_{2}^{North}");
-  h_mEPReCenter_Correlation_2nd_Centrality_2->GetYaxis()->SetTitleSize(0.06);
-  h_mEPReCenter_Correlation_2nd_Centrality_2->GetYaxis()->CenterTitle();
-  h_mEPReCenter_Correlation_2nd_Centrality_2->Draw("colz");
-  
-  c_correlation->cd(3);
-  h_mEPShift_Correlation_2nd_Centrality_2->SetStats(0);
-  h_mEPShift_Correlation_2nd_Centrality_2->GetXaxis()->SetTitle("#Psi_{2}^{South}");
-  h_mEPShift_Correlation_2nd_Centrality_2->GetXaxis()->SetTitleSize(0.06);
-  h_mEPShift_Correlation_2nd_Centrality_2->GetXaxis()->CenterTitle();
+  title = Form("%s EP BBC South @ %s",mOrder[order].c_str(),mCentrality.c_str());
+  h_mEPRaw_BbcSouth->SetTitle(title.c_str());
+  h_mEPRaw_BbcSouth->SetStats(0);
+  title = Form("#Psi_{%s}^{South}",mOrder[order].c_str());
+  h_mEPRaw_BbcSouth->GetXaxis()->SetTitle(title.c_str());
+  h_mEPRaw_BbcSouth->GetXaxis()->CenterTitle();
+  h_mEPRaw_BbcSouth->GetXaxis()->SetTitleSize(0.06);
+  h_mEPRaw_BbcSouth->GetXaxis()->SetTitleFont(132);
+  h_mEPRaw_BbcSouth->GetXaxis()->SetLabelSize(0.04);
+  h_mEPRaw_BbcSouth->SetNdivisions(505,"X");
+  h_mEPRaw_BbcSouth->GetYaxis()->CenterTitle();
+  h_mEPRaw_BbcSouth->GetYaxis()->SetTitleSize(0.06);
+  h_mEPRaw_BbcSouth->GetYaxis()->SetTitleFont(132);
+  h_mEPRaw_BbcSouth->GetYaxis()->SetLabelSize(0.04);
+  // h_mEPRaw_BbcSouth->GetYaxis()->SetRangeUser(0.0,h_mEPRaw_BbcSouth->GetMaximum()*1.1);
+  h_mEPRaw_BbcSouth->SetNdivisions(505,"Y");
+  h_mEPRaw_BbcSouth->SetLineColor(1);
+  h_mEPRaw_BbcSouth->SetLineWidth(2);
+  h_mEPRaw_BbcSouth->SetLineStyle(1);
+  h_mEPRaw_BbcSouth->Draw("hE");
 
-  h_mEPShift_Correlation_2nd_Centrality_2->GetYaxis()->SetTitle("#Psi_{2}^{North}");
-  h_mEPShift_Correlation_2nd_Centrality_2->GetYaxis()->SetTitleSize(0.06);
-  h_mEPShift_Correlation_2nd_Centrality_2->GetYaxis()->CenterTitle();
-  h_mEPShift_Correlation_2nd_Centrality_2->Draw("colz");
+  h_mEPReCenter_BbcSouth->SetLineColor(2);
+  h_mEPReCenter_BbcSouth->SetLineWidth(2);
+  h_mEPReCenter_BbcSouth->Draw("hE same");
 
-  c_correlation->SaveAs("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_correlation.eps");
+  h_mEPShift_BbcSouth->SetLineColor(4);
+  h_mEPShift_BbcSouth->SetLineWidth(2);
+  h_mEPShift_BbcSouth->Draw("hE same");
+
+  TF1 *f_poly_South = new TF1("f_poly_South","pol0",-TMath::Pi()/(order+1.0),TMath::Pi()/(order+1.0));
+  h_mEPShift_BbcSouth->Fit(f_poly_South,"N");
+  f_poly_South->SetLineColor(4);
+  f_poly_South->SetLineStyle(2);
+  f_poly_South->Draw("l same");
+  float chi2_South = f_poly_South->GetChisquare();
+  float ndf_South = f_poly_South->GetNDF();
+  string Chi2_NDF_South = Form("#chi^{2}/ndf = %3.1f/%3.1f",chi2_South,ndf_South);
+
+  TLegend *leg_South = new TLegend(0.35,0.6,0.75,0.8);
+  leg_South->SetBorderSize(0);
+  leg_South->SetFillColor(0);
+  leg_South->AddEntry(h_mEPRaw_BbcSouth,"Raw Event Plane BBC South","l");
+  leg_South->AddEntry(h_mEPReCenter_BbcSouth,"ReCentered Event Plane BBC South","l");
+  leg_South->AddEntry(h_mEPShift_BbcSouth,"Shifted Event Plane BBC South","l");
+  leg_South->AddEntry(f_poly_South,Chi2_NDF_South.c_str(),"l");
+  leg_South->Draw("same");
+
+  c_EventPlane->cd(2);
+
+  title = Form("%s EP BBC North @ %s",mOrder[order].c_str(),mCentrality.c_str());
+  h_mEPRaw_BbcNorth->SetTitle(title.c_str());
+  h_mEPRaw_BbcNorth->SetStats(0);
+  title = Form("#Psi_{%s}^{North}",mOrder[order].c_str());
+  h_mEPRaw_BbcNorth->GetXaxis()->SetTitle(title.c_str());
+  h_mEPRaw_BbcNorth->GetXaxis()->CenterTitle();
+  h_mEPRaw_BbcNorth->GetXaxis()->SetTitleSize(0.06);
+  h_mEPRaw_BbcNorth->GetXaxis()->SetTitleFont(132);
+  h_mEPRaw_BbcNorth->GetXaxis()->SetLabelSize(0.04);
+  h_mEPRaw_BbcNorth->SetNdivisions(505,"X");
+  h_mEPRaw_BbcNorth->GetYaxis()->CenterTitle();
+  h_mEPRaw_BbcNorth->GetYaxis()->SetTitleSize(0.06);
+  h_mEPRaw_BbcNorth->GetYaxis()->SetTitleFont(132);
+  h_mEPRaw_BbcNorth->GetYaxis()->SetLabelSize(0.04);
+  // h_mEPRaw_BbcNorth->GetYaxis()->SetRangeUser(0.0,h_mEPRaw_BbcNorth->GetMaximum()*1.1);
+  h_mEPRaw_BbcNorth->SetNdivisions(505,"Y");
+  h_mEPRaw_BbcNorth->SetLineColor(1);
+  h_mEPRaw_BbcNorth->SetLineWidth(2);
+  h_mEPRaw_BbcNorth->SetLineStyle(1);
+  h_mEPRaw_BbcNorth->Draw("hE");
+
+  h_mEPReCenter_BbcNorth->SetLineColor(2);
+  h_mEPReCenter_BbcNorth->SetLineWidth(2);
+  h_mEPReCenter_BbcNorth->Draw("hE same");
+
+  h_mEPShift_BbcNorth->SetLineColor(4);
+  h_mEPShift_BbcNorth->SetLineWidth(2);
+  h_mEPShift_BbcNorth->Draw("hE same");
+
+  TF1 *f_poly_North = new TF1("f_poly_North","pol0",-TMath::Pi()/(order+1.0),TMath::Pi()/(order+1.0));
+  h_mEPShift_BbcNorth->Fit(f_poly_North,"N");
+  f_poly_North->SetLineColor(4);
+  f_poly_North->Draw("l same");
+  float chi2_North = f_poly_North->GetChisquare();
+  float ndf_North = f_poly_North->GetNDF();
+  string Chi2_NDF_North = Form("#chi^{2}/ndf = %3.1f/%3.1f",chi2_North,ndf_North);
+
+  TLegend *leg_North = new TLegend(0.35,0.6,0.75,0.8);
+  leg_North->SetBorderSize(0);
+  leg_North->SetFillColor(0);
+  leg_North->AddEntry(h_mEPRaw_BbcNorth,"Raw Event Plane BBC North","l");
+  leg_North->AddEntry(h_mEPReCenter_BbcNorth,"ReCentered Event Plane BBC North","l");
+  leg_North->AddEntry(h_mEPShift_BbcNorth,"Shifted Event Plane BBC North","l");
+  leg_North->AddEntry(f_poly_North,Chi2_NDF_North.c_str(),"l");
+  leg_North->Draw("same");
+
+  string FigName = Form("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_EventPlane_%s.eps",mOrder[order].c_str());
+  c_EventPlane->SaveAs(FigName.c_str());
 }
-
