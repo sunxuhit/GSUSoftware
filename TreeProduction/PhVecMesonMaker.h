@@ -9,7 +9,7 @@ class recoConsts;
 
 class PHCompositeNode;
 class PHGlobal;
-// class TrigLvl1;
+class TrigLvl1;
 class RunHeader;
 class BbcRaw;
 class BbcCalib;
@@ -51,6 +51,7 @@ class PhVecMesonMaker: public SubsysReco {
     int mDebug_Bbc;
 
     PHGlobal* mPHGlobal;
+    TrigLvl1* mTrigLvl1;
 
     RunHeader* mRunHeader;
     int mRunId;
@@ -71,6 +72,8 @@ class PhVecMesonMaker: public SubsysReco {
 
     // utilities
     int getNodes(PHCompositeNode *topNode); // extract nodes needed for analysis
+    bool isMinimumBias(); // minimum bias trigger
+    bool isMinimumBiasNarrowVtx(); // minimum bias trigger with narrow vertex
 
     RecoEPHistoManager *mRecoEPHistoManager;
     RecoEPProManager *mRecoEPProManager;

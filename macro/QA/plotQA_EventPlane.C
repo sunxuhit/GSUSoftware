@@ -67,7 +67,7 @@ void plotQA_EventPlane(int order = 1, int cent10 = 5)
   h_mEPRaw_BbcSouth->GetYaxis()->SetTitleSize(0.06);
   h_mEPRaw_BbcSouth->GetYaxis()->SetTitleFont(132);
   h_mEPRaw_BbcSouth->GetYaxis()->SetLabelSize(0.04);
-  // h_mEPRaw_BbcSouth->GetYaxis()->SetRangeUser(0.0,h_mEPRaw_BbcSouth->GetMaximum()*1.1);
+  h_mEPRaw_BbcSouth->GetYaxis()->SetRangeUser(0.0,h_mEPRaw_BbcSouth->GetMaximum()*1.1);
   h_mEPRaw_BbcSouth->SetNdivisions(505,"Y");
   h_mEPRaw_BbcSouth->SetLineColor(1);
   h_mEPRaw_BbcSouth->SetLineWidth(2);
@@ -91,7 +91,7 @@ void plotQA_EventPlane(int order = 1, int cent10 = 5)
   float ndf_South = f_poly_South->GetNDF();
   string Chi2_NDF_South = Form("#chi^{2}/ndf = %3.1f/%3.1f",chi2_South,ndf_South);
 
-  TLegend *leg_South = new TLegend(0.35,0.6,0.75,0.8);
+  TLegend *leg_South = new TLegend(0.2,0.2,0.8,0.5);
   leg_South->SetBorderSize(0);
   leg_South->SetFillColor(0);
   leg_South->AddEntry(h_mEPRaw_BbcSouth,"Raw Event Plane BBC South","l");
@@ -116,7 +116,7 @@ void plotQA_EventPlane(int order = 1, int cent10 = 5)
   h_mEPRaw_BbcNorth->GetYaxis()->SetTitleSize(0.06);
   h_mEPRaw_BbcNorth->GetYaxis()->SetTitleFont(132);
   h_mEPRaw_BbcNorth->GetYaxis()->SetLabelSize(0.04);
-  // h_mEPRaw_BbcNorth->GetYaxis()->SetRangeUser(0.0,h_mEPRaw_BbcNorth->GetMaximum()*1.1);
+  h_mEPRaw_BbcNorth->GetYaxis()->SetRangeUser(0.0,h_mEPRaw_BbcNorth->GetMaximum()*1.1);
   h_mEPRaw_BbcNorth->SetNdivisions(505,"Y");
   h_mEPRaw_BbcNorth->SetLineColor(1);
   h_mEPRaw_BbcNorth->SetLineWidth(2);
@@ -139,7 +139,7 @@ void plotQA_EventPlane(int order = 1, int cent10 = 5)
   float ndf_North = f_poly_North->GetNDF();
   string Chi2_NDF_North = Form("#chi^{2}/ndf = %3.1f/%3.1f",chi2_North,ndf_North);
 
-  TLegend *leg_North = new TLegend(0.35,0.6,0.75,0.8);
+  TLegend *leg_North = new TLegend(0.2,0.2,0.8,0.5);
   leg_North->SetBorderSize(0);
   leg_North->SetFillColor(0);
   leg_North->AddEntry(h_mEPRaw_BbcNorth,"Raw Event Plane BBC North","l");

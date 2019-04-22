@@ -101,6 +101,9 @@ void calEPResolution()
   for(int i_order = 0; i_order < 3; ++i_order)
   {
     p_mResolution_BbcSub[i_order]->Write();
+    // string GraphName = Form("g_mResolution_BbcSub_%s",mOrder[i_order].c_str());
+    // g_mResolution_BbcSub[i_order]->SetName(GraphName.c_str());
+    // g_mResolution_BbcSub[i_order]->Write();
   }
   File_OutPut->Close();
 

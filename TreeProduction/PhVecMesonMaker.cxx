@@ -8,6 +8,8 @@
 #include <phool.h>
 #include <PHGlobal.h>
 #include <PHCompositeNode.h>
+#include "TrigLvl1.h"
+#include "TriggerHelper.h"
 
 #include <RunHeader.h>
 #include <recoConsts.h>
@@ -58,6 +60,7 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
 
   // PH class
   mPHGlobal  = NULL;
+  mTrigLvl1  = NULL;
   mRunHeader = NULL;
   mRunId     = -999;
   mVtxOut    = NULL; // vertex
@@ -223,20 +226,29 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   if(mNumOfEvents%10000 == 0) cout << "processing events:  " << mNumOfEvents << endl;
   // if(mNumOfEvents > 100) return ABORTRUN;
 
-  float zdc1 = mPHGlobal->getZdcEnergyN();
-  float zdc2 = mPHGlobal->getZdcEnergyS();
-  float zdcz = mPHGlobal->getZdcZVertex();
-  bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
-  if (!isZDCOK) return DISCARDEVENT;
+  // float zdc1 = mPHGlobal->getZdcEnergyN();
+  // float zdc2 = mPHGlobal->getZdcEnergyS();
+  // float zdcz = mPHGlobal->getZdcZVertex();
+  // bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
+  // if (!isZDCOK) return DISCARDEVENT;
 
-  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  // float vtx_bbcz = mPHGlobal->getBbcZVertex();
+
   float centrality = mPHGlobal->getCentrality();
-  if(centrality < 0) return DISCARDEVENT; // apply bbc cuts
+  float zdcz = mPHGlobal->getZdcZVertex();
+  float vtx_bbcz = mPHGlobal->getBbcZVertex();
 
-  mRecoEPHistoManager->fillQA_Global_nocuts(zdcz,vtx_bbcz,centrality);
+  if(isMinimumBias()) // fill QA for minium bias trigger
+  {
+    mRecoEPHistoManager->fillQA_Global_MiniBias(mRunId,zdcz,vtx_bbcz,centrality);
+  }
 
-  if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
-  mRecoEPHistoManager->fillQA_Global(zdcz,vtx_bbcz,centrality);
+  if( !isMinimumBiasNarrowVtx() ) return DISCARDEVENT; // select events wth minimum bias trigger & narrow vertex cut
+  if(centrality < 0) return DISCARDEVENT; // remove no ZDC coincidence events
+  mRecoEPHistoManager->fillQA_Global_NarrowVtx(mRunId,zdcz,vtx_bbcz,centrality);
+
+  if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -1.0*(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
+  mRecoEPHistoManager->fillQA_Global_NarrowVtxBbc(mRunId,zdcz,vtx_bbcz,centrality);
 
   if(mMode == 0)  // fill re-center & raw event plane
   {
@@ -474,6 +486,13 @@ int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
     return DISCARDEVENT;
   }
 
+  mTrigLvl1 = findNode::getClass<TrigLvl1>(topNode, "TrigLvl1");
+  if( !mTrigLvl1 )
+  {
+    std::cout << PHWHERE << "can't find TrigLvl1 Node" << std::endl;
+    return DISCARDEVENT;;//exit(1);
+  }
+
   mBbcRaw = findNode::getClass<BbcRaw>(topNode,"BbcRaw");
   if (!mBbcRaw)
   {
@@ -489,4 +508,53 @@ int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
   }
 
   return EVENT_OK;
+}
+
+bool PhVecMesonMaker::isMinimumBias()
+{
+  // Au+Au @ Run14 trigger selection
+  // const unsigned int BBCLL1_narrowvtx = 0x00000010; // 4 - BBCLL1(>1 tubes) narrowvtx
+  // const unsigned int BBCLL1           = 0x00000020; // 5 - BBCLL1(>1 tubes)
+  // const unsigned int BBCLL1_novertex  = 0x00000040; // 6 - BBCLL1(>1 tubes) novertex
+  const int TRIGGERBIT = 5;
+  bool trigscaled_on = false;
+  trigscaled_on = mTrigLvl1->get_lvl1_trigscaled_bit(TRIGGERBIT);
+  // cout << "TRIGGERBIT = " << TRIGGERBIT << ", trigscaled_on = " << trigscaled_on << endl;
+
+  // ZDC coincidence
+  float zdc1 = mPHGlobal->getZdcEnergyN();
+  float zdc2 = mPHGlobal->getZdcEnergyS();
+  float zdcz = mPHGlobal->getZdcZVertex();
+  bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
+
+  // BBC vertex cut
+  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  bool isBbcOK = fabs(vtx_bbcz) < 30;
+
+  return trigscaled_on && isZDCOK && isBbcOK;
+}
+
+bool PhVecMesonMaker::isMinimumBiasNarrowVtx()
+{
+  // Au+Au @ Run14 trigger selection
+  // const unsigned int BBCLL1_narrowvtx = 0x00000010; // 4 - BBCLL1(>1 tubes) narrowvtx
+  // const unsigned int BBCLL1           = 0x00000020; // 5 - BBCLL1(>1 tubes)
+  // const unsigned int BBCLL1_novertex  = 0x00000040; // 6 - BBCLL1(>1 tubes) novertex
+  // const int TRIGGERBIT = mRC->get_IntFlag("TRIGGER_BIT",4);
+  const int TRIGGERBIT = 4;
+  bool trigscaled_on = false;
+  trigscaled_on = mTrigLvl1->get_lvl1_trigscaled_bit(TRIGGERBIT);
+  // cout << "TRIGGERBIT = " << TRIGGERBIT << ", trigscaled_on = " << trigscaled_on << endl;
+
+  // ZDC coincidence
+  float zdc1 = mPHGlobal->getZdcEnergyN();
+  float zdc2 = mPHGlobal->getZdcEnergyS();
+  float zdcz = mPHGlobal->getZdcZVertex();
+  bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
+
+  // BBC vertex cut
+  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  bool isBbcOK = fabs(vtx_bbcz) < 30;
+
+  return trigscaled_on && isZDCOK && isBbcOK;
 }

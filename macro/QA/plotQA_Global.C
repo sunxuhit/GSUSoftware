@@ -9,14 +9,32 @@
 
 void plotQA_Global()
 {
-  string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_ShiftEP_Resoluiton.root";
+  // string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_ShiftEP_Resoluiton.root";
+  string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_RawEP_ReCenterPar.root";
   TFile *File_InPut = TFile::Open(inputfile.c_str());
-  TH1F *h_mVtZ_Bbc_nocuts = (TH1F*)File_InPut->Get("h_mVtZ_Bbc_nocuts");
-  TH1F *h_mVtZ_Bbc = (TH1F*)File_InPut->Get("h_mVtZ_Bbc");
-  TH1F *h_mVtZ_Zdc_nocuts = (TH1F*)File_InPut->Get("h_mVtZ_Zdc_nocuts");
-  TH1F *h_mVtZ_Zdc = (TH1F*)File_InPut->Get("h_mVtZ_Zdc");
-  TH1F *h_mCentrality_nocuts = (TH1F*)File_InPut->Get("h_mCentrality_nocuts");
-  TH1F *h_mCentrality = (TH1F*)File_InPut->Get("h_mCentrality");
+  TH2F *h_mVtxZ_Bbc_MiniBias = (TH2F*)File_InPut->Get("h_mVtxZ_Bbc_MiniBias");
+  TH2F *h_mVtxZ_Zdc_MiniBias = (TH2F*)File_InPut->Get("h_mVtxZ_Zdc_MiniBias");
+  TH2F *h_mCentrality_MiniBias = (TH2F*)File_InPut->Get("h_mCentrality_MiniBias");
+
+  TH2F *h_mVtxZ_Bbc_NarrowVtx = (TH2F*)File_InPut->Get("h_mVtxZ_Bbc_NarrowVtx");
+  TH2F *h_mVtxZ_Zdc_NarrowVtx = (TH2F*)File_InPut->Get("h_mVtxZ_Zdc_NarrowVtx");
+  TH2F *h_mCentrality_NarrowVtx = (TH2F*)File_InPut->Get("h_mCentrality_NarrowVtx");
+
+  TH2F *h_mVtxZ_Bbc_NarrowVtxBbc = (TH2F*)File_InPut->Get("h_mVtxZ_Bbc_NarrowVtxBbc");
+  TH2F *h_mVtxZ_Zdc_NarrowVtxBbc = (TH2F*)File_InPut->Get("h_mVtxZ_Zdc_NarrowVtxBbc");
+  TH2F *h_mCentrality_NarrowVtxBbc = (TH2F*)File_InPut->Get("h_mCentrality_NarrowVtxBbc");
+
+  TH1F *h_mVtxZ_Bbc_MiniBias_ProjY = (TH1F*)h_mVtxZ_Bbc_MiniBias->ProjectionY();
+  TH1F *h_mVtxZ_Zdc_MiniBias_ProjY = (TH1F*)h_mVtxZ_Zdc_MiniBias->ProjectionY();
+  TH1F *h_mCentrality_MiniBias_ProjY = (TH1F*)h_mCentrality_MiniBias->ProjectionY();
+
+  TH1F *h_mVtxZ_Bbc_NarrowVtx_ProjY = (TH1F*)h_mVtxZ_Bbc_NarrowVtx->ProjectionY();
+  TH1F *h_mVtxZ_Zdc_NarrowVtx_ProjY = (TH1F*)h_mVtxZ_Zdc_NarrowVtx->ProjectionY();
+  TH1F *h_mCentrality_NarrowVtx_ProjY = (TH1F*)h_mCentrality_NarrowVtx->ProjectionY();
+
+  TH1F *h_mVtxZ_Bbc_NarrowVtxBbc_ProjY = (TH1F*)h_mVtxZ_Bbc_NarrowVtxBbc->ProjectionY();
+  TH1F *h_mVtxZ_Zdc_NarrowVtxBbc_ProjY = (TH1F*)h_mVtxZ_Zdc_NarrowVtxBbc->ProjectionY();
+  TH1F *h_mCentrality_NarrowVtxBbc_ProjY = (TH1F*)h_mCentrality_NarrowVtxBbc->ProjectionY();
 
   TCanvas *c_global = new TCanvas("c_global","c_global",10,10,1500,500);
   c_global->Divide(3,1);
@@ -30,49 +48,66 @@ void plotQA_Global()
   }
 
   c_global->cd(1);
-  h_mVtZ_Bbc_nocuts->SetTitle("BBC Vertex");
-  h_mVtZ_Bbc_nocuts->SetStats(0);
-  h_mVtZ_Bbc_nocuts->SetLineColor(2);
-  h_mVtZ_Bbc_nocuts->SetLineWidth(4);
-  h_mVtZ_Bbc_nocuts->SetLineStyle(1);
-  h_mVtZ_Bbc_nocuts->GetXaxis()->SetTitle("BBC Vertex Z");
-  h_mVtZ_Bbc_nocuts->Draw("hE");
-  h_mVtZ_Bbc->SetLineColor(4);
-  h_mVtZ_Bbc->SetLineWidth(4);
-  h_mVtZ_Bbc->SetLineStyle(2);
-  h_mVtZ_Bbc->Draw("hE same");
+  c_global->cd(1)->SetLogy();
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->SetTitle("BBC Vertex");
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->SetStats(0);
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->SetLineColor(2);
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->SetLineWidth(2);
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->SetLineStyle(1);
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->GetXaxis()->SetTitle("BBC Vertex Z");
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->Draw("hE");
+  h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->SetLineColor(4);
+  h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->SetLineWidth(2);
+  h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->SetLineStyle(1);
+  h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->Draw("hE same");
+  h_mVtxZ_Bbc_MiniBias_ProjY->SetLineColor(1);
+  h_mVtxZ_Bbc_MiniBias_ProjY->SetLineWidth(2);
+  h_mVtxZ_Bbc_MiniBias_ProjY->SetLineStyle(1);
+  h_mVtxZ_Bbc_MiniBias_ProjY->Draw("hE same");
   
   c_global->cd(2);
-  h_mVtZ_Zdc_nocuts->SetTitle("ZDC Vertex");
-  h_mVtZ_Zdc_nocuts->SetStats(0);
-  h_mVtZ_Zdc_nocuts->SetLineColor(2);
-  h_mVtZ_Zdc_nocuts->SetLineWidth(4);
-  h_mVtZ_Zdc_nocuts->SetLineStyle(1);
-  h_mVtZ_Zdc_nocuts->GetXaxis()->SetTitle("ZDC Vertex Z");
-  h_mVtZ_Zdc_nocuts->Draw("hE");
-  h_mVtZ_Zdc->SetLineColor(4);
-  h_mVtZ_Zdc->SetLineWidth(4);
-  h_mVtZ_Zdc->SetLineStyle(2);
-  h_mVtZ_Zdc->Draw("hE same");
+  c_global->cd(2)->SetLogy();
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->SetTitle("ZDC Vertex");
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->SetStats(0);
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->SetLineColor(2);
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->SetLineWidth(2);
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->SetLineStyle(1);
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->GetXaxis()->SetTitle("ZDC Vertex Z");
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->Draw("hE");
+  h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->SetLineColor(4);
+  h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->SetLineWidth(2);
+  h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->SetLineStyle(1);
+  h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->Draw("hE same");
+  h_mVtxZ_Zdc_MiniBias_ProjY->SetLineColor(1);
+  h_mVtxZ_Zdc_MiniBias_ProjY->SetLineWidth(2);
+  h_mVtxZ_Zdc_MiniBias_ProjY->SetLineStyle(1);
+  h_mVtxZ_Zdc_MiniBias_ProjY->Draw("hE same");
 
   c_global->cd(3);
-  h_mCentrality_nocuts->SetTitle("Centrality");
-  h_mCentrality_nocuts->SetStats(0);
-  h_mCentrality_nocuts->SetLineColor(2);
-  h_mCentrality_nocuts->SetLineWidth(4);
-  h_mCentrality_nocuts->SetLineStyle(1);
-  h_mCentrality_nocuts->GetXaxis()->SetTitle("Centrality (%)");
-  h_mCentrality_nocuts->Draw("hE");
-  h_mCentrality->SetLineColor(4);
-  h_mCentrality->SetLineWidth(4);
-  h_mCentrality->SetLineStyle(2);
-  h_mCentrality->Draw("hE same");
+  c_global->cd(3)->SetLogy();
+  h_mCentrality_NarrowVtx_ProjY->SetTitle("Centrality");
+  h_mCentrality_NarrowVtx_ProjY->SetStats(0);
+  h_mCentrality_NarrowVtx_ProjY->SetLineColor(2);
+  h_mCentrality_NarrowVtx_ProjY->SetLineWidth(2);
+  h_mCentrality_NarrowVtx_ProjY->SetLineStyle(1);
+  h_mCentrality_NarrowVtx_ProjY->GetXaxis()->SetTitle("Centrality (%)");
+  h_mCentrality_NarrowVtx_ProjY->GetYaxis()->SetRangeUser(0.1,1.5*h_mCentrality_NarrowVtx_ProjY->GetMaximum());
+  h_mCentrality_NarrowVtx_ProjY->Draw("hE");
+  h_mCentrality_NarrowVtxBbc_ProjY->SetLineColor(4);
+  h_mCentrality_NarrowVtxBbc_ProjY->SetLineWidth(2);
+  h_mCentrality_NarrowVtxBbc_ProjY->SetLineStyle(1);
+  h_mCentrality_NarrowVtxBbc_ProjY->Draw("hE same");
+  h_mCentrality_MiniBias_ProjY->SetLineColor(1);
+  h_mCentrality_MiniBias_ProjY->SetLineWidth(2);
+  h_mCentrality_MiniBias_ProjY->SetLineStyle(1);
+  h_mCentrality_MiniBias_ProjY->Draw("hE same");
 
-  TLegend *leg = new TLegend(0.2,0.3,0.7,0.5);
+  TLegend *leg = new TLegend(0.2,0.25,0.8,0.55);
   leg->SetBorderSize(0);
   leg->SetFillColor(10);
-  leg->AddEntry(h_mCentrality_nocuts,"w/o BBC cuts","l");
-  leg->AddEntry(h_mCentrality,"with BBC cuts (< 10cm)","l");
+  leg->AddEntry(h_mCentrality_MiniBias_ProjY,"BBCLL1 & BBC VtxZ (< 30 cm)","l");
+  leg->AddEntry(h_mCentrality_NarrowVtx_ProjY,"BBCLL1 narrowvtx & BBC VtxZ (< 30 cm)","l");
+  leg->AddEntry(h_mCentrality_NarrowVtxBbc_ProjY,"BBCLL1 narrowvtx & BBC VtxZ (< 10 cm)","l");
   leg->Draw("same");
   
   c_global->SaveAs("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_global.eps");

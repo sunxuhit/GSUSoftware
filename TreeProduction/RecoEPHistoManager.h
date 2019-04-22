@@ -15,8 +15,9 @@ class RecoEPHistoManager : public TObject
     virtual ~RecoEPHistoManager();
 
     void initQA_Global();
-    void fillQA_Global_nocuts(float vtx_zdc, float vtx_bbc, float centrality);
-    void fillQA_Global(float vtx_zdc, float vtx_bbc, float centrality);
+    void fillQA_Global_MiniBias(int runId, float vtx_zdc, float vtx_bbc, float centrality);
+    void fillQA_Global_NarrowVtx(int runId, float vtx_zdc, float vtx_bbc, float centrality);
+    void fillQA_Global_NarrowVtxBbc(int runId, float vtx_zdc, float vtx_bbc, float centrality);
     void writeQA_Global();
 
     void set_debug(int debug) {mDebug = debug;}
@@ -64,15 +65,17 @@ class RecoEPHistoManager : public TObject
   private:
 
     // vertex QA
-    TH1F *h_mVtZ_Bbc_nocuts;
-    TH2F *h_mVtR_Bbc_nocuts;
-    TH1F *h_mVtZ_Zdc_nocuts;
-    TH1F *h_mCentrality_nocuts;
+    TH2F *h_mVtxZ_Bbc_MiniBias; // runId vs. VtxZ
+    TH2F *h_mVtxZ_Zdc_MiniBias; // runId vs. VtxZ
+    TH2F *h_mCentrality_MiniBias; // runId vs. centrality
 
-    TH1F *h_mVtZ_Bbc;
-    TH2F *h_mVtR_Bbc;
-    TH1F *h_mVtZ_Zdc;
-    TH1F *h_mCentrality;
+    TH2F *h_mVtxZ_Bbc_NarrowVtx;
+    TH2F *h_mVtxZ_Zdc_NarrowVtx;
+    TH2F *h_mCentrality_NarrowVtx;
+
+    TH2F *h_mVtxZ_Bbc_NarrowVtxBbc;
+    TH2F *h_mVtxZ_Zdc_NarrowVtxBbc;
+    TH2F *h_mCentrality_NarrowVtxBbc;
 
     // BBC QA
     int mDebug;
