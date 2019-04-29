@@ -3,6 +3,7 @@
 
 #include <TObject.h>
 #include "Run14AuAuList.h"
+#include "PhVecMesonCons.h"
 
 class TH1F;
 class TH2F;
@@ -21,9 +22,14 @@ class RecoEPUtility : public TObject
 
     //------------BBC Event Plane---------------
     void initBBC();
+
     bool read_in_recal_consts();
-    int get_recal_group(int run_num);
     float get_recal_charge(int PmtIndx, int run_num, int ADC);
+
+    bool read_in_phiweight_corrections();
+    float get_phiweight_correction(int PmtIndx, int run_num, float centrality);
+
+    int get_recal_group(int run_num);
     float get_pedestal(int PmtIndx, int run_num);
     float get_mip(int PmtIndx, int run_num);
     bool isSaturatePMT(int PmtIndx);
@@ -34,6 +40,7 @@ class RecoEPUtility : public TObject
 
     float const_pedestal[128][GoodRunList::ngrp];
     float const_mip[128][GoodRunList::ngrp];
+    float phi_weight[128][GoodRunList::ngrp][vecMesonFlow::mNumOfCentrality20];
 
     ClassDef(RecoEPUtility,1)
 };

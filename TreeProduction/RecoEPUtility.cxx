@@ -1,5 +1,4 @@
 #include "RecoEPUtility.h"
-#include "PhVecMesonCons.h"
 #include <TMath.h>
 
 #include <TOAD.h>
@@ -106,19 +105,21 @@ int RecoEPUtility::getVertexBin(float vtx_z)
 //------------BBC Event Plane---------------
 void RecoEPUtility::initBBC()
 {
-  bool bbc_status = read_in_recal_consts();
-  if(bbc_status) std::cout << "BBC recalibration constants read in!" << std::endl;
+  bool bbc_recal = read_in_recal_consts();
+  if(bbc_recal) std::cout << "BBC recalibration constants read in!" << std::endl;
+  bool bbc_phiweight = read_in_phiweight_corrections();
+  if(bbc_phiweight) std::cout << "BBC phi weight corrections read in!" << std::endl;
 }
 
 bool RecoEPUtility::read_in_recal_consts()
 {
   TOAD toad_loader("PhVecMesonMaker");
-  std::string fname = toad_loader.location("BbcRecalConsts.txt");
-  std::cout << "fname = " << fname.c_str() << std::endl;
-  std::ifstream read_consts( fname.c_str() );
+  std::string inputfile = toad_loader.location("BbcRecalConsts.txt");
+  std::cout << "inputfile = " << inputfile.c_str() << std::endl;
+  std::ifstream read_consts( inputfile.c_str() );
   if ( !read_consts.is_open() )
   {
-    std::cout<<"Abort. Fail to read in BBC recalibration constants: "<<fname<<std::endl;
+    std::cout<<"Abort. Fail to read in BBC recalibration constants: "<<inputfile<<std::endl;
     exit(0);
   }
 
@@ -134,6 +135,48 @@ bool RecoEPUtility::read_in_recal_consts()
   read_consts.close();
 
   return true;
+}
+
+float RecoEPUtility::get_recal_charge(int PmtIndx, int run_num, int ADC)
+{
+  int _grp = get_recal_group(run_num);
+  float _ped = const_pedestal[PmtIndx][_grp-1];
+  float _mip = const_mip[PmtIndx][_grp-1];
+
+  return (ADC-_ped)/(_mip-_ped);
+}
+
+bool RecoEPUtility::read_in_phiweight_corrections()
+{
+  TOAD toad_loader("PhVecMesonMaker");
+  std::string inputfile = toad_loader.location("BbcPhiWeightCorrection.txt");
+  std::cout << "inputfile = " << inputfile.c_str() << std::endl;
+  std::ifstream read_correction ( inputfile.c_str() );
+  if ( !read_correction.is_open() )
+  {
+    std::cout<<"Abort. Fail to read in BBC recalibration constants: "<<inputfile<<std::endl;
+    exit(0);
+  }
+
+  int temp_grp = 0, temp_cent = 0, temp_pmt = 0;
+  double temp_ratio = 0;
+  std::cout << "reading correction factors: " << std::endl;
+  while (read_correction >> temp_grp >> temp_cent >> temp_pmt >> temp_ratio)
+  {
+    phi_weight[temp_pmt][temp_grp][temp_cent] = 1/temp_ratio;
+  }
+  read_correction.close();
+
+  return true;
+}
+
+float RecoEPUtility::get_phiweight_correction(int PmtIndx, int run_num, float centrality)
+{
+  // for BBC, compatible with offset correction
+  int _icent = getCentralityBin20(centrality);
+  int _igrp = get_recal_group(run_num);
+
+  return phi_weight[PmtIndx][_igrp][_icent];
 }
 
 int RecoEPUtility::get_recal_group(int run_num)
@@ -156,15 +199,6 @@ int RecoEPUtility::get_recal_group(int run_num)
   else if (run_num <= GoodRunList::runno_grp16[GoodRunList::nrun_grp16-1]) return 16;
 
   return 0; // no match
-}
-
-float RecoEPUtility::get_recal_charge(int PmtIndx, int run_num, int ADC)
-{
-  int _grp = get_recal_group(run_num);
-  float _ped = const_pedestal[PmtIndx][_grp-1];
-  float _mip = const_mip[PmtIndx][_grp-1];
-
-  return (ADC-_ped)/(_mip-_ped);
 }
 
 float RecoEPUtility::get_pedestal(int PmtIndx, int run_num)

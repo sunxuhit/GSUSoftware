@@ -9,6 +9,7 @@ AM_CPPFLAGS = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/inc
 
 dist_pkgdata_DATA = \
 BbcRecalConsts.txt \
+BbcPhiWeightCorrection.txt \
 file_AuAu200GeV_ReCenterPar.root \
 file_AuAu200GeV_ShiftPar.root
 

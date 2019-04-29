@@ -55,15 +55,15 @@ void plotQA_Global()
   h_mVtxZ_Bbc_NarrowVtx_ProjY->SetLineWidth(2);
   h_mVtxZ_Bbc_NarrowVtx_ProjY->SetLineStyle(1);
   h_mVtxZ_Bbc_NarrowVtx_ProjY->GetXaxis()->SetTitle("BBC Vertex Z");
-  h_mVtxZ_Bbc_NarrowVtx_ProjY->Draw("hE");
+  h_mVtxZ_Bbc_NarrowVtx_ProjY->DrawCopy("hE");
   h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->SetLineColor(4);
   h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->SetLineWidth(2);
   h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->SetLineStyle(1);
-  h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->Draw("hE same");
+  h_mVtxZ_Bbc_NarrowVtxBbc_ProjY->DrawCopy("hE same");
   h_mVtxZ_Bbc_MiniBias_ProjY->SetLineColor(1);
   h_mVtxZ_Bbc_MiniBias_ProjY->SetLineWidth(2);
   h_mVtxZ_Bbc_MiniBias_ProjY->SetLineStyle(1);
-  h_mVtxZ_Bbc_MiniBias_ProjY->Draw("hE same");
+  h_mVtxZ_Bbc_MiniBias_ProjY->DrawCopy("hE same");
   
   c_global->cd(2);
   c_global->cd(2)->SetLogy();
@@ -73,15 +73,15 @@ void plotQA_Global()
   h_mVtxZ_Zdc_NarrowVtx_ProjY->SetLineWidth(2);
   h_mVtxZ_Zdc_NarrowVtx_ProjY->SetLineStyle(1);
   h_mVtxZ_Zdc_NarrowVtx_ProjY->GetXaxis()->SetTitle("ZDC Vertex Z");
-  h_mVtxZ_Zdc_NarrowVtx_ProjY->Draw("hE");
+  h_mVtxZ_Zdc_NarrowVtx_ProjY->DrawCopy("hE");
   h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->SetLineColor(4);
   h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->SetLineWidth(2);
   h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->SetLineStyle(1);
-  h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->Draw("hE same");
+  h_mVtxZ_Zdc_NarrowVtxBbc_ProjY->DrawCopy("hE same");
   h_mVtxZ_Zdc_MiniBias_ProjY->SetLineColor(1);
   h_mVtxZ_Zdc_MiniBias_ProjY->SetLineWidth(2);
   h_mVtxZ_Zdc_MiniBias_ProjY->SetLineStyle(1);
-  h_mVtxZ_Zdc_MiniBias_ProjY->Draw("hE same");
+  h_mVtxZ_Zdc_MiniBias_ProjY->DrawCopy("hE same");
 
   c_global->cd(3);
   c_global->cd(3)->SetLogy();
@@ -92,15 +92,15 @@ void plotQA_Global()
   h_mCentrality_NarrowVtx_ProjY->SetLineStyle(1);
   h_mCentrality_NarrowVtx_ProjY->GetXaxis()->SetTitle("Centrality (%)");
   h_mCentrality_NarrowVtx_ProjY->GetYaxis()->SetRangeUser(0.1,1.5*h_mCentrality_NarrowVtx_ProjY->GetMaximum());
-  h_mCentrality_NarrowVtx_ProjY->Draw("hE");
+  h_mCentrality_NarrowVtx_ProjY->DrawCopy("hE");
   h_mCentrality_NarrowVtxBbc_ProjY->SetLineColor(4);
   h_mCentrality_NarrowVtxBbc_ProjY->SetLineWidth(2);
   h_mCentrality_NarrowVtxBbc_ProjY->SetLineStyle(1);
-  h_mCentrality_NarrowVtxBbc_ProjY->Draw("hE same");
+  h_mCentrality_NarrowVtxBbc_ProjY->DrawCopy("hE same");
   h_mCentrality_MiniBias_ProjY->SetLineColor(1);
   h_mCentrality_MiniBias_ProjY->SetLineWidth(2);
   h_mCentrality_MiniBias_ProjY->SetLineStyle(1);
-  h_mCentrality_MiniBias_ProjY->Draw("hE same");
+  h_mCentrality_MiniBias_ProjY->DrawCopy("hE same");
 
   TLegend *leg = new TLegend(0.2,0.25,0.8,0.55);
   leg->SetBorderSize(0);
@@ -111,5 +111,38 @@ void plotQA_Global()
   leg->Draw("same");
   
   c_global->SaveAs("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_global.eps");
+
+  TCanvas *c_centrality = new TCanvas("c_centrality","c_centrality",10,10,800,800);
+  c_centrality->SetLeftMargin(0.15);
+  c_centrality->SetBottomMargin(0.15);
+  c_centrality->SetTicks(1,1);
+  c_centrality->SetGrid(0,0);
+
+  h_mCentrality_NarrowVtx_ProjY->SetTitle("Centrality");
+  h_mCentrality_NarrowVtx_ProjY->SetStats(0);
+  h_mCentrality_NarrowVtx_ProjY->SetLineColor(2);
+  h_mCentrality_NarrowVtx_ProjY->SetLineWidth(2);
+  h_mCentrality_NarrowVtx_ProjY->SetLineStyle(1);
+  h_mCentrality_NarrowVtx_ProjY->GetXaxis()->SetTitle("Centrality (%)");
+  h_mCentrality_NarrowVtx_ProjY->GetYaxis()->SetRangeUser(0.1,4500);
+  h_mCentrality_NarrowVtx_ProjY->DrawCopy("hE");
+  h_mCentrality_NarrowVtxBbc_ProjY->SetLineColor(4);
+  h_mCentrality_NarrowVtxBbc_ProjY->SetLineWidth(2);
+  h_mCentrality_NarrowVtxBbc_ProjY->SetLineStyle(1);
+  h_mCentrality_NarrowVtxBbc_ProjY->DrawCopy("hE same");
+  h_mCentrality_MiniBias_ProjY->SetLineColor(1);
+  h_mCentrality_MiniBias_ProjY->SetLineWidth(2);
+  h_mCentrality_MiniBias_ProjY->SetLineStyle(1);
+  h_mCentrality_MiniBias_ProjY->DrawCopy("hE same");
+
+  TLegend *leg_cent = new TLegend(0.2,0.25,0.8,0.50);
+  leg_cent->SetBorderSize(0);
+  leg_cent->SetFillColor(10);
+  leg_cent->AddEntry(h_mCentrality_MiniBias_ProjY,"BBCLL1 & BBC VtxZ (< 30 cm)","l");
+  leg_cent->AddEntry(h_mCentrality_NarrowVtx_ProjY,"BBCLL1 narrowvtx & BBC VtxZ (< 30 cm)","l");
+  leg_cent->AddEntry(h_mCentrality_NarrowVtxBbc_ProjY,"BBCLL1 narrowvtx & BBC VtxZ (< 10 cm)","l");
+  leg_cent->Draw("same");
+  
+  c_centrality->SaveAs("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_centrality.eps");
 }
 
