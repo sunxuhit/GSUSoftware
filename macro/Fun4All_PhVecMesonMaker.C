@@ -15,7 +15,7 @@ void Fun4All_PhVecMesonMaker(
   rc->set_IntFlag("ANA_MODE",0); // fill re-center parameter & raw event plane
   // rc->set_IntFlag("ANA_MODE",1); // fill shift parameter & re-centered event plane
   // rc->set_IntFlag("ANA_MODE",2); // calculate resolution & fill shifted event plane
-  rc->set_IntFlag("QA_BBC",0);
+  rc->set_IntFlag("QA_BBC",1);
   rc->set_IntFlag("DEBUG_BBC",0);
 
   std::string outputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/file_AuAu200GeV_RawEP_ReCenterPar.root";

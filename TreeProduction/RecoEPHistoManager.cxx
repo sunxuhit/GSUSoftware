@@ -211,6 +211,39 @@ void RecoEPHistoManager::writeQA_BbcChargeReCalib()
 
 //------------------------------------------------------------
 
+void RecoEPHistoManager::initQA_BbcChargePhiWeight()
+{
+  std::cout << "initialize BBC phi-weight Charge QA!" << std::endl;
+  h_mChargePhiWeightXY_BbcSouth = new TH2F("h_mChargePhiWeightXY_BbcSouth","h_mChargePhiWeightXY_BbcSouth",40,-200,200,40,-200,200);
+  h_mGeoPhiWeightZ_BbcSouth = new TH1F("h_mGeoPhiWeightZ_BbcSouth","h_mGeoPhiWeightZ_BbcSouth",500,-1500.5,-1000.5);
+  h_mChargePhiWeightXY_BbcNorth = new TH2F("h_mChargePhiWeightXY_BbcNorth","h_mChargePhiWeightXY_BbcNorth",40,-200,200,40,-200,200); 
+  h_mGeoPhiWeightZ_BbcNorth = new TH1F("h_mGeoPhiWeightZ_BbcNorth","h_mGeoPhiWeightZ_BbcNorth",500,1000.5,1500.5);
+}
+
+void RecoEPHistoManager::fillQA_BbcChargePhiWeight(int i_pmt, float bbcx, float bbcy, float bbcz, float weight)
+{
+  if(bbcz < 0) // south
+  {
+    h_mChargePhiWeightXY_BbcSouth->Fill(bbcx,bbcy,weight);
+    h_mGeoPhiWeightZ_BbcSouth->Fill(bbcz);
+  }
+  if(bbcz > 0) // north
+  {
+    h_mChargePhiWeightXY_BbcNorth->Fill(bbcx,bbcy,weight);
+    h_mGeoPhiWeightZ_BbcNorth->Fill(bbcz);
+  }
+}
+
+void RecoEPHistoManager::writeQA_BbcChargePhiWeight()
+{
+  h_mChargePhiWeightXY_BbcSouth->Write();
+  h_mGeoPhiWeightZ_BbcSouth->Write();
+  h_mChargePhiWeightXY_BbcNorth->Write();
+  h_mGeoPhiWeightZ_BbcNorth->Write();
+}
+
+//------------------------------------------------------------
+
 //===============Raw BBC Event Plane=========================
 void RecoEPHistoManager::initHist_BbcRawEP()
 {

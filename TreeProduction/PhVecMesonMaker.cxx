@@ -134,6 +134,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
       mRecoEPHistoManager->set_debug(mDebug_Bbc);
       mRecoEPHistoManager->initQA_BbcCharge();
       mRecoEPHistoManager->initQA_BbcChargeReCalib();
+      mRecoEPHistoManager->initQA_BbcChargePhiWeight();
       if(mDebug_Bbc == 1) 
       {
 	cout << "Start debugging for BBC!" << endl;
@@ -283,7 +284,8 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 	{
 	  if(mDebug_Bbc == 1) mRecoEPHistoManager->fillQA_BbcAdc(i_pmt,adc); // fill Adc QA
 	  mRecoEPHistoManager->fillQA_BbcCharge(i_pmt,bbcx,bbcy,bbcz,charge);
-	  mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,weight_BbcEP);
+	  mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
+	  mRecoEPHistoManager->fillQA_BbcChargePhiWeight(i_pmt,bbcx,bbcy,bbcz,weight_BbcEP);
 	}
       }
     }
@@ -457,6 +459,7 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
       if(mDebug_Bbc == 1) mRecoEPHistoManager->writeQA_BbcAdc();
       mRecoEPHistoManager->writeQA_BbcCharge();
       mRecoEPHistoManager->writeQA_BbcChargeReCalib();
+      mRecoEPHistoManager->writeQA_BbcChargePhiWeight();
     }
   }
   if(mMode == 1)

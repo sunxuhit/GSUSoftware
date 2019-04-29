@@ -34,6 +34,10 @@ class RecoEPHistoManager : public TObject
     void initQA_BbcChargeReCalib();
     void fillQA_BbcChargeReCalib(int i_pmt, float bbcx, float bbcy, float bbcz, float charge);
     void writeQA_BbcChargeReCalib();
+
+    void initQA_BbcChargePhiWeight();
+    void fillQA_BbcChargePhiWeight(int i_pmt, float bbcx, float bbcy, float bbcz, float weight);
+    void writeQA_BbcChargePhiWeight();
     //-----------------BBC QA---------------------
 
     //===============Raw BBC Event Plane==================
@@ -92,6 +96,11 @@ class RecoEPHistoManager : public TObject
     TH1F *h_mGeoReCalibZ_BbcSouth; // BBC Z distribution map for south
     TH2F *h_mChargeReCalibXY_BbcNorth;
     TH1F *h_mGeoReCalibZ_BbcNorth; 
+
+    TH2F *h_mChargePhiWeightXY_BbcSouth; // BBC XY recalib charge map for south
+    TH1F *h_mGeoPhiWeightZ_BbcSouth; // BBC Z distribution map for south
+    TH2F *h_mChargePhiWeightXY_BbcNorth;
+    TH1F *h_mGeoPhiWeightZ_BbcNorth; 
 
     // BBC Raw EP
     TH1F *h_mEPRaw_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
