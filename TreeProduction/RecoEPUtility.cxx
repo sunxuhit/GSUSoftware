@@ -15,6 +15,18 @@ ClassImp(RecoEPUtility)
 //------------------------------------------------------------
 RecoEPUtility::RecoEPUtility()
 {
+  for (int i_pmt = 0; i_pmt < 128; ++i_pmt)
+  {
+    for (int i_grp = 0; i_grp < GoodRunList::ngrp; ++i_grp)
+    {
+      const_pedestal[i_pmt][i_grp] = -9999;
+      const_mip[i_pmt][i_grp] = -9999;
+      for (int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+      {
+	phi_weight[i_pmt][i_grp][i_cent] = 1.0;
+      }
+    }
+  }
 }
 
 RecoEPUtility::~RecoEPUtility()
@@ -125,7 +137,7 @@ bool RecoEPUtility::read_in_recal_consts()
 
   int _pmt = 0, _rungrp = 0;
   float _ped = 0, _mip = 0;
-  std::cout<<"reading BBC recalibration constants: "<<std::endl;
+  std::cout << "reading BBC recalibration constants: " << std::endl;
   while (read_consts >> _pmt >> _rungrp >> _ped >> _mip)
   {
     const_pedestal[_pmt][_rungrp] = _ped;
@@ -154,29 +166,30 @@ bool RecoEPUtility::read_in_phiweight_corrections()
   std::ifstream read_correction ( inputfile.c_str() );
   if ( !read_correction.is_open() )
   {
-    std::cout<<"Abort. Fail to read in BBC recalibration constants: "<<inputfile<<std::endl;
+    std::cout << "Abort. Fail to read in BBC recalibration constants: " << inputfile << std::endl;
     exit(0);
   }
 
   int temp_grp = 0, temp_cent = 0, temp_pmt = 0;
-  double temp_ratio = 0;
+  float temp_ratio = 0;
   std::cout << "reading correction factors: " << std::endl;
   while (read_correction >> temp_grp >> temp_cent >> temp_pmt >> temp_ratio)
   {
-    phi_weight[temp_pmt][temp_grp][temp_cent] = 1/temp_ratio;
+    phi_weight[temp_pmt][temp_grp-1][temp_cent] = 1.0/temp_ratio;
+    // std::cout << "i_pmt = " << temp_pmt << ", run group = " << temp_grp << ", cent20 = " << temp_cent << ", phi_weight = " << 1.0/temp_ratio << std::endl;
   }
   read_correction.close();
 
   return true;
 }
 
-float RecoEPUtility::get_phiweight_correction(int PmtIndx, int run_num, float centrality)
+float RecoEPUtility::get_phiweight_correction(int PmtIndx, int run_num, int centrality)
 {
   // for BBC, compatible with offset correction
   int _icent = getCentralityBin20(centrality);
   int _igrp = get_recal_group(run_num);
 
-  return phi_weight[PmtIndx][_igrp][_icent];
+  return phi_weight[PmtIndx][_igrp-1][_icent];
 }
 
 int RecoEPUtility::get_recal_group(int run_num)

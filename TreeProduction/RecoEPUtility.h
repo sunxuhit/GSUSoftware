@@ -27,7 +27,7 @@ class RecoEPUtility : public TObject
     float get_recal_charge(int PmtIndx, int run_num, int ADC);
 
     bool read_in_phiweight_corrections();
-    float get_phiweight_correction(int PmtIndx, int run_num, float centrality);
+    float get_phiweight_correction(int PmtIndx, int run_num, int centrality);
 
     int get_recal_group(int run_num);
     float get_pedestal(int PmtIndx, int run_num);
