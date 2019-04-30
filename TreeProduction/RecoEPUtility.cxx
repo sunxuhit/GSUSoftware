@@ -179,8 +179,11 @@ bool RecoEPUtility::read_in_phiweight_corrections()
   std::cout << "reading correction factors: " << std::endl;
   while (read_correction >> temp_grp >> temp_cent >> temp_pmt >> temp_ratio)
   {
-    phi_weight[temp_pmt][temp_grp-1][temp_cent] = 1.0/temp_ratio;
-    // std::cout << "i_pmt = " << temp_pmt << ", run group = " << temp_grp << ", cent20 = " << temp_cent << ", phi_weight = " << 1.0/temp_ratio << std::endl;
+    if(temp_grp > 0)
+    {
+      phi_weight[temp_pmt][temp_grp-1][temp_cent] = 1.0/temp_ratio;
+      // std::cout << "i_pmt = " << temp_pmt << ", run group = " << temp_grp << ", cent20 = " << temp_cent << ", phi_weight = " << 1.0/temp_ratio << std::endl;
+    }
   }
   read_correction.close();
 
