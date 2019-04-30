@@ -294,6 +294,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
     const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
     // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
     const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
+    // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", vtx4 = " << vtx4 << endl;
 
     for(int i_order = 0; i_order < 3; ++i_order)
     {

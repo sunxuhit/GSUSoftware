@@ -62,10 +62,11 @@ int RecoEPUtility::getCentralityBin20(float centrality)
   // 0: (0%,5%], 1: (5%-10%], 2: (10%,15%], ......, 18: (90%,95%], 19: (95%,100%]
   for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
   {
-    if(centrality > vecMesonFlow::mCentStart20[i_cent] && TMath::Abs(centrality-vecMesonFlow::mCentStop20[i_cent]) < 1e-10)
+    if(centrality > vecMesonFlow::mCentStart20[i_cent] && centrality < vecMesonFlow::mCentStop20[i_cent])
     {
       return vecMesonFlow::mCentrality20[i_cent];
     }
+    if(TMath::Abs(centrality-vecMesonFlow::mCentStop20[i_cent]) < 1e-10) return vecMesonFlow::mCentrality20[i_cent]; // centrality == mCentStop20
   }
 
   return -1;
@@ -76,10 +77,11 @@ int RecoEPUtility::getCentralityBin10(float centrality)
   // 0: (0%,5%], 1: (5%-10%], 2: (10%,20%], ......, 7: (60%,70%], 8: (70%,80%]
   for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality10; ++i_cent)
   {
-    if(centrality > vecMesonFlow::mCentStart10[i_cent] && TMath::Abs(centrality-vecMesonFlow::mCentStop10[i_cent]) < 1e-10)
+    if(centrality > vecMesonFlow::mCentStart10[i_cent] && centrality < vecMesonFlow::mCentStop10[i_cent])
     {
       return vecMesonFlow::mCentrality10[i_cent];
     }
+    if(TMath::Abs(centrality-vecMesonFlow::mCentStop10[i_cent]) < 1e-10) return vecMesonFlow::mCentrality10[i_cent]; // centrality == mCentStop10
   }
 
   return -1;
@@ -90,10 +92,11 @@ int RecoEPUtility::getCentralityBin4(float centrality)
   // 0: (0%,10%], 1: (10%-40%], 2: (40%,80%], 3: (80%,100%]
   for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality4; ++i_cent)
   {
-    if(centrality > vecMesonFlow::mCentStart4[i_cent] && TMath::Abs(centrality-vecMesonFlow::mCentStop4[i_cent]) < 1e-10)
+    if(centrality > vecMesonFlow::mCentStart4[i_cent] && centrality < vecMesonFlow::mCentStop4[i_cent])
     {
       return vecMesonFlow::mCentrality4[i_cent];
     }
+    if(TMath::Abs(centrality-vecMesonFlow::mCentStop4[i_cent]) < 1e-10) return vecMesonFlow::mCentrality4[i_cent]; // centrality == mCentStop4
   }
 
   return -1;
@@ -104,12 +107,13 @@ int RecoEPUtility::getVertexBin(float vtx_z)
   // 0: [-10.0,-5.0], 1: (-5.0,0.0], 2: (0.0,5.0], 3: (5.0,10.0]
   for(int i_vtx = 0; i_vtx < vecMesonFlow::mNumOfVertex; ++i_vtx)
   {
-    if(vtx_z > vecMesonFlow::mVtxStart[i_vtx] && TMath::Abs(vtx_z-vecMesonFlow::mVtxStop[i_vtx]) < 1e-10)
+    if(vtx_z > vecMesonFlow::mVtxStart[i_vtx] && vtx_z < vecMesonFlow::mVtxStop[i_vtx])
     {
       return vecMesonFlow::mVertex[i_vtx];
     }
+    if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStop[i_vtx]) < 1e-10) return vecMesonFlow::mVtxStop[i_vtx]; // vtx_z == mVtxStop
   }
-  if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStart[0]) < 1e-10) return vecMesonFlow::mVertex[0];
+  if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStart[0]) < 1e-10) return vecMesonFlow::mVertex[0]; // vtx_z == mVtxStart lower edge
 
   return -1;
 }

@@ -19,7 +19,7 @@ namespace vecMesonFlow // binning used in flow analysis
   const int mNumOfCentrality4 = 4;
   const float mCentStart4[mNumOfCentrality4]  = { 0.0,10.0,40.0,80.0};
   const float mCentStop4[mNumOfCentrality4]   = {10.0,40.0,80.0,100.0};
-  const int mCentrality4[mNumOfCentrality4] = { 0, 1, 2, 3};
+  const int mCentrality4[mNumOfCentrality4]   = {0, 1, 2, 3};
 
   // 0: [-10.0,-5.0], 1: (-5.0,0.0], 2: (0.0,5.0], 3: (5.0,10.0]
   const int mNumOfVertex = 4;
