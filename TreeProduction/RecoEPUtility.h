@@ -15,9 +15,9 @@ class RecoEPUtility : public TObject
     virtual ~RecoEPUtility();
 
     bool isGoodRun(int runId);
-    int getCentralityBin20(int centrality);
-    int getCentralityBin10(int centrality);
-    int getCentralityBin4(int centrality);
+    int getCentralityBin20(float centrality);
+    int getCentralityBin10(float centrality);
+    int getCentralityBin4(float centrality);
     int getVertexBin(float vtx_z);
 
     //------------BBC Event Plane---------------
@@ -27,7 +27,7 @@ class RecoEPUtility : public TObject
     float get_recal_charge(int PmtIndx, int run_num, int ADC);
 
     bool read_in_phiweight_corrections();
-    float get_phiweight_correction(int PmtIndx, int run_num, int centrality);
+    float get_phiweight_correction(int PmtIndx, int run_num, float centrality);
 
     int get_recal_group(int run_num);
     float get_pedestal(int PmtIndx, int run_num);
