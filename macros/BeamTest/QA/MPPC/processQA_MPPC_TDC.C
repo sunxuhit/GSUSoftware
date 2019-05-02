@@ -51,6 +51,17 @@ void processQA_MPPC_TDC(const int runID = 649)
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/sipmTDC_run%d/sspRich.root",runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
+  float tdc[NumOfPixel][NumOfPixel][2]; // 0 for raising edge | 1 for falling edge
+  TH2D *h_mTimeDuration = new TH2D("h_mTimeDuration","h_mTimeDuration",4000,-0.5,3999.5,500,-0.5,499.5);
+  for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
+  {
+    for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
+    {
+      tdc[i_pixel_x][i_pixel_y][0] = -999.9;
+      tdc[i_pixel_x][i_pixel_y][1] = -999.9;
+    }
+  }
+
   InitDisplay_mRICH();
   TH2D *h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH1D *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
@@ -111,9 +122,28 @@ void processQA_MPPC_TDC(const int runID = 649)
       int pixel_y = y_mRICH[pixel-1];
       if(tPolarity[i_photon] == pol) h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
 
+      // cout << "pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << " pol = " << tPolarity[i_photon] << ", time = " << tTime[i_photon] << endl;
+      int polarity = tPolarity[i_photon];
+      tdc[pixel_x][pixel_y][polarity] = tTime[i_photon];
+
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop) // MPPC
       {
 	h_mRingImage->Fill(x_mRICH[pixel-1],y_mRICH[pixel-1]);
+      }
+    }
+
+    for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x) // fill time duration
+    {
+      for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
+      {
+	if(tdc[i_pixel_x][i_pixel_y][1] > 0)
+	{
+	  float time_duration = tdc[i_pixel_x][i_pixel_y][0] - tdc[i_pixel_x][i_pixel_y][1];
+	  h_mTimeDuration->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration);
+
+	  tdc[i_pixel_x][i_pixel_y][0] = -999.9; // reset tdc array
+	  tdc[i_pixel_x][i_pixel_y][1] = -999.9;
+	}
       }
     }
   }
@@ -122,6 +152,7 @@ void processQA_MPPC_TDC(const int runID = 649)
   string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTDC_run%d.root",mode.c_str(),runID);
   TFile *File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
+  h_mTimeDuration->Write();
   h_mRingImage->Write();
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {

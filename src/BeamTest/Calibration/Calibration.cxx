@@ -89,17 +89,17 @@ int Calibration::initChain()
       Long64_t entries_save = 0;
       while(in)
       {
-	in.getline(str,255);  // take the lines of the file list
-	if(str[0] != 0)
-	{
-	  string addfile;
-	  addfile = str;
-	  addfile = inputdir + addfile + "/sspRich.root";
-	  mChainInPut->AddFile(addfile.c_str(),-1,"data");
-	  Long64_t file_entries = mChainInPut->GetEntries();
-	  cout << "File added to data chain: " << addfile.c_str() << " with " << (file_entries-entries_save) << " entries" << endl;
-	  entries_save = file_entries;
-	}
+        in.getline(str,255);  // take the lines of the file list
+        if(str[0] != 0)
+        {
+          string addfile;
+          addfile = str;
+          addfile = inputdir + addfile + "/sspRich.root";
+          mChainInPut->AddFile(addfile.c_str(),-1,"data");
+          Long64_t file_entries = mChainInPut->GetEntries();
+          cout << "File added to data chain: " << addfile.c_str() << " with " << (file_entries-entries_save) << " entries" << endl;
+          entries_save = file_entries;
+        }
       }
     }
     else
@@ -169,7 +169,7 @@ int Calibration::initTdcCut()
   }
   File_mTDC->Close();
 
-  float nSigma = 2.0;
+  float nSigma = 1.0;
   float mean_tdc_Start = SumTdcMean/NumOfRuns - nSigma*SumTdcSigma/NumOfRuns; 
   float mean_tdc_Stop  = SumTdcMean/NumOfRuns + nSigma*SumTdcSigma/NumOfRuns;
 
@@ -291,7 +291,7 @@ int Calibration::Make()
     p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
 
     // ring finder
-    HoughTransform(NumOfPhotons,h_mRingFinder, mXPixelMap, mYPixelMap);
+    HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
     clearRingFinder();
   }
   cout << "processed events:  " << NumOfEvents << "/" << NumOfEvents << endl;

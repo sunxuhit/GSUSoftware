@@ -19,7 +19,7 @@ int plotQA_PMT_ringFinder()
 {
   gStyle->SetPalette(kDeepSea);
 
-  bool is_sim = true;
+  bool is_sim = false;
 
   TFile *File_InPut;
   TH2D *h_mPhotonDist;
