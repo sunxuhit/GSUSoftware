@@ -52,8 +52,11 @@ TVector2 RecoEventPlane::calqVector_BbcSouth(float bbcx, float bbcy, int order)
   const float phi = getPhi_BbcSouth(bbcx,bbcy);
   TVector2 qVector(0.0,0.0);
 
-  const float qx = TMath::Cos(harmonic[order]*phi); // need to update for 1st EP
-  const float qy = TMath::Sin(harmonic[order]*phi);
+  float sign = 1.0;
+  if(order == 0) sign = -1.0; // flip sign for 1st q-vector
+
+  const float qx = sign*TMath::Cos(harmonic[order]*phi);
+  const float qy = sign*TMath::Sin(harmonic[order]*phi);
   qVector.Set(qx,qy);
 
   // std::cout << "this is calqVector_BbcSouth: input bbcx = " << bbcx << ", bbcy = " << bbcy << ", phi = " << phi << ", order = " << order << std::endl;
@@ -436,7 +439,7 @@ float RecoEventPlane::calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order
   }
 
   float PsiShift_BbcSouth_raw = PsiReCenter_BbcSouth + delta_Psi;
-  if(order == 0) PsiShift_BbcSouth_raw = PsiReCenter_BbcSouth + delta_Psi + TMath::Pi(); // Temp fix for 1st EP
+  // if(order == 0) PsiShift_BbcSouth_raw = PsiReCenter_BbcSouth + delta_Psi + TMath::Pi(); // Temp fix for 1st EP
   float PsiShift_BbcSouth = shiftAngle(PsiShift_BbcSouth_raw,order);
 
   return PsiShift_BbcSouth;

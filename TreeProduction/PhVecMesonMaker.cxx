@@ -116,6 +116,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
 
   mRecoEPUtility      = new RecoEPUtility(); // initialize utilities
   mRecoEventPlane     = new RecoEventPlane(); // initialize utilities
+  mRecoEPUtility->initBBC();
   mRecoEPHistoManager = new RecoEPHistoManager(); // initialize histograms
   mRecoEPHistoManager->initQA_Global();
   mRecoEPProManager   = new RecoEPProManager(); // initialize histograms
@@ -123,7 +124,6 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   if(mMode == 0) // fill re-center parameters & raw event plane
   {
     cout << "fill re-center parameters & raw event plane!" << endl;
-    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEPHistoManager->initHist_BbcRawEP();
     mRecoEPHistoManager->initHist_BbcRawQVector();
@@ -145,7 +145,6 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   if(mMode == 1) // fill shift parameters & re-centered event plane
   {
     cout << "fill shift parameters & re-centered event plane!" << endl;
-    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEventPlane->initReCenterBbcEventPlane();
     bool isReCenter = mRecoEventPlane->readPro_ReCenter();
@@ -161,7 +160,6 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   if(mMode == 2) // calculate resolution & fill shifted event plane
   {
     cout << "calculate resolution & fill shifted event plane!" << endl;
-    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEventPlane->initReCenterBbcEventPlane();
     bool isReCenter = mRecoEventPlane->readPro_ReCenter();
@@ -251,6 +249,42 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -1.0*(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
   mRecoEPHistoManager->fillQA_Global_NarrowVtxBbc(mRunId,zdcz,vtx_bbcz,centrality);
 
+  // calculate raw Q-Vector for BBC
+  for (int i_pmt=0; i_pmt<128; i_pmt++) 
+  {
+    short adc = mBbcRaw->get_Adc(i_pmt);
+    short tdc = mBbcRaw->get_Tdc0(i_pmt);
+    float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
+    float charge = mBbcCalib->getCharge(i_pmt, adc);
+    float bbcx = mBbcGeo->getX(i_pmt);
+    float bbcy = mBbcGeo->getY(i_pmt);
+
+    if(time0 > 0 && charge > 0)
+    {
+      const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
+      const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
+      const float weight_BbcEP = charge_recalib*phi_weight;
+
+      for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
+      {
+	if(i_pmt < 64)
+	{ // south
+	  mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
+	}
+	else
+	{ // north
+	  mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
+	}
+      }
+    }
+  }
+
+  const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
+  // const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
+  // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
+  const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
+  // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", vtx4 = " << vtx4 << endl;
+
   if(mMode == 0)  // fill re-center & raw event plane
   {
     for (int i_pmt=0; i_pmt<128; i_pmt++) 
@@ -263,44 +297,24 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float bbcy = mBbcGeo->getY(i_pmt);
       float bbcz = mBbcGeo->getZ(i_pmt);
 
-      if(time0 > 0 && charge > 0)
+      if(time0 > 0 && charge > 0 && mQA_Bbc == 1)
       {
 	const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
 	const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
 	const float weight_BbcEP = charge_recalib*phi_weight;
 
-	for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
-	{
-	  if(i_pmt < 64)
-	  { // south
-	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
-	  }
-	  else
-	  { // north
-	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
-	  }
-	}
-	if(mQA_Bbc == 1)
-	{
-	  if(mDebug_Bbc == 1) mRecoEPHistoManager->fillQA_BbcAdc(i_pmt,adc); // fill Adc QA
-	  mRecoEPHistoManager->fillQA_BbcCharge(i_pmt,bbcx,bbcy,bbcz,charge);
-	  mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
-	  mRecoEPHistoManager->fillQA_BbcChargePhiWeight(i_pmt,bbcx,bbcy,bbcz,weight_BbcEP);
-	}
+	if(mDebug_Bbc == 1) mRecoEPHistoManager->fillQA_BbcAdc(i_pmt,adc); // fill Adc QA
+	mRecoEPHistoManager->fillQA_BbcCharge(i_pmt,bbcx,bbcy,bbcz,charge);
+	mRecoEPHistoManager->fillQA_BbcChargeReCalib(i_pmt,bbcx,bbcy,bbcz,charge_recalib);
+	mRecoEPHistoManager->fillQA_BbcChargePhiWeight(i_pmt,bbcx,bbcy,bbcz,weight_BbcEP);
       }
     }
-
-    const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
-    const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
-    // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
-    const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
-    // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", vtx4 = " << vtx4 << endl;
 
     for(int i_order = 0; i_order < 3; ++i_order)
     {
       float PsiRaw_BbcSouth = mRecoEventPlane->calPsiRaw_BbcSouth(i_order);
       float PsiRaw_BbcNorth = mRecoEventPlane->calPsiRaw_BbcNorth(i_order);
-      mRecoEPHistoManager->fillHist_BbcRawEP(PsiRaw_BbcSouth,PsiRaw_BbcNorth,i_order,cent10);
+      mRecoEPHistoManager->fillHist_BbcRawEP(PsiRaw_BbcSouth,PsiRaw_BbcNorth,i_order,cent20);
 
       TVector2 QVecRaw_BbcSouth = mRecoEventPlane->getQVectorRaw_BbcSouth(i_order);
       float QWeight_BbcSouth = mRecoEventPlane->getQWeight_BbcSouth(i_order);
@@ -310,8 +324,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float QWeight_BbcNorth = mRecoEventPlane->getQWeight_BbcNorth(i_order);
       mRecoEPProManager->fillPro_BbcNorthReCenter(QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,vtx4,mRunId,cent20); // fill re-center parameters
 
-      // mRecoEPHistoManager->fillHist_BbcRawQVector(QVecRaw_BbcSouth,QWeight_BbcSouth,QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,cent20);
-      mRecoEPHistoManager->fillHist_BbcRawQVector(QVecRaw_BbcSouth,QWeight_BbcSouth,QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,cent10);
+      mRecoEPHistoManager->fillHist_BbcRawQVector(QVecRaw_BbcSouth,QWeight_BbcSouth,QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,cent20);
     }
 
     // mRecoEventPlane->printRawBbcEventPlane(0);
@@ -322,40 +335,6 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   }
   if(mMode == 1)  // fill shift parameters & re-centered event plane
   {
-    for (int i_pmt=0; i_pmt<128; i_pmt++) 
-    {
-      short adc = mBbcRaw->get_Adc(i_pmt);
-      short tdc = mBbcRaw->get_Tdc0(i_pmt);
-      float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
-      float charge = mBbcCalib->getCharge(i_pmt, adc);
-      float bbcx = mBbcGeo->getX(i_pmt);
-      float bbcy = mBbcGeo->getY(i_pmt);
-
-      if(time0 > 0 && charge > 0)
-      {
-	const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
-	const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
-	const float weight_BbcEP = charge_recalib*phi_weight;
-
-	for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
-	{
-	  if(i_pmt < 64)
-	  { // south
-	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
-	  }
-	  else
-	  { // north
-	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
-	  }
-	}
-      }
-    }
-
-    const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
-    const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
-    // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
-    const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
-    // cout << "vertex = " << vtx_bbcz << ", vtx4 = " << vtx4 << ", centrality = " << centrality << ", cent20 = " << cent20 << endl;
     for(int i_order = 0; i_order < 3; ++i_order)
     {
       float PsiReCenter_BbcSouth = mRecoEventPlane->calPsiReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
@@ -364,11 +343,11 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float PsiReCenter_BbcNorth = mRecoEventPlane->calPsiReCenter_BbcNorth(i_order,vtx4,mRunId,cent20);
       mRecoEPProManager->fillPro_BbcNorthShift(PsiReCenter_BbcNorth, i_order, vtx4, mRunId, cent20); // fill shift parater
 
-      mRecoEPHistoManager->fillHist_BbcReCenterEP(PsiReCenter_BbcSouth,PsiReCenter_BbcNorth,i_order,cent10);
+      mRecoEPHistoManager->fillHist_BbcReCenterEP(PsiReCenter_BbcSouth,PsiReCenter_BbcNorth,i_order,cent20);
 
       TVector2 QVecReCenter_BbcSouth = mRecoEventPlane->getQVectorReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
       TVector2 QVecReCenter_BbcNorth = mRecoEventPlane->getQVectorReCenter_BbcNorth(i_order,vtx4,mRunId,cent20);
-      mRecoEPHistoManager->fillHist_BbcReCenterQVector(QVecReCenter_BbcSouth,QVecReCenter_BbcNorth,i_order,cent10);
+      mRecoEPHistoManager->fillHist_BbcReCenterQVector(QVecReCenter_BbcSouth,QVecReCenter_BbcNorth,i_order,cent20);
     }
 
     /*
@@ -387,40 +366,6 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   }
   if(mMode == 2)  // calculate resolution & fill shifted event plane
   {
-    for (int i_pmt=0; i_pmt<128; i_pmt++) 
-    {
-      short adc = mBbcRaw->get_Adc(i_pmt);
-      short tdc = mBbcRaw->get_Tdc0(i_pmt);
-      float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
-      float charge = mBbcCalib->getCharge(i_pmt, adc);
-      float bbcx = mBbcGeo->getX(i_pmt);
-      float bbcy = mBbcGeo->getY(i_pmt);
-
-      if(time0 > 0 && charge > 0)
-      {
-	const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
-	const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
-	const float weight_BbcEP = charge_recalib*phi_weight;
-
-	for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
-	{
-	  if(i_pmt < 64)
-	  { // south
-	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
-	  }
-	  else
-	  { // north
-	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
-	  }
-	}
-      }
-    }
-
-    const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
-    const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
-    // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
-    const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
-    // cout << "vertex = " << vtx_bbcz << ", vtx4 = " << vtx4 << ", centrality = " << centrality << ", cent20 = " << cent20 << endl;
     for(int i_order = 0; i_order < 3; ++i_order)
     {
       float PsiReCenter_BbcSouth = mRecoEventPlane->calPsiReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
@@ -431,7 +376,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float PsiShift_BbcNorth = mRecoEventPlane->calPsiShift_BbcNorth(PsiReCenter_BbcNorth,i_order,vtx4,mRunId,cent20); // calcualte shift EP
       // cout << "i_order = " << i_order << ", PsiReCenter_BbcNorth = " << PsiReCenter_BbcNorth << ", PsiShift_BbcNorth = " << PsiShift_BbcNorth << endl;
 
-      mRecoEPHistoManager->fillHist_BbcShiftEP(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent10);
+      mRecoEPHistoManager->fillHist_BbcShiftEP(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent20);
       mRecoEPProManager->fillPro_BbcResolution(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent20);
     }
 
