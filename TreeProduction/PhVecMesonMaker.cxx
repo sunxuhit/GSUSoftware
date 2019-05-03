@@ -261,19 +261,21 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
     if(time0 > 0 && charge > 0)
     {
-      const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
-      const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
-      const float weight_BbcEP = charge_recalib*phi_weight;
+      // const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
+      // const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
+      // const float weight_BbcEP = charge_recalib*phi_weight;
 
       for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
       {
 	if(i_pmt < 64)
 	{ // south
-	  mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
+	  // mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
+	  mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge,i_order); // try to re-produce Takashi's results
 	}
 	else
 	{ // north
-	  mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
+	  // mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
+	  mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge,i_order); // try to re-produce Takashi's results
 	}
       }
     }
