@@ -57,6 +57,62 @@ bool RecoEPUtility::isGoodRun(int runId)
   return false;
 }
 
+void RecoEPUtility::initRunIndex()
+{
+  map_runIndex.clear();
+  bool isOpen_runIndex = read_in_runIndex();
+  if(isOpen_runIndex) std::cout << "Run Index read in!" << std::endl;
+}
+
+int RecoEPUtility::find_runIndex(int runId)
+{
+   // print map_runIndex content:
+  /*
+  for (std::map<int,int>::iterator it=map_runIndex.begin(); it!=map_runIndex.end(); ++it)
+  {
+    std::cout << it->first << " => " << it->second << '\n';
+  }
+  */
+
+  std::map<int,int>::iterator it_runId = map_runIndex.find(runId);
+  if(it_runId == map_runIndex.end()) 
+  {
+    std::cout << "RecoEPUtility -> could not find in good run list! & send signal to kill the run!" << std::endl;
+    return -999;
+  }
+  else
+  {
+    std::cout << "RecoEPUtility -> runId: " << it_runId->first << " => runIndex: " << it_runId->second << std::endl;
+    return it_runId->second;
+  }
+
+  return -999;
+}
+
+bool RecoEPUtility::read_in_runIndex()
+{
+  TOAD toad_loader("PhVecMesonMaker");
+  std::string inputfile = toad_loader.location("runIndex.txt");
+  std::cout << "inputfile = " << inputfile.c_str() << std::endl;
+  std::ifstream file_runIndex ( inputfile.c_str() );
+  if ( !file_runIndex.is_open() )
+  {
+    std::cout << "Abort. Fail to read in run Index file: " << inputfile << std::endl;
+    exit(0);
+  }
+
+  int temp_runId = 0, temp_runIndex = 0;
+  std::cout << "reading run Index: " << std::endl;
+  while (file_runIndex >> temp_runId >> temp_runIndex)
+  {
+    // std::cout << "runId = " << temp_runId << ", runIndex = " << temp_runIndex << std::endl;
+    map_runIndex[temp_runId] = temp_runIndex;
+  }
+  file_runIndex.close();
+
+  return true;
+}
+
 int RecoEPUtility::getCentralityBin20(float centrality)
 {
   // 0: (0%,5%], 1: (5%-10%], 2: (10%,15%], ......, 18: (90%,95%], 19: (95%,100%]

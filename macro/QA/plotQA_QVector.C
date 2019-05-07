@@ -13,7 +13,7 @@ using namespace std;
 void plotQA_QVector(int order = 1, int cent20 = 5)
 {
   const string mOrder[3] = {"1st","2nd","3rd"};
-  const string mCentrality = Form("%d-%d%%",vecMesonFlow::mCentStart20[cent20],vecMesonFlow::mCentStop20[cent20]);
+  const string mCentrality = Form("%1.1f-%1.1f%%",vecMesonFlow::mCentStart20[cent20],vecMesonFlow::mCentStop20[cent20]);
 
   string inputfile_raw = "/direct/phenix+u/xusun/WorkSpace/PHENIX/output/taxi_AuAu200GeV_RawEP_ReCenterPar.root";
   TFile *File_InPut_Raw = TFile::Open(inputfile_raw.c_str());
@@ -191,6 +191,6 @@ void plotQA_QVector(int order = 1, int cent20 = 5)
   leg_QyNorth->AddEntry(h_mQyReCenter_BbcNorth,leg_QyRecNorth.c_str(),"l");
   leg_QyNorth->Draw("same");
 
-  string FigName = Form("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_BbcQVector_%s.eps",mOrder[order].c_str());
+  string FigName = Form("/direct/phenix+u/xusun/WorkSpace/PHENIX/figures/QA_BBC/EventPlane/c_BbcQVector_%s_%d.eps",mOrder[order].c_str(),cent20);
   c_play->SaveAs(FigName.c_str());
 }

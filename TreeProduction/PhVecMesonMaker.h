@@ -55,6 +55,7 @@ class PhVecMesonMaker: public SubsysReco {
 
     RunHeader* mRunHeader;
     int mRunId;
+    int mRunIndex;
 
     VtxOut* mVtxOut;
 

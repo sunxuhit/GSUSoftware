@@ -63,6 +63,7 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   mTrigLvl1  = NULL;
   mRunHeader = NULL;
   mRunId     = -999;
+  mRunIndex  = -999;
   mVtxOut    = NULL; // vertex
   mBbcRaw    = NULL; // BBC
   mBbcCalib  = NULL;
@@ -116,6 +117,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
 
   mRecoEPUtility      = new RecoEPUtility(); // initialize utilities
   mRecoEventPlane     = new RecoEventPlane(); // initialize utilities
+  mRecoEPUtility->initRunIndex();
   mRecoEPUtility->initBBC();
   mRecoEPHistoManager = new RecoEPHistoManager(); // initialize histograms
   mRecoEPHistoManager->initQA_Global();
@@ -196,8 +198,19 @@ int PhVecMesonMaker::InitRun(PHCompositeNode *topNode)
   cout << "runId is "<< mRunId << endl;
   if(!mRecoEPUtility->isGoodRun(mRunId)) 
   {
-    cout << "could not find in good run list! & drop the run!" << endl;
+    cout << "isGoodRun => could not find in good run list! & drop the run in PhVecMesonMaker!" << endl;
     return ABORTRUN;
+  }
+
+  mRunIndex = mRecoEPUtility->find_runIndex(mRunId);
+  if(mRunIndex < 0)
+  {
+    cout << "find_runIndex => could not find in good run list! & drop the run in PhVecMesonMaker!" << endl;
+    return ABORTRUN;
+  }
+  else
+  {
+    cout << "PhVecMesonMaker -> runId: " << mRunId << " => runIndex: " << mRunIndex << endl;
   }
 
   // set BbcCalib

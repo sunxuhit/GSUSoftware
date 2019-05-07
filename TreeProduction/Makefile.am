@@ -8,6 +8,7 @@ AM_CXXFLAGS = `root-config --cflags`
 AM_CPPFLAGS = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/include -I$(MYINSTALL)/include
 
 dist_pkgdata_DATA = \
+runIndex.txt \
 BbcRecalConsts.txt \
 BbcPhiWeightCorrection.txt \
 file_AuAu200GeV_ReCenterPar.root \

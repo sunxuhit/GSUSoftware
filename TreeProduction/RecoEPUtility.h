@@ -4,6 +4,7 @@
 #include <TObject.h>
 #include "Run14AuAuList.h"
 #include "PhVecMesonCons.h"
+#include <map>
 
 class TH1F;
 class TH2F;
@@ -15,6 +16,11 @@ class RecoEPUtility : public TObject
     virtual ~RecoEPUtility();
 
     bool isGoodRun(int runId);
+
+    void initRunIndex();
+    bool read_in_runIndex();
+    int find_runIndex(int runId);
+
     int getCentralityBin20(float centrality);
     int getCentralityBin10(float centrality);
     int getCentralityBin4(float centrality);
@@ -41,6 +47,8 @@ class RecoEPUtility : public TObject
     float const_pedestal[128][GoodRunList::ngrp];
     float const_mip[128][GoodRunList::ngrp];
     float phi_weight[128][GoodRunList::ngrp][vecMesonFlow::mNumOfCentrality20];
+
+    std::map<int,int> map_runIndex;
 
     ClassDef(RecoEPUtility,1)
 };
