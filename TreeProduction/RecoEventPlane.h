@@ -46,13 +46,13 @@ class RecoEventPlane : public TObject
 
     void initReCenterBbcEventPlane();
     void clearReCenterBbcEventPlane();
-    void printReCenterBbcEventPlane(int order, int vtx4, int runId, int cent20);
+    void printReCenterBbcEventPlane(int order, int vtx4, int runIndex, int cent20);
 
-    TVector2 getQVectorReCenter_BbcSouth(int order, int vtx4, int runId, int cent20);
-    TVector2 getQVectorReCenter_BbcNorth(int order, int vtx4, int runId, int cent20);
+    TVector2 getQVectorReCenter_BbcSouth(int order, int vtx4, int runIndex, int cent20);
+    TVector2 getQVectorReCenter_BbcNorth(int order, int vtx4, int runIndex, int cent20);
 
-    float calPsiReCenter_BbcSouth(int order, int vtx4, int runId, int cent20);
-    float calPsiReCenter_BbcNorth(int order, int vtx4, int runId, int cent20);
+    float calPsiReCenter_BbcSouth(int order, int vtx4, int runIndex, int cent20);
+    float calPsiReCenter_BbcNorth(int order, int vtx4, int runIndex, int cent20);
     //===============ReCenter BBC Event Plane====================
 
     //===============Shift BBC Event Plane====================
@@ -60,8 +60,8 @@ class RecoEventPlane : public TObject
     bool closePro_Shift(); // close Shift parameters
 
     float shiftAngle(float PsiShift_raw, int order); // shift angle to correct range
-    float calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order, int vtx4, int runId, int cent20);
-    float calPsiShift_BbcNorth(float PsiReCenter_BbcNorth, int order, int vtx4, int runId, int cent20);
+    float calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order, int vtx4, int runIndex, int cent20);
+    float calPsiShift_BbcNorth(float PsiReCenter_BbcNorth, int order, int vtx4, int runIndex, int cent20);
     //===============Shift BBC Event Plane====================
 
     //-----------------BBC Event Plane---------------------

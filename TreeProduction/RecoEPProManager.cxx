@@ -32,38 +32,34 @@ void RecoEPProManager::initPro_BbcReCenter()
       std::string ProName;
 
       ProName = Form("p_mQx_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      // p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-      p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQx_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQy_BbcSouth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      // p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-      p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQy_BbcSouth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQx_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      // p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-      p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQx_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
       ProName = Form("p_mQy_BbcNorth_%s_Vtx_%d",Order[i_order].c_str(),i_vtx);
-      // p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-      p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+      p_mQy_BbcNorth[i_order][i_vtx] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
     }
   }
 }
 
-void RecoEPProManager::fillPro_BbcSouthReCenter(TVector2 QVecRaw_BbcSouth, float QWeight_BbcSouth, int order, int vtx4, int runId, int cent20)
+void RecoEPProManager::fillPro_BbcSouthReCenter(TVector2 QVecRaw_BbcSouth, float QWeight_BbcSouth, int order, int vtx4, int runIndex, int cent20)
 {
   float Qx_South = QVecRaw_BbcSouth.X()/QWeight_BbcSouth;
   float Qy_South = QVecRaw_BbcSouth.Y()/QWeight_BbcSouth;
-  p_mQx_BbcSouth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qx_South);
-  p_mQy_BbcSouth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qy_South);
+  p_mQx_BbcSouth[order][vtx4]->Fill((double)runIndex,(double)cent20,(double)Qx_South);
+  p_mQy_BbcSouth[order][vtx4]->Fill((double)runIndex,(double)cent20,(double)Qy_South);
 }
 
-void RecoEPProManager::fillPro_BbcNorthReCenter(TVector2 QVecRaw_BbcNorth, float QWeight_BbcNorth, int order, int vtx4, int runId, int cent20)
+void RecoEPProManager::fillPro_BbcNorthReCenter(TVector2 QVecRaw_BbcNorth, float QWeight_BbcNorth, int order, int vtx4, int runIndex, int cent20)
 {
   float Qx_North = QVecRaw_BbcNorth.X()/QWeight_BbcNorth;
   float Qy_North = QVecRaw_BbcNorth.Y()/QWeight_BbcNorth;
-  p_mQx_BbcNorth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qx_North);
-  p_mQy_BbcNorth[order][vtx4]->Fill((double)runId,(double)cent20,(double)Qy_North);
+  p_mQx_BbcNorth[order][vtx4]->Fill((double)runIndex,(double)cent20,(double)Qx_North);
+  p_mQy_BbcNorth[order][vtx4]->Fill((double)runIndex,(double)cent20,(double)Qy_North);
 }
 
 void RecoEPProManager::writePro_BbcReCenter()
@@ -95,26 +91,22 @@ void RecoEPProManager::initPro_BbcShift()
 	std::string ProName;
 
 	ProName = Form("p_mCos_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	// p_mCos_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mCos_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
 	ProName = Form("p_mSin_BbcSouth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	// p_mSin_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mSin_BbcSouth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
 	ProName = Form("p_mCos_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	// p_mCos_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mCos_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
 
 	ProName = Form("p_mSin_BbcNorth_%s_Vtx_%d_Shift_%d",Order[i_order].c_str(),i_vtx,i_shift);
-	// p_mSin_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),10000,405000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
-	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),2000,413000.5,415000.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+	p_mSin_BbcNorth[i_order][i_vtx][i_shift] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
       }
     }
   }
 }
 
-void RecoEPProManager::fillPro_BbcSouthShift(float PsiReCenter_BbcSouth, int order, int vtx4, int runId, int cent20)
+void RecoEPProManager::fillPro_BbcSouthShift(float PsiReCenter_BbcSouth, int order, int vtx4, int runIndex, int cent20)
 {
   for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
   {
@@ -123,12 +115,12 @@ void RecoEPProManager::fillPro_BbcSouthShift(float PsiReCenter_BbcSouth, int ord
     float Psi_Cos = TMath::Cos(shiftorder*harmonic*PsiReCenter_BbcSouth);
     float Psi_Sin = TMath::Sin(shiftorder*harmonic*PsiReCenter_BbcSouth);
     // std::cout << "Psi_Cos = " << Psi_Cos << ", Psi_Sin = " << Psi_Sin << std::endl;
-    p_mCos_BbcSouth[order][vtx4][i_shift]->Fill((double)runId,(double)cent20,(double)Psi_Cos);
-    p_mSin_BbcSouth[order][vtx4][i_shift]->Fill((double)runId,(double)cent20,(double)Psi_Sin);
+    p_mCos_BbcSouth[order][vtx4][i_shift]->Fill((double)runIndex,(double)cent20,(double)Psi_Cos);
+    p_mSin_BbcSouth[order][vtx4][i_shift]->Fill((double)runIndex,(double)cent20,(double)Psi_Sin);
   }
 }
 
-void RecoEPProManager::fillPro_BbcNorthShift(float PsiReCenter_BbcNorth, int order, int vtx4, int runId, int cent20)
+void RecoEPProManager::fillPro_BbcNorthShift(float PsiReCenter_BbcNorth, int order, int vtx4, int runIndex, int cent20)
 {
   for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
   {
@@ -137,8 +129,8 @@ void RecoEPProManager::fillPro_BbcNorthShift(float PsiReCenter_BbcNorth, int ord
     float Psi_Cos = TMath::Cos(shiftorder*harmonic*PsiReCenter_BbcNorth);
     float Psi_Sin = TMath::Sin(shiftorder*harmonic*PsiReCenter_BbcNorth);
     // std::cout << "Psi_Cos = " << Psi_Cos << ", Psi_Sin = " << Psi_Sin << std::endl;
-    p_mCos_BbcNorth[order][vtx4][i_shift]->Fill((double)runId,(double)cent20,(double)Psi_Cos);
-    p_mSin_BbcNorth[order][vtx4][i_shift]->Fill((double)runId,(double)cent20,(double)Psi_Sin);
+    p_mCos_BbcNorth[order][vtx4][i_shift]->Fill((double)runIndex,(double)cent20,(double)Psi_Cos);
+    p_mSin_BbcNorth[order][vtx4][i_shift]->Fill((double)runIndex,(double)cent20,(double)Psi_Sin);
   }
 }
 

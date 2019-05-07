@@ -25,38 +25,38 @@ RecoEPHistoManager::~RecoEPHistoManager()
 void RecoEPHistoManager::initQA_Global()
 {
   std::cout << "initialize Global QA!" << std::endl;
-  h_mVtxZ_Bbc_MiniBias = new TH2F("h_mVtxZ_Bbc_MiniBias","h_mVtxZ_Bbc_MiniBias",2000,413000.5,415000.5,201,-100.5,100.5);
-  h_mVtxZ_Zdc_MiniBias = new TH2F("h_mVtxZ_Zdc_MiniBias","h_mVtxZ_Zdc_MiniBias",2000,413000.5,415000.5,201,-100.5,100.5);
-  h_mCentrality_MiniBias = new TH2F("h_mCentrality_MiniBias","h_mCentrality_MiniBias",2000,413000.5,415000.5,101,-0.5,100.5);
+  h_mVtxZ_Bbc_MiniBias = new TH2F("h_mVtxZ_Bbc_MiniBias","h_mVtxZ_Bbc_MiniBias",1500,-0.5,1499.5,201,-100.5,100.5);
+  h_mVtxZ_Zdc_MiniBias = new TH2F("h_mVtxZ_Zdc_MiniBias","h_mVtxZ_Zdc_MiniBias",1500,-0.5,1499.5,201,-100.5,100.5);
+  h_mCentrality_MiniBias = new TH2F("h_mCentrality_MiniBias","h_mCentrality_MiniBias",1500,-0.5,1499.5,101,-0.5,100.5);
 
-  h_mVtxZ_Bbc_NarrowVtx = new TH2F("h_mVtxZ_Bbc_NarrowVtx","h_mVtxZ_Bbc_NarrowVtx",2000,413000.5,415000.5,201,-100.5,100.5);
-  h_mVtxZ_Zdc_NarrowVtx = new TH2F("h_mVtxZ_Zdc_NarrowVtx","h_mVtxZ_Zdc_NarrowVtx",2000,413000.5,415000.5,201,-100.5,100.5);
-  h_mCentrality_NarrowVtx = new TH2F("h_mCentrality_NarrowVtx","h_mCentrality_NarrowVtx",2000,413000.5,415000.5,101,-0.5,100.5);
+  h_mVtxZ_Bbc_NarrowVtx = new TH2F("h_mVtxZ_Bbc_NarrowVtx","h_mVtxZ_Bbc_NarrowVtx",1500,-0.5,1499.5,201,-100.5,100.5);
+  h_mVtxZ_Zdc_NarrowVtx = new TH2F("h_mVtxZ_Zdc_NarrowVtx","h_mVtxZ_Zdc_NarrowVtx",1500,-0.5,1499.5,201,-100.5,100.5);
+  h_mCentrality_NarrowVtx = new TH2F("h_mCentrality_NarrowVtx","h_mCentrality_NarrowVtx",1500,-0.5,1499.5,101,-0.5,100.5);
 
-  h_mVtxZ_Bbc_NarrowVtxBbc = new TH2F("h_mVtxZ_Bbc_NarrowVtxBbc","h_mVtxZ_Bbc_NarrowVtxBbc",2000,413000.5,415000.5,201,-100.5,100.5);
-  h_mVtxZ_Zdc_NarrowVtxBbc = new TH2F("h_mVtxZ_Zdc_NarrowVtxBbc","h_mVtxZ_Zdc_NarrowVtxBbc",2000,413000.5,415000.5,201,-100.5,100.5);
-  h_mCentrality_NarrowVtxBbc = new TH2F("h_mCentrality_NarrowVtxBbc","h_mCentrality_NarrowVtxBbc",2000,413000.5,415000.5,101,-0.5,100.5);
+  h_mVtxZ_Bbc_NarrowVtxBbc = new TH2F("h_mVtxZ_Bbc_NarrowVtxBbc","h_mVtxZ_Bbc_NarrowVtxBbc",1500,-0.5,1499.5,201,-100.5,100.5);
+  h_mVtxZ_Zdc_NarrowVtxBbc = new TH2F("h_mVtxZ_Zdc_NarrowVtxBbc","h_mVtxZ_Zdc_NarrowVtxBbc",1500,-0.5,1499.5,201,-100.5,100.5);
+  h_mCentrality_NarrowVtxBbc = new TH2F("h_mCentrality_NarrowVtxBbc","h_mCentrality_NarrowVtxBbc",1500,-0.5,1499.5,101,-0.5,100.5);
 }
 
-void RecoEPHistoManager::fillQA_Global_MiniBias(int runId, float vtx_zdc, float vtx_bbc, float centrality)
+void RecoEPHistoManager::fillQA_Global_MiniBias(int runIndex, float vtx_zdc, float vtx_bbc, float centrality)
 {
-  h_mVtxZ_Bbc_MiniBias->Fill(runId,vtx_bbc);
-  h_mVtxZ_Zdc_MiniBias->Fill(runId,vtx_zdc);
-  h_mCentrality_MiniBias->Fill(runId,centrality);
+  h_mVtxZ_Bbc_MiniBias->Fill(runIndex,vtx_bbc);
+  h_mVtxZ_Zdc_MiniBias->Fill(runIndex,vtx_zdc);
+  h_mCentrality_MiniBias->Fill(runIndex,centrality);
 }
 
-void RecoEPHistoManager::fillQA_Global_NarrowVtx(int runId, float vtx_zdc, float vtx_bbc, float centrality)
+void RecoEPHistoManager::fillQA_Global_NarrowVtx(int runIndex, float vtx_zdc, float vtx_bbc, float centrality)
 {
-  h_mVtxZ_Bbc_NarrowVtx->Fill(runId,vtx_bbc);
-  h_mVtxZ_Zdc_NarrowVtx->Fill(runId,vtx_zdc);
-  h_mCentrality_NarrowVtx->Fill(runId,centrality);
+  h_mVtxZ_Bbc_NarrowVtx->Fill(runIndex,vtx_bbc);
+  h_mVtxZ_Zdc_NarrowVtx->Fill(runIndex,vtx_zdc);
+  h_mCentrality_NarrowVtx->Fill(runIndex,centrality);
 }
 
-void RecoEPHistoManager::fillQA_Global_NarrowVtxBbc(int runId, float vtx_zdc, float vtx_bbc, float centrality)
+void RecoEPHistoManager::fillQA_Global_NarrowVtxBbc(int runIndex, float vtx_zdc, float vtx_bbc, float centrality)
 {
-  h_mVtxZ_Bbc_NarrowVtxBbc->Fill(runId,vtx_bbc);
-  h_mVtxZ_Zdc_NarrowVtxBbc->Fill(runId,vtx_zdc);
-  h_mCentrality_NarrowVtxBbc->Fill(runId,centrality);
+  h_mVtxZ_Bbc_NarrowVtxBbc->Fill(runIndex,vtx_bbc);
+  h_mVtxZ_Zdc_NarrowVtxBbc->Fill(runIndex,vtx_zdc);
+  h_mCentrality_NarrowVtxBbc->Fill(runIndex,centrality);
 }
 
 void RecoEPHistoManager::writeQA_Global()

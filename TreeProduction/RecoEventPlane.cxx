@@ -273,30 +273,30 @@ void RecoEventPlane::clearReCenterBbcEventPlane()
   }
 }
 
-void RecoEventPlane::printReCenterBbcEventPlane(int order, int vtx4, int runId, int cent20)
+void RecoEventPlane::printReCenterBbcEventPlane(int order, int vtx4, int runIndex, int cent20)
 {
   std::string Order[3] = {"1st","2nd","3rd"};
   std::cout << "print information of " << Order[order] << " Event Plane: " << std::endl;
 
   std::cout << "mQVectorReCenter_BbcSouth.X =  " << mQVectorReCenter_BbcSouth[order].X() << std::endl;
   std::cout << "mQVectorReCenter_BbcSouth.Y =  " << mQVectorReCenter_BbcSouth[order].Y() << std::endl;
-  float mean_Qx_South = p_mQx_BbcSouth[order][vtx4]->GetBinContent(p_mQx_BbcSouth[order][vtx4]->FindBin((double)runId,(double)cent20));
-  float mean_Qy_South = p_mQy_BbcSouth[order][vtx4]->GetBinContent(p_mQy_BbcSouth[order][vtx4]->FindBin((double)runId,(double)cent20));
+  float mean_Qx_South = p_mQx_BbcSouth[order][vtx4]->GetBinContent(p_mQx_BbcSouth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
+  float mean_Qy_South = p_mQy_BbcSouth[order][vtx4]->GetBinContent(p_mQy_BbcSouth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
   std::cout << "mean_Qx_South = " << mean_Qx_South << ", mean_Qy_South = " << mean_Qy_South << std::endl;
 
   std::cout << "mQVectorReCenter_BbcNorth.X =  " << mQVectorReCenter_BbcNorth[order].X() << std::endl;
   std::cout << "mQVectorReCenter_BbcNorth.Y =  " << mQVectorReCenter_BbcNorth[order].Y() << std::endl;
-  float mean_Qx_North = p_mQx_BbcNorth[order][vtx4]->GetBinContent(p_mQx_BbcNorth[order][vtx4]->FindBin((double)runId,(double)cent20));
-  float mean_Qy_North = p_mQy_BbcNorth[order][vtx4]->GetBinContent(p_mQy_BbcNorth[order][vtx4]->FindBin((double)runId,(double)cent20));
+  float mean_Qx_North = p_mQx_BbcNorth[order][vtx4]->GetBinContent(p_mQx_BbcNorth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
+  float mean_Qy_North = p_mQy_BbcNorth[order][vtx4]->GetBinContent(p_mQy_BbcNorth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
   std::cout << "mean_Qx_North = " << mean_Qx_North << ", mean_Qy_North = " << mean_Qy_North << std::endl;
 
   std::cout << std::endl;
 }
 
-TVector2 RecoEventPlane::getQVectorReCenter_BbcSouth(int order, int vtx4, int runId, int cent20)
+TVector2 RecoEventPlane::getQVectorReCenter_BbcSouth(int order, int vtx4, int runIndex, int cent20)
 {
-  float mean_Qx = p_mQx_BbcSouth[order][vtx4]->GetBinContent(p_mQx_BbcSouth[order][vtx4]->FindBin((double)runId,(double)cent20));
-  float mean_Qy = p_mQy_BbcSouth[order][vtx4]->GetBinContent(p_mQy_BbcSouth[order][vtx4]->FindBin((double)runId,(double)cent20));
+  float mean_Qx = p_mQx_BbcSouth[order][vtx4]->GetBinContent(p_mQx_BbcSouth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
+  float mean_Qy = p_mQy_BbcSouth[order][vtx4]->GetBinContent(p_mQy_BbcSouth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
 
   TVector2 QVector_Raw = getQVectorRaw_BbcSouth(order);
   float weight = getQWeight_BbcSouth(order);
@@ -308,10 +308,10 @@ TVector2 RecoEventPlane::getQVectorReCenter_BbcSouth(int order, int vtx4, int ru
   return mQVectorReCenter_BbcSouth[order];
 }
 
-TVector2 RecoEventPlane::getQVectorReCenter_BbcNorth(int order, int vtx4, int runId, int cent20)
+TVector2 RecoEventPlane::getQVectorReCenter_BbcNorth(int order, int vtx4, int runIndex, int cent20)
 {
-  float mean_Qx = p_mQx_BbcNorth[order][vtx4]->GetBinContent(p_mQx_BbcNorth[order][vtx4]->FindBin((double)runId,(double)cent20));
-  float mean_Qy = p_mQy_BbcNorth[order][vtx4]->GetBinContent(p_mQy_BbcNorth[order][vtx4]->FindBin((double)runId,(double)cent20));
+  float mean_Qx = p_mQx_BbcNorth[order][vtx4]->GetBinContent(p_mQx_BbcNorth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
+  float mean_Qy = p_mQy_BbcNorth[order][vtx4]->GetBinContent(p_mQy_BbcNorth[order][vtx4]->FindBin((double)runIndex,(double)cent20));
 
   TVector2 QVector_Raw = getQVectorRaw_BbcNorth(order);
   float weight = getQWeight_BbcNorth(order);
@@ -325,10 +325,10 @@ TVector2 RecoEventPlane::getQVectorReCenter_BbcNorth(int order, int vtx4, int ru
 
 //------------------------------------------------------------
 // calculate re-centered Psi
-float RecoEventPlane::calPsiReCenter_BbcSouth(int order, int vtx4, int runId, int cent20)
+float RecoEventPlane::calPsiReCenter_BbcSouth(int order, int vtx4, int runIndex, int cent20)
 {
   const float harmonic[3] = {1.0,2.0,3.0};
-  TVector2 QVector = getQVectorReCenter_BbcSouth(order,vtx4,runId,cent20);
+  TVector2 QVector = getQVectorReCenter_BbcSouth(order,vtx4,runIndex,cent20);
   float Qx = QVector.X();
   float Qy = QVector.Y();
   float Psi = TMath::ATan2(Qy,Qx)/harmonic[order];
@@ -336,10 +336,10 @@ float RecoEventPlane::calPsiReCenter_BbcSouth(int order, int vtx4, int runId, in
   return Psi;
 }
 
-float RecoEventPlane::calPsiReCenter_BbcNorth(int order, int vtx4, int runId, int cent20)
+float RecoEventPlane::calPsiReCenter_BbcNorth(int order, int vtx4, int runIndex, int cent20)
 {
   const float harmonic[3] = {1.0,2.0,3.0};
-  TVector2 QVector = getQVectorReCenter_BbcNorth(order,vtx4,runId,cent20);
+  TVector2 QVector = getQVectorReCenter_BbcNorth(order,vtx4,runIndex,cent20);
   float Qx = QVector.X();
   float Qy = QVector.Y();
   float Psi = TMath::ATan2(Qy,Qx)/harmonic[order];
@@ -422,17 +422,17 @@ float RecoEventPlane::shiftAngle(float PsiShift_raw, int order) // shift angle t
   return PsiShift;
 }
 
-float RecoEventPlane::calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order, int vtx4, int runId, int cent20)
+float RecoEventPlane::calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order, int vtx4, int runIndex, int cent20)
 {
   float delta_Psi = 0.0;
 
   const float harmonic[3] = {1.0,2.0,3.0};
   for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
   {
-    int bin_cos = p_mCos_BbcSouth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    int bin_cos = p_mCos_BbcSouth[order][vtx4][i_shift]->FindBin((double)runIndex,(double)cent20);
     float mean_cos = p_mCos_BbcSouth[order][vtx4][i_shift]->GetBinContent(bin_cos);
 
-    int bin_sin = p_mSin_BbcSouth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    int bin_sin = p_mSin_BbcSouth[order][vtx4][i_shift]->FindBin((double)runIndex,(double)cent20);
     float mean_sin = p_mSin_BbcSouth[order][vtx4][i_shift]->GetBinContent(bin_sin);
 
     float CosShift = -1.0*mean_sin*TMath::Cos((i_shift+1)*harmonic[order]*PsiReCenter_BbcSouth);
@@ -447,17 +447,17 @@ float RecoEventPlane::calPsiShift_BbcSouth(float PsiReCenter_BbcSouth, int order
   return PsiShift_BbcSouth;
 }
 
-float RecoEventPlane::calPsiShift_BbcNorth(float PsiReCenter_BbcNorth, int order, int vtx4, int runId, int cent20)
+float RecoEventPlane::calPsiShift_BbcNorth(float PsiReCenter_BbcNorth, int order, int vtx4, int runIndex, int cent20)
 {
   float delta_Psi = 0.0;
 
   const float harmonic[3] = {1.0,2.0,3.0};
   for(int i_shift = 0; i_shift < vecMesonFlow::mNumOfShiftOrder; ++i_shift)
   {
-    int bin_cos = p_mCos_BbcNorth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    int bin_cos = p_mCos_BbcNorth[order][vtx4][i_shift]->FindBin((double)runIndex,(double)cent20);
     float mean_cos = p_mCos_BbcNorth[order][vtx4][i_shift]->GetBinContent(bin_cos);
 
-    int bin_sin = p_mSin_BbcNorth[order][vtx4][i_shift]->FindBin((double)runId,(double)cent20);
+    int bin_sin = p_mSin_BbcNorth[order][vtx4][i_shift]->FindBin((double)runIndex,(double)cent20);
     float mean_sin = p_mSin_BbcNorth[order][vtx4][i_shift]->GetBinContent(bin_sin);
 
     float CosShift = -1.0*mean_sin*TMath::Cos((i_shift+1)*harmonic[order]*PsiReCenter_BbcNorth);

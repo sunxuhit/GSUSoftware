@@ -15,9 +15,9 @@ class RecoEPHistoManager : public TObject
     virtual ~RecoEPHistoManager();
 
     void initQA_Global();
-    void fillQA_Global_MiniBias(int runId, float vtx_zdc, float vtx_bbc, float centrality);
-    void fillQA_Global_NarrowVtx(int runId, float vtx_zdc, float vtx_bbc, float centrality);
-    void fillQA_Global_NarrowVtxBbc(int runId, float vtx_zdc, float vtx_bbc, float centrality);
+    void fillQA_Global_MiniBias(int runIndex, float vtx_zdc, float vtx_bbc, float centrality);
+    void fillQA_Global_NarrowVtx(int runIndex, float vtx_zdc, float vtx_bbc, float centrality);
+    void fillQA_Global_NarrowVtxBbc(int runIndex, float vtx_zdc, float vtx_bbc, float centrality);
     void writeQA_Global();
 
     void set_debug(int debug) {mDebug = debug;}
@@ -69,9 +69,9 @@ class RecoEPHistoManager : public TObject
   private:
 
     // vertex QA
-    TH2F *h_mVtxZ_Bbc_MiniBias; // runId vs. VtxZ
-    TH2F *h_mVtxZ_Zdc_MiniBias; // runId vs. VtxZ
-    TH2F *h_mCentrality_MiniBias; // runId vs. centrality
+    TH2F *h_mVtxZ_Bbc_MiniBias; // runIndex vs. VtxZ
+    TH2F *h_mVtxZ_Zdc_MiniBias; // runIndex vs. VtxZ
+    TH2F *h_mCentrality_MiniBias; // runIndex vs. centrality
 
     TH2F *h_mVtxZ_Bbc_NarrowVtx;
     TH2F *h_mVtxZ_Zdc_NarrowVtx;

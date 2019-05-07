@@ -252,15 +252,15 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
   if(isMinimumBias()) // fill QA for minium bias trigger
   {
-    mRecoEPHistoManager->fillQA_Global_MiniBias(mRunId,zdcz,vtx_bbcz,centrality);
+    mRecoEPHistoManager->fillQA_Global_MiniBias(mRunIndex,zdcz,vtx_bbcz,centrality);
   }
 
   if( !isMinimumBiasNarrowVtx() ) return DISCARDEVENT; // select events wth minimum bias trigger & narrow vertex cut
   if(centrality < 0) return DISCARDEVENT; // remove no ZDC coincidence events
-  mRecoEPHistoManager->fillQA_Global_NarrowVtx(mRunId,zdcz,vtx_bbcz,centrality);
+  mRecoEPHistoManager->fillQA_Global_NarrowVtx(mRunIndex,zdcz,vtx_bbcz,centrality);
 
   if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -1.0*(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
-  mRecoEPHistoManager->fillQA_Global_NarrowVtxBbc(mRunId,zdcz,vtx_bbcz,centrality);
+  mRecoEPHistoManager->fillQA_Global_NarrowVtxBbc(mRunIndex,zdcz,vtx_bbcz,centrality);
 
   // calculate raw Q-Vector for BBC
   for (int i_pmt=0; i_pmt<128; i_pmt++) 
@@ -333,11 +333,11 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
       TVector2 QVecRaw_BbcSouth = mRecoEventPlane->getQVectorRaw_BbcSouth(i_order);
       float QWeight_BbcSouth = mRecoEventPlane->getQWeight_BbcSouth(i_order);
-      mRecoEPProManager->fillPro_BbcSouthReCenter(QVecRaw_BbcSouth,QWeight_BbcSouth,i_order,vtx4,mRunId,cent20); // fill re-center parameters
+      mRecoEPProManager->fillPro_BbcSouthReCenter(QVecRaw_BbcSouth,QWeight_BbcSouth,i_order,vtx4,mRunIndex,cent20); // fill re-center parameters
 
       TVector2 QVecRaw_BbcNorth = mRecoEventPlane->getQVectorRaw_BbcNorth(i_order);
       float QWeight_BbcNorth = mRecoEventPlane->getQWeight_BbcNorth(i_order);
-      mRecoEPProManager->fillPro_BbcNorthReCenter(QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,vtx4,mRunId,cent20); // fill re-center parameters
+      mRecoEPProManager->fillPro_BbcNorthReCenter(QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,vtx4,mRunIndex,cent20); // fill re-center parameters
 
       mRecoEPHistoManager->fillHist_BbcRawQVector(QVecRaw_BbcSouth,QWeight_BbcSouth,QVecRaw_BbcNorth,QWeight_BbcNorth,i_order,cent20);
     }
@@ -352,27 +352,27 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   {
     for(int i_order = 0; i_order < 3; ++i_order)
     {
-      float PsiReCenter_BbcSouth = mRecoEventPlane->calPsiReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
-      mRecoEPProManager->fillPro_BbcSouthShift(PsiReCenter_BbcSouth, i_order, vtx4, mRunId, cent20); // fill shift parater
+      float PsiReCenter_BbcSouth = mRecoEventPlane->calPsiReCenter_BbcSouth(i_order,vtx4,mRunIndex,cent20);
+      mRecoEPProManager->fillPro_BbcSouthShift(PsiReCenter_BbcSouth, i_order, vtx4, mRunIndex, cent20); // fill shift parater
 
-      float PsiReCenter_BbcNorth = mRecoEventPlane->calPsiReCenter_BbcNorth(i_order,vtx4,mRunId,cent20);
-      mRecoEPProManager->fillPro_BbcNorthShift(PsiReCenter_BbcNorth, i_order, vtx4, mRunId, cent20); // fill shift parater
+      float PsiReCenter_BbcNorth = mRecoEventPlane->calPsiReCenter_BbcNorth(i_order,vtx4,mRunIndex,cent20);
+      mRecoEPProManager->fillPro_BbcNorthShift(PsiReCenter_BbcNorth, i_order, vtx4, mRunIndex, cent20); // fill shift parater
 
       mRecoEPHistoManager->fillHist_BbcReCenterEP(PsiReCenter_BbcSouth,PsiReCenter_BbcNorth,i_order,cent20);
 
-      TVector2 QVecReCenter_BbcSouth = mRecoEventPlane->getQVectorReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
-      TVector2 QVecReCenter_BbcNorth = mRecoEventPlane->getQVectorReCenter_BbcNorth(i_order,vtx4,mRunId,cent20);
+      TVector2 QVecReCenter_BbcSouth = mRecoEventPlane->getQVectorReCenter_BbcSouth(i_order,vtx4,mRunIndex,cent20);
+      TVector2 QVecReCenter_BbcNorth = mRecoEventPlane->getQVectorReCenter_BbcNorth(i_order,vtx4,mRunIndex,cent20);
       mRecoEPHistoManager->fillHist_BbcReCenterQVector(QVecReCenter_BbcSouth,QVecReCenter_BbcNorth,i_order,cent20);
     }
 
     /*
     mRecoEventPlane->printRawBbcEventPlane(0);
-    mRecoEventPlane->printReCenterBbcEventPlane(0,vtx4,mRunId,cent20);
+    mRecoEventPlane->printReCenterBbcEventPlane(0,vtx4,mRunIndex,cent20);
 
     mRecoEventPlane->printRawBbcEventPlane(1);
-    mRecoEventPlane->printReCenterBbcEventPlane(1,vtx4,mRunId,cent20);
+    mRecoEventPlane->printReCenterBbcEventPlane(1,vtx4,mRunIndex,cent20);
 
-    mRecoEventPlane->printReCenterBbcEventPlane(2,vtx4,mRunId,cent20);
+    mRecoEventPlane->printReCenterBbcEventPlane(2,vtx4,mRunIndex,cent20);
     mRecoEventPlane->printRawBbcEventPlane(2);
     */
 
@@ -383,12 +383,12 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   {
     for(int i_order = 0; i_order < 3; ++i_order)
     {
-      float PsiReCenter_BbcSouth = mRecoEventPlane->calPsiReCenter_BbcSouth(i_order,vtx4,mRunId,cent20);
-      float PsiShift_BbcSouth = mRecoEventPlane->calPsiShift_BbcSouth(PsiReCenter_BbcSouth,i_order,vtx4,mRunId,cent20); // calcualte shift EP
+      float PsiReCenter_BbcSouth = mRecoEventPlane->calPsiReCenter_BbcSouth(i_order,vtx4,mRunIndex,cent20);
+      float PsiShift_BbcSouth = mRecoEventPlane->calPsiShift_BbcSouth(PsiReCenter_BbcSouth,i_order,vtx4,mRunIndex,cent20); // calcualte shift EP
       // cout << "i_order = " << i_order << ", PsiReCenter_BbcSouth = " << PsiReCenter_BbcSouth << ", PsiShift_BbcSouth = " << PsiShift_BbcSouth << endl;
 
-      float PsiReCenter_BbcNorth = mRecoEventPlane->calPsiReCenter_BbcNorth(i_order,vtx4,mRunId,cent20);
-      float PsiShift_BbcNorth = mRecoEventPlane->calPsiShift_BbcNorth(PsiReCenter_BbcNorth,i_order,vtx4,mRunId,cent20); // calcualte shift EP
+      float PsiReCenter_BbcNorth = mRecoEventPlane->calPsiReCenter_BbcNorth(i_order,vtx4,mRunIndex,cent20);
+      float PsiShift_BbcNorth = mRecoEventPlane->calPsiShift_BbcNorth(PsiReCenter_BbcNorth,i_order,vtx4,mRunIndex,cent20); // calcualte shift EP
       // cout << "i_order = " << i_order << ", PsiReCenter_BbcNorth = " << PsiReCenter_BbcNorth << ", PsiShift_BbcNorth = " << PsiShift_BbcNorth << endl;
 
       mRecoEPHistoManager->fillHist_BbcShiftEP(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent20);
