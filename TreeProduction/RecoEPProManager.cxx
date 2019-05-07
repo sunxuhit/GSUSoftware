@@ -162,14 +162,18 @@ void RecoEPProManager::initPro_BbcResolution()
   {
     std::string ProName = Form("p_mResolution_BbcSub_%s",Order[i_order].c_str());
     p_mResolution_BbcSub[i_order] = new TProfile(ProName.c_str(),ProName.c_str(),vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
+
+    ProName = Form("p_mResQA_BbcSub_%s",Order[i_order].c_str());
+    p_mResQA_BbcSub[i_order] = new TProfile2D(ProName.c_str(),ProName.c_str(),1500,-0.5,1499.5,vecMesonFlow::mNumOfCentrality20,-0.5,19.5);
   }
 }
 
-void RecoEPProManager::fillPro_BbcResolution(float PsiReCenter_BbcSouth, float PsiReCenter_BbcNorth, int order, int cent20)
+void RecoEPProManager::fillPro_BbcResolution(float PsiReCenter_BbcSouth, float PsiReCenter_BbcNorth, int order, int runIndex, int cent20)
 { // PsiShift_BbcNorth - PsiShift_BbcSouth
   float harmonic = vecMesonFlow::mHarmonic[order];
   float resolution = TMath::Cos(harmonic*(PsiReCenter_BbcNorth-PsiReCenter_BbcSouth));
-  p_mResolution_BbcSub[order]->Fill(cent20,resolution);
+  p_mResolution_BbcSub[order]->Fill((double)cent20,(double)resolution);
+  p_mResQA_BbcSub[order]->Fill((double)runIndex,(double)cent20,(double)resolution);
 }
 
 void RecoEPProManager::writePro_BbcResolution()
@@ -177,6 +181,7 @@ void RecoEPProManager::writePro_BbcResolution()
   for(int i_order = 0; i_order < 3; ++i_order)
   {
     p_mResolution_BbcSub[i_order]->Write();
+    p_mResQA_BbcSub[i_order]->Write();
   }
 }
 

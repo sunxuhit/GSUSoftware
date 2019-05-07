@@ -392,7 +392,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       // cout << "i_order = " << i_order << ", PsiReCenter_BbcNorth = " << PsiReCenter_BbcNorth << ", PsiShift_BbcNorth = " << PsiShift_BbcNorth << endl;
 
       mRecoEPHistoManager->fillHist_BbcShiftEP(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent20);
-      mRecoEPProManager->fillPro_BbcResolution(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,cent20);
+      mRecoEPProManager->fillPro_BbcResolution(PsiShift_BbcSouth,PsiShift_BbcNorth,i_order,mRunIndex,cent20);
     }
 
     // mRecoEventPlane->printRawBbcEventPlane(1);

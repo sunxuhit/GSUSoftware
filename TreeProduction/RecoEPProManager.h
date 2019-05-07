@@ -33,7 +33,7 @@ class RecoEPProManager : public TObject
 
     //===============BBC Event Plane Resolution=========================
     void initPro_BbcResolution();
-    void fillPro_BbcResolution(float PsiReCenter_BbcSouth, float PsiReCenter_BbcNorth, int order, int cent20);
+    void fillPro_BbcResolution(float PsiReCenter_BbcSouth, float PsiReCenter_BbcNorth, int order, int runIndex, int cent20);
     void writePro_BbcResolution();
     //===============BBC Event Plane Resolution=========================
 
@@ -59,6 +59,8 @@ class RecoEPProManager : public TObject
     //===============BBC Event Plane Resolution=========================
 
     TProfile *p_mResolution_BbcSub[3]; // PsiShift_BbcNorth - PsiShift_BbcSouth
+    // Resolution | x-axis is runIndex, y-axis is centrality (every 5%)
+    TProfile2D *p_mResQA_BbcSub[3]; // PsiShift_BbcNorth - PsiShift_BbcSouth vs. runIndex
 
     //===============BBC Event Plane Resolution=========================
 
