@@ -28,8 +28,8 @@ RecoEventPlane::~RecoEventPlane()
 // get phi angle of pmt
 float RecoEventPlane::getPhi_BbcSouth(float bbcx, float bbcy)
 {
-  // const float xoff_BbcSouth = -0.5;
-  const float xoff_BbcSouth = 0.0;
+  const float xoff_BbcSouth = -0.5;
+  // const float xoff_BbcSouth = 0.0;
   const float yoff_BbcSouth = 0.0;
   float phi = TMath::ATan2(bbcy-yoff_BbcSouth,bbcx-xoff_BbcSouth);
 
@@ -38,8 +38,8 @@ float RecoEventPlane::getPhi_BbcSouth(float bbcx, float bbcy)
 
 float RecoEventPlane::getPhi_BbcNorth(float bbcx, float bbcy)
 {
-  // const float xoff_BbcNorth = 7.0;
-  const float xoff_BbcNorth = 0.0;
+  const float xoff_BbcNorth = 7.0;
+  // const float xoff_BbcNorth = 0.0;
   const float yoff_BbcNorth = 0.0;
   float phi = TMath::ATan2(bbcy-yoff_BbcNorth,bbcx-xoff_BbcNorth);
 
