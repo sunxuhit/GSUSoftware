@@ -38,6 +38,7 @@ class Calibration : public TObject
     int Init();
     int initChain();
     int initTdcCut();
+    int initTimeDurationCut();
 
     int Make();
     int Finish();
@@ -65,6 +66,8 @@ class Calibration : public TObject
     // static int const mNumOfPixels = 33;
     float mTdc_Start;
     float mTdc_Stop;
+    float mTime_Low;
+    float mTime_High;
     TH1D *h_mTDC[mRICH::mNumOfPixels][mRICH::mNumOfPixels]; // 0 for x-pixel | 1 for y-pixel
     TH2D *h_mRingImage;
     TH2D *h_mRingImage_DisPlay;

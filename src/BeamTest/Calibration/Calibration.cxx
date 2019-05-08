@@ -41,9 +41,11 @@ int Calibration::Init()
     pixel_map->Init_PixelMap_MPPC();
   }
 
-  initChain();
+  initChain(); // initialize input list
 
-  initTdcCut();
+  initTdcCut(); // initialize TDC cuts
+
+  initTimeDurationCut(); // initialize Time Duration Cuts
 
   for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
   {
@@ -125,6 +127,8 @@ int Calibration::initChain()
 
 int Calibration::initTdcCut()
 {
+  cout << endl;
+  cout << "initialize TDC Cuts!!" << endl;
   string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/%s/Calibration/",mHome.c_str(),mDet.c_str());
   string inputfile;
   if( is_pmt )
@@ -181,6 +185,59 @@ int Calibration::initTdcCut()
   cout << "tdc_mean = " << SumTdcMean/NumOfRuns << ", tdc_sigma = " << SumTdcSigma/NumOfRuns << ", nSigma = " << nSigma << endl;
   cout << "mean_tdc_Start = " << mean_tdc_Start  << ", mean_tdc_Stop = " << mean_tdc_Stop << endl;
   cout << "mTdc_Start set to " << mTdc_Start << " and mTdc_Stop set to " << mTdc_Stop << endl;
+
+  return 0;
+}
+
+int Calibration::initTimeDurationCut()
+{
+  cout << endl;
+  cout << "initialize Time Duration Cuts!!" << endl;
+  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/%s/Calibration/",mHome.c_str(),mDet.c_str());
+  string inputfile;
+  if( is_pmt )
+  {
+    inputfile = inputdir + "richTimeDurationCuts.root";
+  }
+  if( !is_pmt )
+  {
+    inputfile = inputdir + "sipmTimeDurationCuts.root";
+  }
+
+  float NumOfRuns   = 0.0;
+  float SumTimeMean  = 0.0;
+  float SumTimeSigma = 0.0;
+
+  TFile *File_mTimeDuration = TFile::Open(inputfile.c_str());
+  TH2D *h_mTimeDurationCuts = (TH2D*)File_mTimeDuration->Get("h_mTimeDurationCuts")->Clone();
+  TH1D *h_mTimeMean  = (TH1D*)h_mTimeDurationCuts->ProjectionY("h_mTimeMean",1,1)->Clone();
+  TH1D *h_mTimeSigma = (TH1D*)h_mTimeDurationCuts->ProjectionY("h_mTimeSigma",2,2)->Clone();
+  TH1D *h_mRunId    = (TH1D*)h_mTimeDurationCuts->ProjectionY("h_mRunId",3,3)->Clone();
+  for(int i_bin = 1; i_bin < h_mRunId->GetNbinsX(); ++i_bin)
+  {
+    float runId     = h_mRunId->GetBinContent(i_bin);
+    float time_mean  = h_mTimeMean->GetBinContent(i_bin);
+    float time_sigma = h_mTimeSigma->GetBinContent(i_bin);
+    if(runId > 0)
+    {
+      NumOfRuns++;
+      SumTimeMean  += time_mean;
+      SumTimeSigma += time_sigma;
+      cout << "runId = " << runId << ", time_mean = " << time_mean << ", time_sigma = " << time_sigma << ", NumOfRuns = " << NumOfRuns << endl;
+    }
+  }
+  File_mTimeDuration->Close();
+
+  float nSigma = 3.0;
+  float mean_time_Low = SumTimeMean/NumOfRuns - nSigma*SumTimeSigma/NumOfRuns; 
+  float mean_time_High = SumTimeMean/NumOfRuns + nSigma*SumTimeSigma/NumOfRuns;
+
+  mTime_Low = floor(mean_time_Low);
+  mTime_High = ceil(mean_time_High);
+
+  cout << "time_mean = " << SumTimeMean/NumOfRuns << ", time_sigma = " << SumTimeSigma/NumOfRuns << ", nSigma = " << nSigma << endl;
+  cout << "mean_time_Low = " << mean_time_Low << ", mean_time_High = " << mean_time_High << endl;
+  cout << "mTime_Low set to " << mTime_Low << " and mTime_High set to " << mTime_High << endl;
 
   return 0;
 }
