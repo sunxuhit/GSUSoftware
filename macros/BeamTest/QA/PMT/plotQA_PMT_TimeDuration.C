@@ -19,6 +19,7 @@ double doubleGauss(double *x_val, double *par)
   // double gaus_1st = norm_1st*TMath::Exp(power_1st)/TMath::Sqrt(2.0*TMath::Pi()*sigSquare_1st);
   double gaus_1st = norm_1st*TMath::Exp(power_1st);
 
+  /*
   double norm_2nd = par[3];
   double mean_2nd = par[4];
   double sigma_2nd = par[5];
@@ -26,8 +27,10 @@ double doubleGauss(double *x_val, double *par)
   double power_2nd = -0.5*(x-mean_2nd)*(x-mean_2nd)/sigSquare_2nd;
   // double gaus_2nd = norm_2nd*TMath::Exp(power_2nd)/TMath::Sqrt(2.0*TMath::Pi()*sigSquare_2nd);
   double gaus_2nd = norm_2nd*TMath::Exp(power_2nd);
+  */
 
-  double y = gaus_1st + gaus_2nd;
+  // double y = gaus_1st + gaus_2nd;
+  double y = gaus_1st;
 
   return y;
 }
@@ -78,14 +81,13 @@ void plotQA_PMT_TimeDuration(int runId = 182)
   h_mTdcDuration->GetXaxis()->SetRangeUser(0,100);
   h_mTdcDuration->Draw();
 
-  TF1 *f_gaus = new TF1("f_gaus",doubleGauss,0,100,6);
-  f_gaus->FixParameter(0,0);
-  f_gaus->SetParameter(1,30.0);
-  f_gaus->SetParLimits(1,25.0,31.0);
-  f_gaus->SetParameter(2,10.0);
-  f_gaus->SetParameter(3,5000);
-  f_gaus->SetParameter(4,50.0);
-  f_gaus->SetParameter(5,10.0);
+  TF1 *f_gaus = new TF1("f_gaus",doubleGauss,0,100,3);
+  f_gaus->SetParameter(0,1000);
+  f_gaus->SetParameter(1,50.0);
+  f_gaus->SetParameter(2,5.0);
+  // f_gaus->SetParameter(3,5000);
+  // f_gaus->SetParameter(4,50.0);
+  // f_gaus->SetParameter(5,5.0);
   f_gaus->SetRange(48,58);
   h_mTdcDuration->Fit(f_gaus,"MNR");
   f_gaus->SetLineColor(2);
@@ -97,8 +99,8 @@ void plotQA_PMT_TimeDuration(int runId = 182)
   string c_timeduration = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/Calibration/c_TimeDuration_%d.eps",runId); 
   c_TimeDuration->SaveAs(c_timeduration.c_str());
 
-  float mean_timeduration = f_gaus->GetParameter(4);
-  float sigma_timeduration = f_gaus->GetParameter(5);
+  float mean_timeduration = f_gaus->GetParameter(1);
+  float sigma_timeduration = f_gaus->GetParameter(2);
 
   TH2D *h_mTimeDurationCuts = new TH2D("h_mTimeDurationCuts","h_mTimeDurationCuts",3,-0.5,2.5,800,-0.5,799.5);
   h_mTimeDurationCuts->SetBinContent(1,runId,mean_timeduration);

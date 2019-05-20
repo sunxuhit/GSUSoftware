@@ -54,8 +54,11 @@ int Calibration::Init()
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
       // cout << HistName.c_str() << endl;
       h_mTDC[i_pixel_x][i_pixel_y] = new TH1D(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
+      mTimeDuration[i_pixel_x][i_pixel_y][0] = -999.9;
+      mTimeDuration[i_pixel_x][i_pixel_y][1] = -999.9;
     }
   }
+
   h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
   h_mRingImage_DisPlay = new TH2D("h_mRingImage_DisPlay","h_mRingImage_DisPlay",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
   h_mRingImage_DisPlay_beam = new TH2D("h_mRingImage_DisPlay_beam","h_mRingImage_DisPlay_beam",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
@@ -173,7 +176,7 @@ int Calibration::initTdcCut()
   }
   File_mTDC->Close();
 
-  float nSigma = 1.0;
+  float nSigma = 2.0;
   float mean_tdc_Start = SumTdcMean/NumOfRuns - nSigma*SumTdcSigma/NumOfRuns; 
   float mean_tdc_Stop  = SumTdcMean/NumOfRuns + nSigma*SumTdcSigma/NumOfRuns;
 
@@ -228,7 +231,7 @@ int Calibration::initTimeDurationCut()
   }
   File_mTimeDuration->Close();
 
-  float nSigma = 3.0;
+  float nSigma = 2.0;
   float mean_time_Low = SumTimeMean/NumOfRuns - nSigma*SumTimeSigma/NumOfRuns; 
   float mean_time_High = SumTimeMean/NumOfRuns + nSigma*SumTimeSigma/NumOfRuns;
 
@@ -259,6 +262,58 @@ int Calibration::Make()
       printf("Event to big: %u edges vs %u array size...skip\n",tNedge,MAXEDGE);
       continue;
     }
+
+    //--------------prepare Time Duration--------------------
+    for(unsigned int i_photon = 0; i_photon < tNedge; ++i_photon)
+    {
+      int slot = tSlot[i_photon];
+      int fiber = tFiber[i_photon];
+      int channel = tChannel[i_photon];
+      int asic = channel/64;
+      int pin = channel%64;
+
+      int pixel_x = -1;
+      int pixel_y = -1;
+
+      if(asic == 0) 
+      {
+	// corresponding to empty MPPC 
+	continue;
+      }
+
+      if(tSlot[i_photon] < 3 || tSlot[i_photon] > 7)
+      {
+	printf("%s EVT %d Data Error: bad slot %d \n",__FUNCTION__,i_event,slot);
+	continue;
+      }
+      if(tFiber[i_photon] > 31)
+      {
+	printf("%s EVT %d Data Error: bad fiber %d \n",__FUNCTION__,i_event,fiber);
+	continue;
+      }
+      if(tChannel[i_photon] > 191)
+      {
+	printf("%s EVT %d Data Error: bad channel %d \n",__FUNCTION__,i_photon,channel); 
+	continue;
+      }
+
+      if( is_pmt ) 
+      {
+	pixel_x = pixel_map->get_Pixel_x_PMT(slot, fiber, asic, pin);
+	pixel_y = pixel_map->get_Pixel_y_PMT(slot, fiber, asic, pin);
+      }
+      if( !is_pmt ) 
+      {
+	pixel_x = pixel_map->get_Pixel_x_MPPC(slot, fiber, asic, pin);
+	pixel_y = pixel_map->get_Pixel_y_MPPC(slot, fiber, asic, pin);
+      }
+
+      if(pixel_x < 0 || pixel_y < 0) return -1;
+
+      int polarity = tPolarity[i_photon];
+      mTimeDuration[pixel_x][pixel_y][polarity] = tTime[i_photon];
+    }
+    //--------------prepare Time Duration--------------------
 
     int NumOfPhotons = 0;
     for(unsigned int i_photon = 0; i_photon < tNedge; ++i_photon)
@@ -314,42 +369,59 @@ int Calibration::Make()
 
       if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start && tTime[i_photon] < mTdc_Stop)
       {
-	h_mRingImage->Fill(pixel_x,pixel_y);
-	// if(i_event > 1024 && i_event < 1025)
-	if(i_event == 1024)
+	float time_duration = mTimeDuration[pixel_x][pixel_y][0] - mTimeDuration[pixel_x][pixel_y][1];
+	if(time_duration > mTime_Low && time_duration < mTime_High)
 	{
-	  h_mRingImage_DisPlay_beam->Fill(pixel_x,pixel_y);
-	}
-	bool is_beam = (pixel_x > 12 && pixel_x < 20) && (pixel_y > 12 && pixel_y < 20);
-	if( !is_beam ) // exclude beam spot
-	{
+	  h_mRingImage->Fill(pixel_x,pixel_y);
 	  // if(i_event > 1024 && i_event < 1025)
 	  if(i_event == 1024)
 	  {
-	    h_mRingImage_DisPlay->Fill(pixel_x,pixel_y);
+	    h_mRingImage_DisPlay_beam->Fill(pixel_x,pixel_y);
 	  }
-	}
-	NumOfPhotons++;
+	  bool is_beam = (pixel_x > 12 && pixel_x < 20) && (pixel_y > 12 && pixel_y < 20);
+	  if( !is_beam ) // exclude beam spot
+	  {
+	    // if(i_event > 1024 && i_event < 1025)
+	    if(i_event == 1024)
+	    {
+	      h_mRingImage_DisPlay->Fill(pixel_x,pixel_y);
+	    }
+	  }
+	  NumOfPhotons++;
 
-	// ring finder
-	float out_x = findPixelCoord(pixel_x);
-	float out_y = findPixelCoord(pixel_y);
-	// cout << "out_x = " << out_x << ", pixel_x = " << pixel_x << endl;
-	// cout << "out_y = " << out_y << ", pixel_y = " << pixel_y << endl;
-	h_mRingFinder->Fill(out_x,out_y); // single event distribution => reset for each event
-	h_mRingFinder_Display->Fill(out_x,out_y);
-	if(i_event == 1024) h_mRingFinder_SingleEvent->Fill(out_x,out_y);
-	mXPixelMap.push_back(pixel_x);
-	mYPixelMap.push_back(pixel_y);
+	  // ring finder
+	  float out_x = findPixelCoord(pixel_x);
+	  float out_y = findPixelCoord(pixel_y);
+	  // cout << "out_x = " << out_x << ", pixel_x = " << pixel_x << endl;
+	  // cout << "out_y = " << out_y << ", pixel_y = " << pixel_y << endl;
+	  h_mRingFinder->Fill(out_x,out_y); // single event distribution => reset for each event
+	  h_mRingFinder_Display->Fill(out_x,out_y);
+	  if(i_event == 1024) h_mRingFinder_SingleEvent->Fill(out_x,out_y);
+	  mXPixelMap.push_back(pixel_x);
+	  mYPixelMap.push_back(pixel_y);
+	}
       }
     }
     // cout << "NumOfPhotons = " << NumOfPhotons << endl;
-    h_mNumOfPhotons->Fill(NumOfPhotons);
-    p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
 
-    // ring finder
-    HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
-    clearRingFinder();
+    if(NumOfPhotons > 0)
+    {
+      h_mNumOfPhotons->Fill(NumOfPhotons);
+      p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
+
+      // ring finder
+      HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
+      clearRingFinder();
+    }
+
+    for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x) // fill time duration
+    {
+      for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
+      {
+	mTimeDuration[i_pixel_x][i_pixel_y][0] = -999.9; // reset tdc array
+	mTimeDuration[i_pixel_x][i_pixel_y][1] = -999.9;
+      }
+    }
   }
   cout << "processed events:  " << NumOfEvents << "/" << NumOfEvents << endl;
 

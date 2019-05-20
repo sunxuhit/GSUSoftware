@@ -15,6 +15,9 @@ bin/pid
 bin/nsigma
 
 macros/AutoDict_*
+macros/BeamTest/*/*/*_C.d
+macros/BeamTest/*/*/*_C.so
+macros/BeamTest/*/*/*_C_ACLiC_dict_rdict.pcm
 
 figures/*.png
 figures/*/*.png

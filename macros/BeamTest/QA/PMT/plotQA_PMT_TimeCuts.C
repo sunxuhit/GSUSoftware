@@ -275,7 +275,6 @@ void plotQA_PMT_TimeCuts(const int runID = 182)
   h_mTimeCuts->GetXaxis()->SetBinLabel(1,"tdc start");
   h_mTimeCuts->GetXaxis()->SetBinLabel(2,"tdc stop");
   h_mTimeCuts->GetXaxis()->SetBinLabel(3,"runID");
-  h_mTimeCuts->GetXaxis()->SetBinLabel(3,"runID");
   h_mTimeCuts->GetXaxis()->SetLabelSize(0.06);
   h_mTimeCuts->GetYaxis()->SetTitle("runID");
   h_mTimeCuts->GetYaxis()->CenterTitle();

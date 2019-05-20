@@ -60,7 +60,7 @@ void comQA_PMT_NumOfPhotons()
   h_NumOnRing_Sim->GetXaxis()->SetTitle("Number of Photons On Ring");
   h_NumOnRing_Sim->GetXaxis()->CenterTitle();
   h_NumOnRing_Sim->GetXaxis()->SetRangeUser(-0.5,49.5);
-  h_NumOnRing_Sim->GetYaxis()->SetRangeUser(0.0,1000.0);
+  h_NumOnRing_Sim->GetYaxis()->SetRangeUser(0.0,2000.0);
   h_NumOnRing_Sim->SetLineColor(4);
   h_NumOnRing_Sim->Draw("h");
 

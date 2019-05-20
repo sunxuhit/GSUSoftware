@@ -68,6 +68,7 @@ class Calibration : public TObject
     float mTdc_Stop;
     float mTime_Low;
     float mTime_High;
+    float mTimeDuration[mRICH::mNumOfPixels][mRICH::mNumOfPixels][2];
     TH1D *h_mTDC[mRICH::mNumOfPixels][mRICH::mNumOfPixels]; // 0 for x-pixel | 1 for y-pixel
     TH2D *h_mRingImage;
     TH2D *h_mRingImage_DisPlay;

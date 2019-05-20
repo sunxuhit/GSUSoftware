@@ -20,8 +20,8 @@ void comQA_MPPC_NumOfPhotons()
   string inputData = "/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/BeamTest/MPPC/BeamTest_Calibration.root";
   TFile *File_Data = TFile::Open(inputData.c_str());
   TH1D *h_NumOfPhotons_Data = (TH1D*)File_Data->Get("h_mNumOfPhotons")->Clone();
-  TH2D *h_NumOfCherenkovPhotons_Data = (TH2D*)File_Data->Get("h_mNumOfCherenkovPhotons")->Clone();
-  TH1D *h_NumOnRing_Data = (TH1D*)h_NumOfCherenkovPhotons_Data->ProjectionY()->Clone("h_NumOnRing_Data");
+  TH3D *h_NumOfCherenkovPhotons_Data = (TH3D*)File_Data->Get("h_mNumOfCherenkovPhotons")->Clone();
+  TH1D *h_NumOnRing_Data = (TH1D*)h_NumOfCherenkovPhotons_Data->Project3D("y")->Clone("h_NumOnRing_Data");
 
   TCanvas *c_NumOfPhotons = new TCanvas("c_NumOfPhotons","c_NumOfPhotons",10,10,800,800);
   c_NumOfPhotons->SetLeftMargin(0.15);
