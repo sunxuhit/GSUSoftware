@@ -1,9 +1,10 @@
-#include "string"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TCanvas.h"
+#include <string>
+#include <TH1D.h>
+#include <TH2D.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TCanvas.h>
+#include <TMath.h>
 #include <iostream>
 
 #define MAXEDGE 100000
@@ -38,7 +39,8 @@ void InitDisplay_mRICH();
 void ResetEventData();
 int GetPMT_mRICH(int slot,int fiber,int asic);
 void GenCoord_mRICH(int ipmt, int x1, int y1);
-int GetPixel_mRICH(int fiber, int asic, int maroc_channel);
+int GetPixel_mRICH(int fiber, int asic, int maroc_channel); // return pixel number
+float findPixelCoord(int pixel); // return pixel position
 
 void processQA_PMT_TDC(const int runID = 182)
 {
@@ -56,28 +58,26 @@ void processQA_PMT_TDC(const int runID = 182)
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/richTDC_run%d/sspRich.root",runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
+  InitDisplay_mRICH();
+
   float tdc[NumOfPixel][NumOfPixel][2]; // 0 for raising edge | 1 for falling edge
-  TH2D *h_mTimeDuration = new TH2D("h_mTimeDuration","h_mTimeDuration",4000,-0.5,3999.5,500,-0.5,499.5);
+  float radius[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
+  TH1D *h_mTDC[NumOfPixel][NumOfPixel];
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
     {
       tdc[i_pixel_x][i_pixel_y][0] = -999.9;
       tdc[i_pixel_x][i_pixel_y][1] = -999.9;
-    }
-  }
-
-  InitDisplay_mRICH();
-  TH2D *h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  TH1D *h_mTDC[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
-  for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
-  {
-    for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
-    {
       string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
       h_mTDC[i_pixel_x][i_pixel_y] = new TH1D(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
     }
   }
+  TH2D *h_mRingImage_on = new TH2D("h_mRingImage_on","h_mRingImage_on",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mRingImage_before = new TH2D("h_mRingImage_before","h_mRingImage_before",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mRingImage_after = new TH2D("h_mRingImage_after","h_mRingImage_after",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mTime_TDC = new TH2D("h_mTime_TDC","h_mTime_TDC",4000,-0.5,3999.5,150,-0.5,149.5);
+  TH2D *h_mTime_Radius = new TH2D("h_mTime_Radius","h_mTime_Radius",105,0,2.0*52.5,150,-0.5,149.5);
 
   unsigned int pol=MAROCPOLARITY; // 1 falling, 0 rising
 
@@ -124,16 +124,29 @@ void processQA_PMT_TDC(const int runID = 182)
       int pixel = GetPixel_mRICH(fiber, asic, pin);
       int pixel_x = x_mRICH[pixel-1];
       int pixel_y = y_mRICH[pixel-1];
+      float out_x = findPixelCoord(pixel_x);
+      float out_y = findPixelCoord(pixel_y);
+      // cout << "pixel_x = " << pixel_x << ", out_x = " << out_x << endl;
+      // cout << "pixel_y = " << pixel_y << ", out_y = " << out_y << endl;
+      // cout << endl;
+
+      // fill tdc of falling edge for each pixel
       if(tPolarity[i_photon] == pol) h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
 
-      // cout << "pixel_x = " << pixel_x << ", pixel_y = " << pixel_y << " pol = " << tPolarity[i_photon] << ", time = " << tTime[i_photon] << endl;
       int polarity = tPolarity[i_photon];
       tdc[pixel_x][pixel_y][polarity] = tTime[i_photon];
 
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop)
       {
-	// h_mRingImage->Fill(x_mRICH[pixel-1],y_mRICH[pixel-1]);
-	h_mRingImage->Fill(pixel_x,pixel_y);
+	h_mRingImage_on->Fill(pixel_x,pixel_y);
+      }
+      if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Stop)
+      {
+	h_mRingImage_after->Fill(pixel_x,pixel_y);
+      }
+      if(tPolarity[i_photon] == pol && tTime[i_photon] < tdc_Start)
+      {
+	h_mRingImage_before->Fill(pixel_x,pixel_y);
       }
     }
 
@@ -144,7 +157,12 @@ void processQA_PMT_TDC(const int runID = 182)
 	if(tdc[i_pixel_x][i_pixel_y][1] > 0)
 	{
 	  float time_duration = tdc[i_pixel_x][i_pixel_y][0] - tdc[i_pixel_x][i_pixel_y][1];
-	  h_mTimeDuration->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration);
+	  h_mTime_TDC->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration);
+
+	  float out_x = findPixelCoord(i_pixel_x);
+	  float out_y = findPixelCoord(i_pixel_y);
+	  float radius = TMath::Sqrt(out_x*out_x+out_y*out_y);
+	  h_mTime_Radius->Fill(radius,time_duration);
 
 	  tdc[i_pixel_x][i_pixel_y][0] = -999.9; // reset tdc array
 	  tdc[i_pixel_x][i_pixel_y][1] = -999.9;
@@ -157,13 +175,16 @@ void processQA_PMT_TDC(const int runID = 182)
   string outputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/PMT/%s/richTDC_run%d.root",mode.c_str(),runID);
   TFile *File_OutPut = new TFile(outputfile.c_str(),"RECREATE");
   File_OutPut->cd();
-  h_mTimeDuration->Write();
-  h_mRingImage->Write();
+  h_mRingImage_on->Write();
+  h_mRingImage_before->Write();
+  h_mRingImage_after->Write();
+  h_mTime_TDC->Write();
+  h_mTime_Radius->Write();
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
     {
-      h_mTDC[i_pixel_x][i_pixel_y]->Write();
+      // h_mTDC[i_pixel_x][i_pixel_y]->Write();
     }
   }
   File_OutPut->Close();
@@ -273,4 +294,21 @@ void GenCoord_mRICH(int ipmt, int x1, int y1)
     }
     // if(debug)if(j==0||j==255)printf("PMT %2d  Pixel %2d  -->  rw %3d  cm  %3d  X %3d Y %3d\n",ipmt, j+1,rw, cm,x_mRICH[j],y_mRICH[j]);
   }
+}
+
+float findPixelCoord(int pixel)
+{
+  float out_coord = -999.9;
+
+  const int mNumOfPixels = 33; // 16*2 3mm-pixels + 1 2*2mm-glasswindow+1mm-gap
+  const double mPixels[mNumOfPixels+1] = {-50.5,-47.5,-44.5,-41.5,-38.5,-35.5,-32.5,-29.5,-26.5,-23.5,-20.5,-17.5,-14.5,-11.5,-8.5,-5.5,-2.5,2.5,5.5,8.5,11.5,14.5,17.5,20.5,23.5,26.5,29.5,32.5,35.5,38.5,41.5,44.5,47.5,50.5};
+
+  if(pixel < 0 || pixel > 32) return -999.9; // out of photon sensor
+
+  float out_low = mPixels[pixel];
+  float out_high = mPixels[pixel+1];
+
+  out_coord = 0.5*(out_low+out_high);
+
+  return out_coord;
 }
