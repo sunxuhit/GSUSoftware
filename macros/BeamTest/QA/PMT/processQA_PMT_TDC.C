@@ -74,7 +74,7 @@ void processQA_PMT_TDC(const int runID = 182)
   if(runID >= 172 && runID <= 192) // Calibration
   {
     beam_x_start = 14;
-    beam_x_stop  = 17;
+    beam_x_stop  = 18;
     beam_y_start = 12;
     beam_y_stop  = 20;
   }
