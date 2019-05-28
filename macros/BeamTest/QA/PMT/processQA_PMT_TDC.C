@@ -1,6 +1,7 @@
 #include <string>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TH3D.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TCanvas.h>
@@ -45,7 +46,12 @@ float findPixelCoord(int pixel); // return pixel position
 void processQA_PMT_TDC(const int runID = 182)
 {
   int debug = 1;
-  const string mode = "Calibration";
+  string mode = "Calibration";
+  if(runID < 172) mode = "PositionScan";
+  if(runID >= 196 && runID <= 215) mode = "AngleRun";
+  if(runID >= 266 && runID <= 316) mode = "ThresholdScan";
+  if(runID >= 344 && runID <= 380) mode = "MesonRun";
+
   float tdc_Start = 2000.0;
   float tdc_Stop  = 2050.0;
   if(runID > 343 && runID < 381) // meson run 344-380
@@ -54,11 +60,80 @@ void processQA_PMT_TDC(const int runID = 182)
     tdc_Stop  = 590.0;
   }
 
+  // beam spot
+  int beam_x_start = -1;
+  int beam_x_stop  = -1;
+  int beam_y_start = -1;
+  int beam_y_stop  = -1;
+
+  int off_x_start = 0;
+  int off_x_stop  = 4;
+  int off_y_start = 0;
+  int off_y_stop  = 4;
+
+  if(runID >= 172 && runID <= 192) // Calibration
+  {
+    beam_x_start = 14;
+    beam_x_stop  = 17;
+    beam_y_start = 12;
+    beam_y_stop  = 20;
+  }
+  if(runID == 16 || (runID >= 18 && runID <= 21)) // PositionScan 
+  {
+    beam_x_start = 0;
+    beam_x_stop  = 5;
+    beam_y_start = 27;
+    beam_y_stop  = 32;
+  }
+  if(runID >= 22 && runID <= 35) // PositionScan 
+  {
+    beam_x_start = 5;
+    beam_x_stop  = 11;
+    beam_y_start = 20;
+    beam_y_stop  = 26;
+  }
+  if((runID >= 42 && runID <= 51) || (runID >= 54 && runID <= 64)) // PositionScan 
+  {
+    beam_x_start = 13;
+    beam_x_stop  = 15;
+    beam_y_start = 17;
+    beam_y_stop  = 20;
+  }
+  if((runID >= 65 && runID <= 70) || (runID >= 88 && runID <= 102)) // PositionScan 
+  {
+    beam_x_start = 14;
+    beam_x_stop  = 18;
+    beam_y_start = 12;
+    beam_y_stop  = 15;
+  }
+  if(runID >= 103 && runID <= 122) // PositionScan 
+  {
+    beam_x_start = 16;
+    beam_x_stop  = 19;
+    beam_y_start = 12;
+    beam_y_stop  = 15;
+  }
+  if(runID >= 123 && runID <= 142) // PositionScan 
+  {
+    beam_x_start = 21;
+    beam_x_stop  = 26;
+    beam_y_start = 4;
+    beam_y_stop  = 11;
+
+  }
+  if(runID >= 144 && runID <= 163) // PositionScan 
+  {
+    beam_x_start = 28;
+    beam_x_stop  = 32;
+    beam_y_start = 0;
+    beam_y_stop  = 4;
+  }
+
+  InitDisplay_mRICH();
+
   int const NumOfPixel = 33;
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/richTDC_run%d/sspRich.root",runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
-
-  InitDisplay_mRICH();
 
   float tdc[NumOfPixel][NumOfPixel][2]; // 0 for raising edge | 1 for falling edge
   float radius[NumOfPixel][NumOfPixel]; // 0 for x-pixel | 1 for y-pixel
@@ -76,8 +151,17 @@ void processQA_PMT_TDC(const int runID = 182)
   TH2D *h_mRingImage_on = new TH2D("h_mRingImage_on","h_mRingImage_on",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_before = new TH2D("h_mRingImage_before","h_mRingImage_before",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_after = new TH2D("h_mRingImage_after","h_mRingImage_after",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
-  TH2D *h_mTime_TDC = new TH2D("h_mTime_TDC","h_mTime_TDC",4000,-0.5,3999.5,150,-0.5,149.5);
-  TH2D *h_mTime_Radius = new TH2D("h_mTime_Radius","h_mTime_Radius",105,0,2.0*52.5,150,-0.5,149.5);
+  TH2D *h_mRingImage_Display1 = new TH2D("h_mRingImage_Display1","h_mRingImage_Display1",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mRingImage_Display2 = new TH2D("h_mRingImage_Display2","h_mRingImage_Display2",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH2D *h_mRingImage_Display3 = new TH2D("h_mRingImage_Display3","h_mRingImage_Display3",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+
+  TH2D *h_mTdcTime_OnBeam = new TH2D("h_mTdcTime_OnBeam","h_mTdcTime_OnBeam",4000,-0.5,3999.5,150,-0.5,149.5);
+  TH2D *h_mTdcTime_OffBeam = new TH2D("h_mTdcTime_OffBeam","h_mTdcTime_OffBeam",4000,-0.5,3999.5,150,-0.5,149.5);
+  TH3D *h_mTdcTimeRadius;
+  if(mode == "Calibration")
+  {
+    h_mTdcTimeRadius = new TH3D("h_mTdcTimeRadius","h_mTdcTimeRadius",4000,-0.5,3999.5,150,-0.5,149.5,60,-0.5,59.5);
+  }
 
   unsigned int pol=MAROCPOLARITY; // 1 falling, 0 rising
 
@@ -92,7 +176,7 @@ void processQA_PMT_TDC(const int runID = 182)
   tree_mRICH->SetBranchAddress("time",tTime);
 
   int NumOfEvents = tree_mRICH->GetEntries();
-  // if(NumOfEvents > 50000) NumOfEvents = 50000; // for test only
+  if(NumOfEvents > 50000) NumOfEvents = 50000; // for test only
   printf("NEntries %d\n",NumOfEvents);
 
   tree_mRICH->GetEntry(0);
@@ -124,11 +208,6 @@ void processQA_PMT_TDC(const int runID = 182)
       int pixel = GetPixel_mRICH(fiber, asic, pin);
       int pixel_x = x_mRICH[pixel-1];
       int pixel_y = y_mRICH[pixel-1];
-      float out_x = findPixelCoord(pixel_x);
-      float out_y = findPixelCoord(pixel_y);
-      // cout << "pixel_x = " << pixel_x << ", out_x = " << out_x << endl;
-      // cout << "pixel_y = " << pixel_y << ", out_y = " << out_y << endl;
-      // cout << endl;
 
       // fill tdc of falling edge for each pixel
       if(tPolarity[i_photon] == pol) h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
@@ -139,6 +218,9 @@ void processQA_PMT_TDC(const int runID = 182)
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop)
       {
 	h_mRingImage_on->Fill(pixel_x,pixel_y);
+	if(i_event == 1024) h_mRingImage_Display1->Fill(pixel_x,pixel_y);
+	if(i_event == 2048) h_mRingImage_Display2->Fill(pixel_x,pixel_y);
+	if(i_event == 4096) h_mRingImage_Display3->Fill(pixel_x,pixel_y);
       }
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Stop)
       {
@@ -157,12 +239,31 @@ void processQA_PMT_TDC(const int runID = 182)
 	if(tdc[i_pixel_x][i_pixel_y][1] > 0)
 	{
 	  float time_duration = tdc[i_pixel_x][i_pixel_y][0] - tdc[i_pixel_x][i_pixel_y][1];
-	  h_mTime_TDC->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration);
 
-	  float out_x = findPixelCoord(i_pixel_x);
-	  float out_y = findPixelCoord(i_pixel_y);
-	  float radius = TMath::Sqrt(out_x*out_x+out_y*out_y);
-	  h_mTime_Radius->Fill(radius,time_duration);
+	  // On Beam
+	  if(i_pixel_x >= beam_x_start && i_pixel_x <= beam_x_stop)
+	  {
+	    if(i_pixel_y >= beam_y_start && i_pixel_y <= beam_y_stop)
+	    {
+	      h_mTdcTime_OnBeam->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration);
+	    }
+	  }
+	  // Off Beam
+	  if(i_pixel_x >= off_x_start && i_pixel_x <= off_x_stop)
+	  {
+	    if(i_pixel_y >= off_y_start && i_pixel_y <= off_y_stop)
+	    {
+	      h_mTdcTime_OffBeam->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration);
+	    }
+	  }
+
+	  if(mode == "Calibration")
+	  {
+	    float out_x = findPixelCoord(i_pixel_x);
+	    float out_y = findPixelCoord(i_pixel_y);
+	    float radius = TMath::Sqrt(out_x*out_x+out_y*out_y);
+	    h_mTdcTimeRadius->Fill(tdc[i_pixel_x][i_pixel_y][1],time_duration,radius);
+	  }
 
 	  tdc[i_pixel_x][i_pixel_y][0] = -999.9; // reset tdc array
 	  tdc[i_pixel_x][i_pixel_y][1] = -999.9;
@@ -178,8 +279,15 @@ void processQA_PMT_TDC(const int runID = 182)
   h_mRingImage_on->Write();
   h_mRingImage_before->Write();
   h_mRingImage_after->Write();
-  h_mTime_TDC->Write();
-  h_mTime_Radius->Write();
+  h_mRingImage_Display1->Write();
+  h_mRingImage_Display2->Write();
+  h_mRingImage_Display3->Write();
+  h_mTdcTime_OnBeam->Write();
+  h_mTdcTime_OffBeam->Write();
+  if(mode == "Calibration")
+  {
+    h_mTdcTimeRadius->Write();
+  }
   for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
   {
     for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)

@@ -1,10 +1,3 @@
-energy  120.0
-HV      1000.0
-thr     50
-table   540.4    174.8
-beam    565.5    146.9
-angle   0.0
-
 richTDC_run123
 richTDC_run124
 richTDC_run125

@@ -7,7 +7,8 @@
 
 void plotQA_PMT_TDC(const int runID = 182)
 {
-  const string mode = "Calibration";
+  string mode = "Calibration";
+  if(runID < 172) mode = "PositionScan";
   float tdc_Start = 2000.0;
   float tdc_Stop  = 2050.0;
 
