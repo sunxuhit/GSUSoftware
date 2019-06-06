@@ -66,6 +66,12 @@ class RecoEPHistoManager : public TObject
     void writeHist_BbcShiftEP();
     //===============Shift BBC Event Plane==============
 
+    //===============di-muon spectra==============
+    void initHist_DiMuonSpec();
+    void fillHist_DiMuonSpec(float invmass, int cent);
+    void writeHist_DiMuonSpec();
+    //===============di-muon spectra==============
+
   private:
 
     // vertex QA
@@ -126,6 +132,10 @@ class RecoEPHistoManager : public TObject
     TH1F *h_mEPShift_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mEPShift_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH2F *h_mEPShift_Correlation[3][vecMesonFlow::mNumOfCentrality20];
+
+    // DiMuon Spectra
+    TH1F *h_mDiMuonSpec_South[vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mDiMuonSpec_North[vecMesonFlow::mNumOfCentrality20];
 
     ClassDef(RecoEPHistoManager,1)
 };

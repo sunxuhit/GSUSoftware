@@ -478,4 +478,35 @@ void RecoEPHistoManager::writeHist_BbcShiftEP()
 }
 //===============Shift BBC Event Plane=========================
 
+//===============Shift BBC Event Plane=========================
+void RecoEPHistoManager::initHist_DiMuonSpec()
+{
+  std::cout << "initialize Di-Muon Spectra Histograms!" << std::endl;
+  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+  {
+    std::string HistName;
+    HistName = Form("h_mDiMuonSpec_South_Centrality_%d",i_cent);
+    h_mDiMuonSpec_South[i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
+
+    HistName = Form("h_mDiMuonSpec_North_Centrality_%d",i_cent);
+    h_mDiMuonSpec_North[i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
+  }
+}
+
+void RecoEPHistoManager::fillHist_DiMuonSpec(float invmass, int cent)
+{
+  h_mDiMuonSpec_South[cent]->Fill(invmass);
+  h_mDiMuonSpec_North[cent]->Fill(invmass);
+}
+
+void RecoEPHistoManager::writeHist_DiMuonSpec()
+{
+  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+  {
+    h_mDiMuonSpec_South[i_cent]->Write();
+    h_mDiMuonSpec_North[i_cent]->Write();
+  }
+}
+//===============Shift BBC Event Plane=========================
+
 //------------------------------------------------------------

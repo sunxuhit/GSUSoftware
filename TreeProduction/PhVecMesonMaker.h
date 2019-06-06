@@ -15,6 +15,7 @@ class BbcRaw;
 class BbcCalib;
 class BbcGeo;
 class VtxOut;
+class DiMuonContainer;
 
 class TTree;
 class TFile;
@@ -62,6 +63,8 @@ class PhVecMesonMaker: public SubsysReco {
     BbcRaw* mBbcRaw;
     BbcCalib* mBbcCalib;
     BbcGeo* mBbcGeo;
+
+    DiMuonContainer *mDiMuonContainer;
 
     int mNumOfEvents;
 

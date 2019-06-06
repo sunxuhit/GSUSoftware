@@ -62,7 +62,8 @@ libPhVecMesonMaker_la_LIBADD = \
   -lert \
   -lrecal \
   -lTOAD \
-  -lphool
+  -lphool \
+  -lpicodst_object
 
 noinst_PROGRAMS = \
   testexternals

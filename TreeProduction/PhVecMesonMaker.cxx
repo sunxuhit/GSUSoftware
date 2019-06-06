@@ -24,6 +24,9 @@
 #include <VtxOut.h>
 #include <PHPoint.h>
 
+#include <DiMuonContainer.h>
+#include <DiMuon.h>
+
 //stl
 #include <iostream>
 #include <ostream>
@@ -178,6 +181,27 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
     }
     mRecoEPHistoManager->initHist_BbcShiftEP();
     mRecoEPProManager->initPro_BbcResolution();
+  }
+  if(mMode == 3) // generate DiMuon TTree
+  {
+    cout << "Produce Di-Muon TTree!" << endl;
+    /*
+    mRecoEventPlane->initRawBbcEventPlane();
+    mRecoEventPlane->initReCenterBbcEventPlane();
+    bool isReCenter = mRecoEventPlane->readPro_ReCenter();
+    if(!isReCenter) 
+    {
+      cout << "Could NOT find the re-center parameters! & drop the run!" << endl;
+      return ABORTRUN;
+    }
+    bool isShift = mRecoEventPlane->readPro_Shift();
+    if(!isShift) 
+    {
+      cout << "Could NOT find the shift parameters! & drop the run!" << endl;
+      return ABORTRUN;
+    }
+    */
+    mRecoEPHistoManager->initHist_DiMuonSpec();
   }
 
   return EVENT_OK;
@@ -400,6 +424,20 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
     mRecoEventPlane->clearRawBbcEventPlane();
     mRecoEventPlane->clearReCenterBbcEventPlane();
   }
+  if(mMode == 3)  // Di-Muon TTree Production
+  {
+    for(unsigned int i_dimuon = 0; i_dimuon < mDiMuonContainer->get_nDiMuons(); ++i_dimuon) 
+    {
+      float InvMass = -999.0;
+      DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
+      InvMass = dimuon->get_mass();
+
+      mRecoEPHistoManager->fillHist_DiMuonSpec(InvMass,cent20);
+    }
+
+    // mRecoEventPlane->clearRawBbcEventPlane();
+    // mRecoEventPlane->clearReCenterBbcEventPlane();
+  }
 
   return EVENT_OK;
 }
@@ -434,6 +472,10 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
     mRecoEPHistoManager->writeHist_BbcShiftEP();
     mRecoEPProManager->writePro_BbcResolution();
   }
+  if(mMode == 3)
+  {
+    mRecoEPHistoManager->writeHist_DiMuonSpec();
+  }
 
   File_mOutPut->Close();
 
@@ -443,6 +485,13 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
     mRecoEventPlane->closePro_ReCenter();
     mRecoEventPlane->closePro_Shift();
   }
+  /*
+  if(mMode == 3) 
+  {
+    mRecoEventPlane->closePro_ReCenter();
+    mRecoEventPlane->closePro_Shift();
+  }
+  */
 
   return EVENT_OK;
 }
@@ -474,6 +523,13 @@ int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
   if( !mVtxOut )
   {
     std::cout<<"can't find VtxOut "<<std::endl;
+    return DISCARDEVENT;
+  }
+
+  mDiMuonContainer = findNode::getClass<DiMuonContainer>(topNode,"DiMuonContainer");
+  if( !mDiMuonContainer )
+  {
+    std::cout<<"can't find DiMuonContainer "<<std::endl;
     return DISCARDEVENT;
   }
 
