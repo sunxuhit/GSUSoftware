@@ -75,9 +75,9 @@ class PhVecMesonMaker: public SubsysReco {
     std::string mOutPutFile;
 
     // utilities
-    int getNodes(PHCompositeNode *topNode); // extract nodes needed for analysis
-    bool isMinimumBias(); // minimum bias trigger
-    bool isMinimumBiasNarrowVtx(); // minimum bias trigger with narrow vertex
+    int getNodes(PHCompositeNode *topNode, int mode); // extract nodes needed for analysis
+    bool isMinimumBias(int mode); // minimum bias trigger
+    bool isMinimumBiasNarrowVtx(int mode); // minimum bias trigger with narrow vertex
 
     RecoEPHistoManager *mRecoEPHistoManager;
     RecoEPProManager *mRecoEPProManager;

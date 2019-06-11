@@ -119,17 +119,17 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   mNumOfEvents = 0; // number of events
 
   mRecoEPUtility      = new RecoEPUtility(); // initialize utilities
-  mRecoEventPlane     = new RecoEventPlane(); // initialize utilities
   mRecoEPUtility->initRunIndex();
-  mRecoEPUtility->initBBC();
+  mRecoEventPlane     = new RecoEventPlane(); // initialize event plane
   mRecoEPHistoManager = new RecoEPHistoManager(); // initialize histograms
-  mRecoEPHistoManager->initQA_Global();
   mRecoEPProManager   = new RecoEPProManager(); // initialize histograms
 
   if(mMode == 0) // fill re-center parameters & raw event plane
   {
     cout << "fill re-center parameters & raw event plane!" << endl;
+    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
+    mRecoEPHistoManager->initQA_Global();
     mRecoEPHistoManager->initHist_BbcRawEP();
     mRecoEPHistoManager->initHist_BbcRawQVector();
     mRecoEPProManager->initPro_BbcReCenter();
@@ -150,6 +150,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   if(mMode == 1) // fill shift parameters & re-centered event plane
   {
     cout << "fill shift parameters & re-centered event plane!" << endl;
+    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEventPlane->initReCenterBbcEventPlane();
     bool isReCenter = mRecoEventPlane->readPro_ReCenter();
@@ -158,6 +159,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
       cout << "Could NOT find the re-center parameters! & drop the run!" << endl;
       return ABORTRUN;
     }
+    mRecoEPHistoManager->initQA_Global();
     mRecoEPHistoManager->initHist_BbcReCenterEP();
     mRecoEPHistoManager->initHist_BbcReCenterQVector();
     mRecoEPProManager->initPro_BbcShift();
@@ -165,6 +167,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   if(mMode == 2) // calculate resolution & fill shifted event plane
   {
     cout << "calculate resolution & fill shifted event plane!" << endl;
+    mRecoEPUtility->initBBC();
     mRecoEventPlane->initRawBbcEventPlane();
     mRecoEventPlane->initReCenterBbcEventPlane();
     bool isReCenter = mRecoEventPlane->readPro_ReCenter();
@@ -179,28 +182,14 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
       cout << "Could NOT find the shift parameters! & drop the run!" << endl;
       return ABORTRUN;
     }
+    mRecoEPHistoManager->initQA_Global();
     mRecoEPHistoManager->initHist_BbcShiftEP();
     mRecoEPProManager->initPro_BbcResolution();
   }
   if(mMode == 3) // generate DiMuon TTree
   {
     cout << "Produce Di-Muon TTree!" << endl;
-    /*
-    mRecoEventPlane->initRawBbcEventPlane();
-    mRecoEventPlane->initReCenterBbcEventPlane();
-    bool isReCenter = mRecoEventPlane->readPro_ReCenter();
-    if(!isReCenter) 
-    {
-      cout << "Could NOT find the re-center parameters! & drop the run!" << endl;
-      return ABORTRUN;
-    }
-    bool isShift = mRecoEventPlane->readPro_Shift();
-    if(!isShift) 
-    {
-      cout << "Could NOT find the shift parameters! & drop the run!" << endl;
-      return ABORTRUN;
-    }
-    */
+    mRecoEPHistoManager->initQA_Global();
     mRecoEPHistoManager->initHist_DiMuonSpec();
   }
 
@@ -255,74 +244,79 @@ int PhVecMesonMaker::InitRun(PHCompositeNode *topNode)
 
 int PhVecMesonMaker::process_event(PHCompositeNode *topNode) 
 {
-  if( getNodes(topNode) == DISCARDEVENT ) return DISCARDEVENT;
+  if( getNodes(topNode,mMode) == DISCARDEVENT ) return DISCARDEVENT;
 
   mNumOfEvents++;
   // if(mNumOfEvents%1000 == 0) cout << "processing events:  " << mNumOfEvents << "/" << 10000 << endl;
   if(mNumOfEvents%10000 == 0) cout << "processing events:  " << mNumOfEvents << endl;
   // if(mNumOfEvents > 100) return ABORTRUN;
 
-  // float zdc1 = mPHGlobal->getZdcEnergyN();
-  // float zdc2 = mPHGlobal->getZdcEnergyS();
-  // float zdcz = mPHGlobal->getZdcZVertex();
-  // bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
-  // if (!isZDCOK) return DISCARDEVENT;
+  float centrality = -1;
 
-  // float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  if(mMode < 3)
+  {
+    centrality = mPHGlobal->getCentrality();
+  }
+  if(mMode == 3)
+  {
+    centrality = mDiMuonContainer->get_Evt_Cent();
+  }
 
-  float centrality = mPHGlobal->getCentrality();
-  float zdcz = mPHGlobal->getZdcZVertex();
-  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  float zdcz = mVtxOut->get_ZdcVertex();
+  float vtx_bbcz = mVtxOut->get_BbcVertex();
+  if(mMode == 3) zdcz = mDiMuonContainer->get_Evt_bbcZ();
 
-  if(isMinimumBias()) // fill QA for minium bias trigger
+  if(isMinimumBias(mMode)) // fill QA for minium bias trigger
   {
     mRecoEPHistoManager->fillQA_Global_MiniBias(mRunIndex,zdcz,vtx_bbcz,centrality);
   }
 
-  if( !isMinimumBiasNarrowVtx() ) return DISCARDEVENT; // select events wth minimum bias trigger & narrow vertex cut
+  if( !isMinimumBiasNarrowVtx(mMode) ) return DISCARDEVENT; // select events wth minimum bias trigger & narrow vertex cut
   if(centrality < 0) return DISCARDEVENT; // remove no ZDC coincidence events
   mRecoEPHistoManager->fillQA_Global_NarrowVtx(mRunIndex,zdcz,vtx_bbcz,centrality);
 
   if ( vtx_bbcz >= mBbczCut_val || vtx_bbcz <= -1.0*(mBbczCut_val)) return DISCARDEVENT; // apply bbc cuts
   mRecoEPHistoManager->fillQA_Global_NarrowVtxBbc(mRunIndex,zdcz,vtx_bbcz,centrality);
 
-  // calculate raw Q-Vector for BBC
-  for (int i_pmt=0; i_pmt<128; i_pmt++) 
-  {
-    short adc = mBbcRaw->get_Adc(i_pmt);
-    short tdc = mBbcRaw->get_Tdc0(i_pmt);
-    float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
-    float charge = mBbcCalib->getCharge(i_pmt, adc);
-    float bbcx = mBbcGeo->getX(i_pmt);
-    float bbcy = mBbcGeo->getY(i_pmt);
-
-    if(time0 > 0 && charge > 0)
-    {
-      const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
-      const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
-      const float weight_BbcEP = charge_recalib*phi_weight; // charge recalibration & phi-weight correction
-
-      for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
-      {
-	if(i_pmt < 64)
-	{ // south
-	  mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
-	  // mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge,i_order); // try to re-produce Takashi's results
-	}
-	else
-	{ // north
-	  mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
-	  // mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge,i_order); // try to re-produce Takashi's results
-	}
-      }
-    }
-  }
-
   const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
   // const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
   // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
   const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
   // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", vtx4 = " << vtx4 << endl;
+
+  if(mMode < 3)
+  { // calculate raw Q-Vector for BBC
+    for (int i_pmt=0; i_pmt<128; i_pmt++) 
+    {
+      short adc = mBbcRaw->get_Adc(i_pmt);
+      short tdc = mBbcRaw->get_Tdc0(i_pmt);
+      float time0 = mBbcCalib->getHitTime0(i_pmt, tdc, adc);
+      float charge = mBbcCalib->getCharge(i_pmt, adc);
+      float bbcx = mBbcGeo->getX(i_pmt);
+      float bbcy = mBbcGeo->getY(i_pmt);
+
+      if(time0 > 0 && charge > 0)
+      {
+	const float charge_recalib = mRecoEPUtility->get_recal_charge(i_pmt,mRunId,adc);
+	const float phi_weight = mRecoEPUtility->get_phiweight_correction(i_pmt,mRunId,centrality);
+	const float weight_BbcEP = charge_recalib*phi_weight; // charge recalibration & phi-weight correction
+
+	for(int i_order = 0; i_order < 3; ++i_order) // 0 for 1st, 1 for 2nd, 2 for 3rd
+	{
+	  if(i_pmt < 64)
+	  { // south
+	    mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,weight_BbcEP,i_order);
+	    // mRecoEventPlane->addQVectorRaw_BbcSouth(bbcx,bbcy,charge,i_order); // try to re-produce Takashi's results
+	  }
+	  else
+	  { // north
+	    mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,weight_BbcEP,i_order);
+	    // mRecoEventPlane->addQVectorRaw_BbcNorth(bbcx,bbcy,charge,i_order); // try to re-produce Takashi's results
+	  }
+	}
+      }
+    }
+  }
 
   if(mMode == 0)  // fill re-center & raw event plane
   {
@@ -496,27 +490,13 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
   return EVENT_OK;
 }
 
-int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
+int PhVecMesonMaker::getNodes(PHCompositeNode *topNode, int mode)
 {
-  mPHGlobal = findNode::getClass<PHGlobal>(topNode,"PHGlobal");
-  if( !mPHGlobal )
-  {
-    std::cout<<"can't find PHGlobal "<<std::endl;
-    return DISCARDEVENT;
-  }
-
   mTrigLvl1 = findNode::getClass<TrigLvl1>(topNode, "TrigLvl1");
   if( !mTrigLvl1 )
   {
     std::cout << PHWHERE << "can't find TrigLvl1 Node" << std::endl;
     return DISCARDEVENT;;//exit(1);
-  }
-
-  mBbcRaw = findNode::getClass<BbcRaw>(topNode,"BbcRaw");
-  if (!mBbcRaw)
-  {
-    std::cout << PHWHERE << "Could not find BbcRaw !" << std::endl;
-    return DISCARDEVENT;
   }
 
   mVtxOut = findNode::getClass<VtxOut>(topNode,"VtxOut");
@@ -526,17 +506,37 @@ int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
     return DISCARDEVENT;
   }
 
-  mDiMuonContainer = findNode::getClass<DiMuonContainer>(topNode,"DiMuonContainer");
-  if( !mDiMuonContainer )
+  if(mode < 3) // for event plane
   {
-    std::cout<<"can't find DiMuonContainer "<<std::endl;
-    return DISCARDEVENT;
+    mPHGlobal = findNode::getClass<PHGlobal>(topNode,"PHGlobal");
+    if( !mPHGlobal )
+    {
+      std::cout<<"can't find PHGlobal "<<std::endl;
+      return DISCARDEVENT;
+    }
+
+    mBbcRaw = findNode::getClass<BbcRaw>(topNode,"BbcRaw");
+    if (!mBbcRaw)
+    {
+      std::cout << PHWHERE << "Could not find BbcRaw !" << std::endl;
+      return DISCARDEVENT;
+    }
+  }
+
+  if(mode == 3) // for di-muon TTree production
+  {
+    mDiMuonContainer = findNode::getClass<DiMuonContainer>(topNode,"DiMuonContainer");
+    if( !mDiMuonContainer )
+    {
+      std::cout<<"can't find DiMuonContainer "<<std::endl;
+      return DISCARDEVENT;
+    }
   }
 
   return EVENT_OK;
 }
 
-bool PhVecMesonMaker::isMinimumBias()
+bool PhVecMesonMaker::isMinimumBias(int mode)
 {
   // Au+Au @ Run14 trigger selection
   // const unsigned int BBCLL1_narrowvtx = 0x00000010; // 4 - BBCLL1(>1 tubes) narrowvtx
@@ -547,20 +547,25 @@ bool PhVecMesonMaker::isMinimumBias()
   trigscaled_on = mTrigLvl1->get_lvl1_trigscaled_bit(TRIGGERBIT);
   // cout << "TRIGGERBIT = " << TRIGGERBIT << ", trigscaled_on = " << trigscaled_on << endl;
 
-  // ZDC coincidence
-  float zdc1 = mPHGlobal->getZdcEnergyN();
-  float zdc2 = mPHGlobal->getZdcEnergyS();
-  float zdcz = mPHGlobal->getZdcZVertex();
-  bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
-
   // BBC vertex cut
-  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  float vtx_bbcz = mVtxOut->get_BbcVertex();
   bool isBbcOK = fabs(vtx_bbcz) < 30;
 
-  return trigscaled_on && isZDCOK && isBbcOK;
+  if(mode < 3) // temp fix
+  {
+    // ZDC coincidence
+    float zdc1 = mPHGlobal->getZdcEnergyN();
+    float zdc2 = mPHGlobal->getZdcEnergyS();
+    float zdcz = mPHGlobal->getZdcZVertex();
+    bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
+
+    return trigscaled_on && isZDCOK && isBbcOK;
+  }
+
+  return trigscaled_on && isBbcOK;
 }
 
-bool PhVecMesonMaker::isMinimumBiasNarrowVtx()
+bool PhVecMesonMaker::isMinimumBiasNarrowVtx(int mode)
 {
   // Au+Au @ Run14 trigger selection
   // const unsigned int BBCLL1_narrowvtx = 0x00000010; // 4 - BBCLL1(>1 tubes) narrowvtx
@@ -572,15 +577,20 @@ bool PhVecMesonMaker::isMinimumBiasNarrowVtx()
   trigscaled_on = mTrigLvl1->get_lvl1_trigscaled_bit(TRIGGERBIT);
   // cout << "TRIGGERBIT = " << TRIGGERBIT << ", trigscaled_on = " << trigscaled_on << endl;
 
-  // ZDC coincidence
-  float zdc1 = mPHGlobal->getZdcEnergyN();
-  float zdc2 = mPHGlobal->getZdcEnergyS();
-  float zdcz = mPHGlobal->getZdcZVertex();
-  bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
-
   // BBC vertex cut
-  float vtx_bbcz = mPHGlobal->getBbcZVertex();
+  float vtx_bbcz = mVtxOut->get_BbcVertex();
   bool isBbcOK = fabs(vtx_bbcz) < 30;
 
-  return trigscaled_on && isZDCOK && isBbcOK;
+  if(mode < 3)
+  {
+    // ZDC coincidence
+    float zdc1 = mPHGlobal->getZdcEnergyN();
+    float zdc2 = mPHGlobal->getZdcEnergyS();
+    float zdcz = mPHGlobal->getZdcZVertex();
+    bool isZDCOK = (zdc1>0 && zdc2>0 && zdcz > -9000);
+
+    return trigscaled_on && isZDCOK && isBbcOK;
+  }
+
+  return trigscaled_on && isBbcOK;
 }

@@ -136,6 +136,8 @@ class RecoEPHistoManager : public TObject
     // DiMuon Spectra
     TH1F *h_mDiMuonSpec_South[vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mDiMuonSpec_North[vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mDiMuonInteSpec_South;
+    TH1F *h_mDiMuonInteSpec_North;
 
     ClassDef(RecoEPHistoManager,1)
 };
