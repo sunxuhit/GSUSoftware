@@ -220,7 +220,7 @@ float RecoEPUtility::get_recal_charge(int PmtIndx, int run_num, int ADC)
 
 bool RecoEPUtility::read_in_phiweight_corrections()
 {
-  TOAD toad_loader("PhVecMesonMaker");
+  TOAD toad_loader("PhEventPlaneMaker");
   std::string inputfile = toad_loader.location("BbcPhiWeightCorrection.txt");
   std::cout << "inputfile = " << inputfile.c_str() << std::endl;
   std::ifstream read_correction ( inputfile.c_str() );
