@@ -108,6 +108,8 @@ void processQA_MPPC_TDC(const int runID = 649)
   TH2D *h_mRingImage_on = new TH2D("h_mRingImage_on","h_mRingImage_on",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_before = new TH2D("h_mRingImage_before","h_mRingImage_before",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_after = new TH2D("h_mRingImage_after","h_mRingImage_after",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH1D *h_mNumOfPhotons = new TH1D("h_mNumOfPhotons","h_mNumOfPhotons",100,-0.5,99.5);
+
   TH2D *h_mRingImage_Display1 = new TH2D("h_mRingImage_Display1","h_mRingImage_Display1",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_Display2 = new TH2D("h_mRingImage_Display2","h_mRingImage_Display2",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_Display3 = new TH2D("h_mRingImage_Display3","h_mRingImage_Display3",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
@@ -149,6 +151,7 @@ void processQA_MPPC_TDC(const int runID = 649)
       continue;
     }
 
+    int NumOfPhotons = 0;
     for(unsigned int i_photon = 0; i_photon < tNedge; ++i_photon)
     {
       int slot = tSlot[i_photon];
@@ -176,6 +179,7 @@ void processQA_MPPC_TDC(const int runID = 649)
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop) // MPPC
       {
 	h_mRingImage_on->Fill(pixel_x,pixel_y);
+	NumOfPhotons++;
 	if(i_event == 1024) h_mRingImage_Display1->Fill(pixel_x,pixel_y);
 	if(i_event == 2048) h_mRingImage_Display2->Fill(pixel_x,pixel_y);
 	if(i_event == 4096) h_mRingImage_Display3->Fill(pixel_x,pixel_y);
@@ -188,6 +192,10 @@ void processQA_MPPC_TDC(const int runID = 649)
       {
 	h_mRingImage_before->Fill(pixel_x,pixel_y);
       }
+    }
+    if(NumOfPhotons > 0)
+    {
+      h_mNumOfPhotons->Fill(NumOfPhotons);
     }
 
     for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x) // fill time duration
@@ -237,6 +245,7 @@ void processQA_MPPC_TDC(const int runID = 649)
   h_mRingImage_on->Write();
   h_mRingImage_before->Write();
   h_mRingImage_after->Write();
+  h_mNumOfPhotons->Write();
   h_mRingImage_Display1->Write();
   h_mRingImage_Display2->Write();
   h_mRingImage_Display3->Write();

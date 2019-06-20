@@ -7,6 +7,7 @@
 #include <TTree.h>
 #include <TCanvas.h>
 #include <TEllipse.h>
+#include <TLegend.h>
 #include "../../../draw.h"
 
 void plotQA_MPPC_SigConfigPositionScan(const int runID = 649)
@@ -60,6 +61,10 @@ void plotQA_MPPC_SigConfigPositionScan(const int runID = 649)
   TH3D *h_mTdcTimeRadius;
   if(mode == "Calibration") h_mTdcTimeRadius = (TH3D*)File_InPut->Get("h_mTdcTimeRadius")->Clone();
 
+  TH1D *h_mNumOfPhotons = (TH1D*)File_InPut->Get("h_mNumOfPhotons")->Clone();
+  float NumOfEvents = h_mNumOfPhotons->GetEntries();
+  cout << "NumOfEvents = " << NumOfEvents << endl;
+
   TCanvas *c_SigConfig = new TCanvas("c_SigConfig","c_SigConfig",10,10,1200,400);
   c_SigConfig->Divide(3,1);
   for(int i_pad = 0; i_pad < 3; ++i_pad)
@@ -103,10 +108,18 @@ void plotQA_MPPC_SigConfigPositionScan(const int runID = 649)
   TH1D *h_mTime_OnBeam = (TH1D*)h_mTdcTime_OnBeam->ProjectionY("h_mTime_OnBeam",bin_OnBeam_Start,bin_OnBeam_Stop)->Clone("h_mTime_OnBeam");
   h_mTime_OnBeam->SetTitle("Time Duration On Beam");
   h_mTime_OnBeam->SetStats(0);
-  h_mTime_OnBeam->GetXaxis()->SetTitle("time duration");
+  h_mTime_OnBeam->GetXaxis()->SetTitle("time duration (ns)");
   h_mTime_OnBeam->GetXaxis()->CenterTitle();
   h_mTime_OnBeam->SetLineColor(2);
-  h_mTime_OnBeam->Draw();
+  h_mTime_OnBeam->SetLineWidth(2);
+  h_mTime_OnBeam->Scale(1.0/NumOfEvents);
+  h_mTime_OnBeam->DrawCopy("h");
+  TLegend *leg_onbeam = new TLegend(0.45,0.7,0.85,0.8);
+  leg_onbeam->SetBorderSize(0);
+  leg_onbeam->SetFillColor(0);
+  leg_onbeam->AddEntry(h_mTime_OnBeam,"photons on beam","l");
+  leg_onbeam->Draw("same");
+
 
   c_SigConfig->cd(3);
   int bin_OffBeam_Start = h_mTdcTime_OffBeam->GetXaxis()->FindBin(tdc_Start);
@@ -114,11 +127,61 @@ void plotQA_MPPC_SigConfigPositionScan(const int runID = 649)
   TH1D *h_mTime_OffBeam = (TH1D*)h_mTdcTime_OffBeam->ProjectionY("h_mTime_OffBeam",bin_OffBeam_Start,bin_OffBeam_Stop)->Clone("h_mTime_OffBeam");
   h_mTime_OffBeam->SetTitle("Time Duration Off Beam");
   h_mTime_OffBeam->SetStats(0);
-  h_mTime_OffBeam->GetXaxis()->SetTitle("time duration");
+  h_mTime_OffBeam->GetXaxis()->SetTitle("time duration (ns)");
   h_mTime_OffBeam->GetXaxis()->CenterTitle();
   h_mTime_OffBeam->SetLineColor(1);
-  h_mTime_OffBeam->Draw();
+  h_mTime_OffBeam->SetLineWidth(2);
+  h_mTime_OffBeam->Scale(1.0/NumOfEvents);
+  h_mTime_OffBeam->DrawCopy("h");
+  TLegend *leg_offbeam = new TLegend(0.45,0.7,0.85,0.8);
+  leg_offbeam->SetBorderSize(0);
+  leg_offbeam->SetFillColor(0);
+  leg_offbeam->AddEntry(h_mTime_OffBeam,"photons off beam","l");
+  leg_offbeam->Draw("same");
 
-  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_SigConfigPositionScan_MPPC_%d.eps",mode.c_str(),runID);
+  // string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_SigConfigPositionScan_MPPC_%d.eps",runID);
+  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_SigConfigPositionScan_MPPC_%d.png",runID);
   c_SigConfig->SaveAs(c_ringimage.c_str());
+
+  TCanvas *c_SigConfigSum = new TCanvas("c_SigConfigSum","c_SigConfigSum",10,10,800,400);
+  c_SigConfigSum->Divide(2,1);
+  for(int i_pad = 0; i_pad < 2; ++i_pad)
+  {
+    c_SigConfigSum->cd(i_pad+1)->SetLeftMargin(0.15);
+    c_SigConfigSum->cd(i_pad+1)->SetBottomMargin(0.15);
+    c_SigConfigSum->cd(i_pad+1)->SetRightMargin(0.15);
+    c_SigConfigSum->cd(i_pad+1)->SetTicks(1,1);
+    c_SigConfigSum->cd(i_pad+1)->SetGrid(0,0);
+  }
+
+  c_SigConfigSum->cd(1);
+  h_mRingImage_on->Draw("colz");
+
+  // plot beam spot
+  PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+  PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+
+  // plot off spot
+  PlotLine(off_x_start-0.5,off_x_start-0.5,off_y_start-0.5,off_y_stop+0.5,1,5,2);
+  PlotLine(off_x_stop+0.5,off_x_stop+0.5,off_y_start-0.5,off_y_stop+0.5,1,5,2);
+  PlotLine(off_x_start-0.5,off_x_stop+0.5,off_y_start-0.5,off_y_start-0.5,1,5,2);
+  PlotLine(off_x_start-0.5,off_x_stop+0.5,off_y_stop+0.5,off_y_stop+0.5,1,5,2);
+
+  c_SigConfigSum->cd(2);
+  h_mTime_OnBeam->SetTitle("");
+  // h_mTime_OnBeam->GetYaxis()->SetRangeUser(0.0,0.080);
+  h_mTime_OnBeam->DrawCopy("h");
+  h_mTime_OffBeam->DrawCopy("h same");
+  TLegend *leg = new TLegend(0.45,0.5,0.85,0.7);
+  leg->SetBorderSize(0);
+  leg->SetFillColor(0);
+  leg->AddEntry(h_mTime_OnBeam,"photons on beam","l");
+  leg->AddEntry(h_mTime_OffBeam,"photons off beam","l");
+  leg->Draw("same");
+
+  // string FigNameSum = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_SigConfigSumPositionScan_PMT_%d.eps",runID);
+  string FigNameSum = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_SigConfigSumPositionScan_PMT_%d.png",runID);
+  c_SigConfigSum->SaveAs(FigNameSum.c_str());
 }

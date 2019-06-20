@@ -132,6 +132,8 @@ void processQA_PMT_TDC(const int runID = 182)
   InitDisplay_mRICH();
 
   int const NumOfPixel = 33;
+  const double Pixels[NumOfPixel+1] = {-50.5,-47.5,-44.5,-41.5,-38.5,-35.5,-32.5,-29.5,-26.5,-23.5,-20.5,-17.5,-14.5,-11.5,-8.5,-5.5,-2.5,2.5,5.5,8.5,11.5,14.5,17.5,20.5,23.5,26.5,29.5,32.5,35.5,38.5,41.5,44.5,47.5,50.5};
+
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/tdc/richTDC_run%d/sspRich.root",runID);
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
@@ -151,9 +153,17 @@ void processQA_PMT_TDC(const int runID = 182)
   TH2D *h_mRingImage_on = new TH2D("h_mRingImage_on","h_mRingImage_on",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_before = new TH2D("h_mRingImage_before","h_mRingImage_before",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_after = new TH2D("h_mRingImage_after","h_mRingImage_after",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+  TH1D *h_mNumOfPhotons = new TH1D("h_mNumOfPhotons","h_mNumOfPhotons",100,-0.5,99.5);
+
+  //---------------------ring display------------------------- 
   TH2D *h_mRingImage_Display1 = new TH2D("h_mRingImage_Display1","h_mRingImage_Display1",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_Display2 = new TH2D("h_mRingImage_Display2","h_mRingImage_Display2",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
   TH2D *h_mRingImage_Display3 = new TH2D("h_mRingImage_Display3","h_mRingImage_Display3",NumOfPixel,-0.5,32.5,NumOfPixel,-0.5,32.5);
+
+  TH2D *h_mRingFinder1 = new TH2D("h_mRingFinder1","h_mRingFinder1",NumOfPixel,Pixels,NumOfPixel,Pixels);
+  TH2D *h_mRingFinder2 = new TH2D("h_mRingFinder2","h_mRingFinder2",NumOfPixel,Pixels,NumOfPixel,Pixels);
+  TH2D *h_mRingFinder3 = new TH2D("h_mRingFinder3","h_mRingFinder3",NumOfPixel,Pixels,NumOfPixel,Pixels);
+  //---------------------------------------------------------- 
 
   TH2D *h_mTdcTime_OnBeam = new TH2D("h_mTdcTime_OnBeam","h_mTdcTime_OnBeam",4000,-0.5,3999.5,150,-0.5,149.5);
   TH2D *h_mTdcTime_OffBeam = new TH2D("h_mTdcTime_OffBeam","h_mTdcTime_OffBeam",4000,-0.5,3999.5,150,-0.5,149.5);
@@ -191,6 +201,7 @@ void processQA_PMT_TDC(const int runID = 182)
       continue;
     }
 
+    int NumOfPhotons = 0;
     for(unsigned int i_photon = 0; i_photon < tNedge; ++i_photon)
     {
       int slot = tSlot[i_photon];
@@ -218,9 +229,28 @@ void processQA_PMT_TDC(const int runID = 182)
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Start && tTime[i_photon] < tdc_Stop)
       {
 	h_mRingImage_on->Fill(pixel_x,pixel_y);
-	if(i_event == 1024) h_mRingImage_Display1->Fill(pixel_x,pixel_y);
-	if(i_event == 2048) h_mRingImage_Display2->Fill(pixel_x,pixel_y);
-	if(i_event == 4096) h_mRingImage_Display3->Fill(pixel_x,pixel_y);
+	NumOfPhotons++;
+	if(i_event == 4096) 
+	{
+	  h_mRingImage_Display1->Fill(pixel_x,pixel_y);
+	  float out_x = findPixelCoord(pixel_x);
+	  float out_y = findPixelCoord(pixel_y);
+	  h_mRingFinder1->Fill(out_x,out_y);
+	}
+	if(i_event == 1024) 
+	{
+	  h_mRingImage_Display2->Fill(pixel_x,pixel_y);
+	  float out_x = findPixelCoord(pixel_x);
+	  float out_y = findPixelCoord(pixel_y);
+	  h_mRingFinder2->Fill(out_x,out_y);
+	}
+	if(i_event == 18134) 
+	{
+	  h_mRingImage_Display3->Fill(pixel_x,pixel_y);
+	  float out_x = findPixelCoord(pixel_x);
+	  float out_y = findPixelCoord(pixel_y);
+	  h_mRingFinder3->Fill(out_x,out_y);
+	}
       }
       if(tPolarity[i_photon] == pol && tTime[i_photon] > tdc_Stop)
       {
@@ -230,6 +260,10 @@ void processQA_PMT_TDC(const int runID = 182)
       {
 	h_mRingImage_before->Fill(pixel_x,pixel_y);
       }
+    }
+    if(NumOfPhotons > 0)
+    {
+      h_mNumOfPhotons->Fill(NumOfPhotons);
     }
 
     for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x) // fill time duration
@@ -279,9 +313,15 @@ void processQA_PMT_TDC(const int runID = 182)
   h_mRingImage_on->Write();
   h_mRingImage_before->Write();
   h_mRingImage_after->Write();
+  h_mNumOfPhotons->Write();
+
   h_mRingImage_Display1->Write();
   h_mRingImage_Display2->Write();
   h_mRingImage_Display3->Write();
+  h_mRingFinder1->Write();
+  h_mRingFinder2->Write();
+  h_mRingFinder3->Write();
+
   h_mTdcTime_OnBeam->Write();
   h_mTdcTime_OffBeam->Write();
   if(mode == "Calibration")

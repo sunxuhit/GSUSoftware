@@ -8,6 +8,7 @@
 
 void plotQA_MPPC_RingImage(const int runID = 649)
 {
+  gStyle->SetPalette(kRainBow);
   string mode = "Calibration";
   if(runID >= 665 && runID <= 673) mode = "PositionScan";
 
@@ -104,7 +105,8 @@ void plotQA_MPPC_RingImage(const int runID = 649)
   h_mRingImage_after->GetYaxis()->CenterTitle();
   h_mRingImage_after->Draw("colz");
 
-  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_RingImage_MPPC_%d.eps",mode.c_str(),runID);
+  // string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_RingImage_MPPC_%d.eps",runID);
+  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_RingImage_MPPC_%d.png",runID);
   c_RingImage->SaveAs(c_ringimage.c_str());
 
   TCanvas *c_RingImage_Display = new TCanvas("c_RingImage_Display","c_RingImage_Display",10,10,800,800);
@@ -180,6 +182,7 @@ void plotQA_MPPC_RingImage(const int runID = 649)
   PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
   PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
 
-  string c_ringimage_display = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_RingImageDisplay_MPPC_%d.eps",mode.c_str(),runID);
+  // string c_ringimage_display = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_RingImageDisplay_MPPC_%d.eps",runID);
+  string c_ringimage_display = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/SiPM/c_RingImageDisplay_MPPC_%d.png",runID);
   c_RingImage_Display->SaveAs(c_ringimage_display.c_str());
 }

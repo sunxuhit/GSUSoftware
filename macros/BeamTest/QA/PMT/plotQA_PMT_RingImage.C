@@ -99,6 +99,16 @@ void plotQA_PMT_RingImage(const int runID = 182)
   TH2D *h_mRingImage_Display2 = (TH2D*)File_InPut->Get("h_mRingImage_Display2")->Clone();
   TH2D *h_mRingImage_Display3 = (TH2D*)File_InPut->Get("h_mRingImage_Display3")->Clone();
 
+  TH2D *h_mRingFinder1 = (TH2D*)File_InPut->Get("h_mRingFinder1")->Clone();
+  TH2D *h_mRingFinder2 = (TH2D*)File_InPut->Get("h_mRingFinder2")->Clone();
+  TH2D *h_mRingFinder3 = (TH2D*)File_InPut->Get("h_mRingFinder3")->Clone();
+
+  string input_gemc = "/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/Simulation/PMT/GEMC_Calibration.root";
+  TFile *File_GEMC = TFile::Open(input_gemc.c_str());
+  TH2D *h_mPhotonDist = (TH2D*)File_GEMC->Get("h_mPhotonDist")->Clone();
+  TH1D *h_mNumOfEvents = (TH1D*)File_GEMC->Get("h_mNumOfEvents")->Clone();
+  float NumOfEvents = h_mNumOfEvents->GetEntries();
+
   TCanvas *c_RingImage = new TCanvas("c_RingImage","c_RingImage",10,10,1500,500);
   c_RingImage->Divide(3,1);
   for(int i_pad = 0; i_pad < 3; ++i_pad)
@@ -145,7 +155,8 @@ void plotQA_PMT_RingImage(const int runID = 182)
   h_mRingImage_after->GetYaxis()->CenterTitle();
   h_mRingImage_after->Draw("colz");
 
-  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_RingImage_PMT_%d.eps",mode.c_str(),runID);
+  // string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_RingImage_PMT_%d.eps",runID);
+  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_RingImage_PMT_%d.png",runID);
   c_RingImage->SaveAs(c_ringimage.c_str());
 
   TCanvas *c_RingImage_Display = new TCanvas("c_RingImage_Display","c_RingImage_Display",10,10,800,800);
@@ -161,23 +172,19 @@ void plotQA_PMT_RingImage(const int runID = 182)
   }
 
   c_RingImage_Display->cd(1);
-  title = Form("%s & %1.1f < tdc < %1.1f",mode.c_str(),tdc_Start,tdc_Stop);
-  h_mRingImage_on->SetTitle(title.c_str());
-  h_mRingImage_on->SetStats(0);
-  h_mRingImage_on->GetXaxis()->SetTitle("pixel ID");
-  h_mRingImage_on->GetXaxis()->CenterTitle();
-  h_mRingImage_on->GetYaxis()->SetTitle("pixel ID");
-  h_mRingImage_on->GetYaxis()->CenterTitle();
   h_mRingImage_on->Draw("colz");
 
-  // plot beam spot
-  PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  if(mode != "MesonRun")
+  {
+    // plot beam spot
+    PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  }
 
   c_RingImage_Display->cd(2);
-  h_mRingImage_Display1->SetTitle("Single Event: 1024");
+  h_mRingImage_Display1->SetTitle("Single Event");
   h_mRingImage_Display1->SetStats(0);
   h_mRingImage_Display1->GetXaxis()->SetTitle("pixel ID");
   h_mRingImage_Display1->GetXaxis()->CenterTitle();
@@ -185,14 +192,17 @@ void plotQA_PMT_RingImage(const int runID = 182)
   h_mRingImage_Display1->GetYaxis()->CenterTitle();
   h_mRingImage_Display1->Draw("colz");
 
-  // plot beam spot
-  PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  if(mode != "MesonRun")
+  {
+    // plot beam spot
+    PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  }
 
   c_RingImage_Display->cd(3);
-  h_mRingImage_Display2->SetTitle("Single Event: 2048");
+  h_mRingImage_Display2->SetTitle("Single Event");
   h_mRingImage_Display2->SetStats(0);
   h_mRingImage_Display2->GetXaxis()->SetTitle("pixel ID");
   h_mRingImage_Display2->GetXaxis()->CenterTitle();
@@ -200,14 +210,17 @@ void plotQA_PMT_RingImage(const int runID = 182)
   h_mRingImage_Display2->GetYaxis()->CenterTitle();
   h_mRingImage_Display2->Draw("colz");
 
-  // plot beam spot
-  PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  if(mode != "MesonRun")
+  {
+    // plot beam spot
+    PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  }
 
   c_RingImage_Display->cd(4);
-  h_mRingImage_Display3->SetTitle("Single Event: 4096");
+  h_mRingImage_Display3->SetTitle("Single Event");
   h_mRingImage_Display3->SetStats(0);
   h_mRingImage_Display3->GetXaxis()->SetTitle("pixel ID");
   h_mRingImage_Display3->GetXaxis()->CenterTitle();
@@ -215,12 +228,116 @@ void plotQA_PMT_RingImage(const int runID = 182)
   h_mRingImage_Display3->GetYaxis()->CenterTitle();
   h_mRingImage_Display3->Draw("colz");
 
-  // plot beam spot
-  PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
-  PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  if(mode != "MesonRun")
+  {
+    // plot beam spot
+    PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  }
 
-  string c_ringimage_display = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_RingImageDisplay_PMT_%d.eps",mode.c_str(),runID);
+  // string c_ringimage_display = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_RingImageDisplay_PMT_%d.eps",runID);
+  string c_ringimage_display = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_RingImageDisplay_PMT_%d.png",runID);
   c_RingImage_Display->SaveAs(c_ringimage_display.c_str());
+
+  if(runID == 24)
+  {
+    TCanvas *c_RingImage_GEMC = new TCanvas("c_RingImage_GEMC","c_RingImage_GEMC",10,10,800,800);
+    c_RingImage_GEMC->Divide(2,2);
+    for(int i_pad = 0; i_pad < 4; ++i_pad)
+    {
+      c_RingImage_GEMC->cd(i_pad+1)->SetLeftMargin(0.15);
+      c_RingImage_GEMC->cd(i_pad+1)->SetBottomMargin(0.15);
+      c_RingImage_GEMC->cd(i_pad+1)->SetRightMargin(0.15);
+      c_RingImage_GEMC->cd(i_pad+1)->SetTicks(1,1);
+      c_RingImage_GEMC->cd(i_pad+1)->SetGrid(0,0);
+      // c_RingImage_Display->cd(i_pad+1)->SetLogz();
+    }
+
+    int const NumOfPixel = 33;
+    const double Pixels[NumOfPixel+1] = {-50.5,-47.5,-44.5,-41.5,-38.5,-35.5,-32.5,-29.5,-26.5,-23.5,-20.5,-17.5,-14.5,-11.5,-8.5,-5.5,-2.5,2.5,5.5,8.5,11.5,14.5,17.5,20.5,23.5,26.5,29.5,32.5,35.5,38.5,41.5,44.5,47.5,50.5};
+    float out_x_start = 0.5*(Pixels[beam_x_start]+Pixels[beam_x_start+1]);
+    float out_x_stop  = 0.5*(Pixels[beam_x_stop]+Pixels[beam_x_stop+1]);
+    float out_y_start = 0.5*(Pixels[beam_y_start]+Pixels[beam_y_start+1]);
+    float out_y_stop  = 0.5*(Pixels[beam_y_stop]+Pixels[beam_y_stop+1]);
+
+    c_RingImage_GEMC->cd(1);
+    h_mRingImage_on->Draw("colz");
+
+    if(mode != "MesonRun")
+    {
+      // plot beam spot
+      PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+      PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+      PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+      PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+    }
+
+    c_RingImage_GEMC->cd(2);
+    h_mPhotonDist->SetTitle("");
+    h_mPhotonDist->SetStats(0);
+    h_mPhotonDist->GetXaxis()->SetTitle("x (mm)");
+    h_mPhotonDist->GetXaxis()->CenterTitle();
+    h_mPhotonDist->GetYaxis()->SetTitle("y (mm)");
+    h_mPhotonDist->GetYaxis()->CenterTitle();
+    h_mPhotonDist->Scale(1.0/NumOfEvents);
+    h_mPhotonDist->SetMarkerColor(kAzure-2);
+    h_mPhotonDist->Draw("");
+
+    h_mRingFinder1->Draw("col same");
+
+    if(mode != "MesonRun")
+    {
+      // plot beam spot
+      PlotLine(out_x_start-1.5,out_x_start-1.5,out_y_start-1.5,out_y_stop+1.5,2,5,2);
+      PlotLine(out_x_stop+1.5,out_x_stop+1.5,out_y_start-1.5,out_y_stop+1.5,2,5,2);
+      PlotLine(out_x_start-1.5,out_x_stop+1.5,out_y_start-1.5,out_y_start-1.5,2,5,2);
+      PlotLine(out_x_start-1.5,out_x_stop+1.5,out_y_stop+1.5,out_y_stop+1.5,2,5,2);
+    }
+
+    c_RingImage_GEMC->cd(3);
+    h_mPhotonDist->SetTitle("");
+    h_mPhotonDist->SetStats(0);
+    h_mPhotonDist->GetXaxis()->SetTitle("x (mm)");
+    h_mPhotonDist->GetXaxis()->CenterTitle();
+    h_mPhotonDist->GetYaxis()->SetTitle("y (mm)");
+    h_mPhotonDist->GetYaxis()->CenterTitle();
+    h_mPhotonDist->Draw();
+
+    h_mRingFinder2->Draw("col same");
+
+    if(mode != "MesonRun")
+    {
+      // plot beam spot
+      PlotLine(out_x_start-1.5,out_x_start-1.5,out_y_start-1.5,out_y_stop+1.5,2,5,2);
+      PlotLine(out_x_stop+1.5,out_x_stop+1.5,out_y_start-1.5,out_y_stop+1.5,2,5,2);
+      PlotLine(out_x_start-1.5,out_x_stop+1.5,out_y_start-1.5,out_y_start-1.5,2,5,2);
+      PlotLine(out_x_start-1.5,out_x_stop+1.5,out_y_stop+1.5,out_y_stop+1.5,2,5,2);
+    }
+
+    c_RingImage_GEMC->cd(4);
+    h_mPhotonDist->SetTitle("");
+    h_mPhotonDist->SetStats(0);
+    h_mPhotonDist->GetXaxis()->SetTitle("x (mm)");
+    h_mPhotonDist->GetXaxis()->CenterTitle();
+    h_mPhotonDist->GetYaxis()->SetTitle("y (mm)");
+    h_mPhotonDist->GetYaxis()->CenterTitle();
+    h_mPhotonDist->Draw();
+
+    h_mRingFinder3->Draw("col same");
+
+    if(mode != "MesonRun")
+    {
+      // plot beam spot
+      PlotLine(out_x_start-1.5,out_x_start-1.5,out_y_start-1.5,out_y_stop+1.5,2,5,2);
+      PlotLine(out_x_stop+1.5,out_x_stop+1.5,out_y_start-1.5,out_y_stop+1.5,2,5,2);
+      PlotLine(out_x_start-1.5,out_x_stop+1.5,out_y_start-1.5,out_y_start-1.5,2,5,2);
+      PlotLine(out_x_start-1.5,out_x_stop+1.5,out_y_stop+1.5,out_y_stop+1.5,2,5,2);
+    }
+
+    // string FigName = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_RingImageGEMC_PMT_%d.eps",runID);
+    string FigName = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_RingImageGEMC_PMT_%d.png",runID);
+    c_RingImage_GEMC->SaveAs(FigName.c_str());
+  }
 }
