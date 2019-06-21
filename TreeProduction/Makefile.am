@@ -20,8 +20,7 @@ noinst_HEADERS = \
 PhVecMesonMakerLinkDef.h \
 RecoEPHistoManagerLinkDef.h \
 RecoEPProManagerLinkDef.h \
-RecoEPUtilityLinkDef.h \
-RecoEventPlaneLinkDef.h
+RecoEPUtilityLinkDef.h
 
 ##############################################
 # please add new classes in alphabetical order
@@ -32,8 +31,7 @@ pkginclude_HEADERS = \
 	RecoEPProManager.h \
 	Run14AuAuList.h \
 	PhVecMesonCons.h \
-	RecoEPUtility.h \
-	RecoEventPlane.h
+	RecoEPUtility.h
 
 ##############################################
 # please add new classes in alphabetical order
@@ -46,9 +44,7 @@ libPhVecMesonMaker_la_SOURCES = \
   RecoEPProManager_Dict.C \
   RecoEPProManager.cxx \
   RecoEPUtility_Dict.C \
-  RecoEPUtility.cxx \
-  RecoEventPlane_Dict.C \
-  RecoEventPlane.cxx
+  RecoEPUtility.cxx
 
 ##############################################
 # libraries used in the package
@@ -106,11 +102,5 @@ RecoEPUtility_Dict.C: \
 	PhVecMesonCons.h \
 	RecoEPUtility.h \
 	RecoEPUtilityLinkDef.h
-	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
-
-RecoEventPlane_Dict.C: \
-	PhVecMesonCons.h \
-	RecoEventPlane.h \
-	RecoEventPlaneLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 

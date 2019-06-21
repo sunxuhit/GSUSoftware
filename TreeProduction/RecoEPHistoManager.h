@@ -68,7 +68,7 @@ class RecoEPHistoManager : public TObject
 
     //===============di-muon spectra==============
     void initHist_DiMuonSpec();
-    void fillHist_DiMuonSpec(float invmass, int cent);
+    void fillHist_DiMuonSpec(float invmass, int cent, float pt, float rapidity);
     void writeHist_DiMuonSpec();
     //===============di-muon spectra==============
 
@@ -134,10 +134,10 @@ class RecoEPHistoManager : public TObject
     TH2F *h_mEPShift_Correlation[3][vecMesonFlow::mNumOfCentrality20];
 
     // DiMuon Spectra
-    TH1F *h_mDiMuonSpec_South[vecMesonFlow::mNumOfCentrality20];
-    TH1F *h_mDiMuonSpec_North[vecMesonFlow::mNumOfCentrality20];
-    TH1F *h_mDiMuonInteSpec_South;
-    TH1F *h_mDiMuonInteSpec_North;
+    TH1F *h_mDiMuonSpec_South[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mDiMuonSpec_North[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mDiMuonInteSpec_South[3];
+    TH1F *h_mDiMuonInteSpec_North[3];
 
     ClassDef(RecoEPHistoManager,1)
 };

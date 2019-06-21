@@ -11,7 +11,6 @@ class PHCompositeNode;
 class PHGlobal;
 class TrigLvl1;
 class RunHeader;
-class BbcRaw;
 class BbcCalib;
 class BbcGeo;
 class VtxOut;
@@ -26,7 +25,6 @@ class TProfile2D;
 class RecoEPHistoManager;
 class RecoEPProManager;
 class RecoEPUtility;
-class RecoEventPlane;
 
 class PhVecMesonMaker: public SubsysReco {
   public:
@@ -60,7 +58,6 @@ class PhVecMesonMaker: public SubsysReco {
 
     VtxOut* mVtxOut;
 
-    BbcRaw* mBbcRaw;
     BbcCalib* mBbcCalib;
     BbcGeo* mBbcGeo;
 
@@ -75,14 +72,13 @@ class PhVecMesonMaker: public SubsysReco {
     std::string mOutPutFile;
 
     // utilities
-    int getNodes(PHCompositeNode *topNode, int mode); // extract nodes needed for analysis
-    bool isMinimumBias(int mode); // minimum bias trigger
-    bool isMinimumBiasNarrowVtx(int mode); // minimum bias trigger with narrow vertex
+    int getNodes(PHCompositeNode *topNode); // extract nodes needed for analysis
+    bool isMinimumBias(); // minimum bias trigger
+    bool isMinimumBiasNarrowVtx(); // minimum bias trigger with narrow vertex
 
     RecoEPHistoManager *mRecoEPHistoManager;
     RecoEPProManager *mRecoEPProManager;
     RecoEPUtility *mRecoEPUtility;
-    RecoEventPlane *mRecoEventPlane;
 };
 
 #endif

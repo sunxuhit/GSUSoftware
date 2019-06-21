@@ -482,37 +482,54 @@ void RecoEPHistoManager::writeHist_BbcShiftEP()
 void RecoEPHistoManager::initHist_DiMuonSpec()
 {
   std::cout << "initialize Di-Muon Spectra Histograms!" << std::endl;
-  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+  for(int i_pt = 0; i_pt < 3; ++i_pt)
   {
     std::string HistName;
-    HistName = Form("h_mDiMuonSpec_South_Centrality_%d",i_cent);
-    h_mDiMuonSpec_South[i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      HistName = Form("h_mDiMuonSpec_South_Centrality_%d_pt_%d",i_cent,i_pt);
+      h_mDiMuonSpec_South[i_pt][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
 
-    HistName = Form("h_mDiMuonSpec_North_Centrality_%d",i_cent);
-    h_mDiMuonSpec_North[i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
+      HistName = Form("h_mDiMuonSpec_North_Centrality_%d_pt_%d",i_cent,i_pt);
+      h_mDiMuonSpec_North[i_pt][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
+    }
+    HistName = Form("h_mDiMuonInteSpec_South_pt_%d",i_pt);
+    h_mDiMuonInteSpec_South[i_pt] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
+    HistName = Form("h_mDiMuonInteSpec_North_pt_%d",i_pt);
+    h_mDiMuonInteSpec_North[i_pt] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
   }
-
-  h_mDiMuonInteSpec_South = new TH1F("h_mDiMuonInteSpec_South","h_mDiMuonInteSpec_South",100,0.0,5.0);
-  h_mDiMuonInteSpec_North = new TH1F("h_mDiMuonInteSpec_North","h_mDiMuonInteSpec_North",100,0.0,5.0);
 }
 
-void RecoEPHistoManager::fillHist_DiMuonSpec(float invmass, int cent)
+void RecoEPHistoManager::fillHist_DiMuonSpec(float invmass, int cent, float pt, float rapidity)
 {
-  h_mDiMuonSpec_South[cent]->Fill(invmass);
-  h_mDiMuonSpec_North[cent]->Fill(invmass);
-  h_mDiMuonInteSpec_South->Fill(invmass);
-  h_mDiMuonInteSpec_North->Fill(invmass);
+  int pt_bin = -1;
+  if(pt > 0 && pt <= 2.0) pt_bin = 0;
+  if(pt > 2.0 && pt <= 6.0) pt_bin = 1;
+  if(pt > 6.0) pt_bin = 2;
+  if(rapidity > 0 && pt > 0)
+  { // North
+    h_mDiMuonSpec_North[pt_bin][cent]->Fill(invmass);
+    h_mDiMuonInteSpec_North[pt_bin]->Fill(invmass);
+  }
+  if(rapidity < 0 && pt > 0)
+  { // South
+    h_mDiMuonSpec_South[pt_bin][cent]->Fill(invmass);
+    h_mDiMuonInteSpec_South[pt_bin]->Fill(invmass);
+  }
 }
 
 void RecoEPHistoManager::writeHist_DiMuonSpec()
 {
-  for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+  for(int i_pt = 0; i_pt < 3; ++i_pt)
   {
-    h_mDiMuonSpec_South[i_cent]->Write();
-    h_mDiMuonSpec_North[i_cent]->Write();
+    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
+    {
+      h_mDiMuonSpec_South[i_pt][i_cent]->Write();
+      h_mDiMuonSpec_North[i_pt][i_cent]->Write();
+    }
+    h_mDiMuonInteSpec_South[i_pt]->Write();
+    h_mDiMuonInteSpec_North[i_pt]->Write();
   }
-  h_mDiMuonInteSpec_South->Write();
-  h_mDiMuonInteSpec_North->Write();
 }
 //===============Shift BBC Event Plane=========================
 
