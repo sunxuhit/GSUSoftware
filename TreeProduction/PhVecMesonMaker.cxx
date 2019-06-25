@@ -27,6 +27,9 @@
 #include <DiMuonContainer.h>
 #include <DiMuon.h>
 
+#include "ReactionPlaneObject.h"
+#include "ReactionPlaneSngl.h"
+
 //stl
 #include <iostream>
 #include <ostream>
@@ -124,6 +127,8 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
     cout << "Produce Di-Muon TTree!" << endl;
     mRecoEPHistoManager->initQA_Global();
     mRecoEPHistoManager->initHist_DiMuonSpec();
+    mRecoEPHistoManager->initHist_BbcShiftEP();
+    mRecoEPProManager->initPro_BbcResolution();
   }
 
   return EVENT_OK;
@@ -209,6 +214,17 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
   if(mMode == 0)  // Di-Muon TTree Production
   {
+    for(int i_order = 0; i_order < 3; ++i_order) // Event Plane QA
+    {
+      mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, i_order));
+      float Psi_BbcSouth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
+      mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 1, i_order));
+      float Psi_BbcNorth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
+      mRecoEPHistoManager->fillHist_BbcShiftEP(Psi_BbcSouth,Psi_BbcNorth,i_order,cent20);
+      mRecoEPProManager->fillPro_BbcResolution(Psi_BbcSouth,Psi_BbcNorth,i_order,mRunIndex,cent20);
+    }
+
+    // di-muon spectra
     for(unsigned int i_dimuon = 0; i_dimuon < mDiMuonContainer->get_nDiMuons(); ++i_dimuon) 
     {
       DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
@@ -231,6 +247,8 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
   if(mMode == 0)
   {
     mRecoEPHistoManager->writeHist_DiMuonSpec();
+    mRecoEPHistoManager->writeHist_BbcShiftEP();
+    mRecoEPProManager->writePro_BbcResolution();
   }
 
   File_mOutPut->Close();
@@ -266,6 +284,13 @@ int PhVecMesonMaker::getNodes(PHCompositeNode *topNode)
   {
     std::cout<<"can't find DiMuonContainer "<<std::endl;
     return DISCARDEVENT;
+  }
+
+  mReactionPlaneObject = findNode::getClass<ReactionPlaneObject>(topNode, "ReactionPlaneObject");
+  if( !mReactionPlaneObject )
+  {
+    std::cout<<"can't find ReactionPlaneObject "<<std::endl;
+    return DISCARDEVENT;//exit(1);
   }
 
   return EVENT_OK;

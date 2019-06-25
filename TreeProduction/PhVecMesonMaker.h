@@ -15,6 +15,8 @@ class BbcCalib;
 class BbcGeo;
 class VtxOut;
 class DiMuonContainer;
+class ReactionPlaneObject;
+class ReactionPlaneSngl;
 
 class TTree;
 class TFile;
@@ -62,6 +64,9 @@ class PhVecMesonMaker: public SubsysReco {
     BbcGeo* mBbcGeo;
 
     DiMuonContainer *mDiMuonContainer;
+
+    ReactionPlaneObject *mReactionPlaneObject;
+    ReactionPlaneSngl *mReactionPlaneSngl;
 
     int mNumOfEvents;
 
