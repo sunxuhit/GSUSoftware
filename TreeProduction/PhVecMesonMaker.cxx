@@ -29,6 +29,7 @@
 
 #include "ReactionPlaneObject.h"
 #include "ReactionPlaneSngl.h"
+#include "RpConst.h"
 
 //stl
 #include <iostream>
@@ -126,9 +127,11 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   {
     cout << "Produce Di-Muon TTree!" << endl;
     mRecoEPHistoManager->initQA_Global();
+    mRecoEPHistoManager->initHist_BbcEP();
+    mRecoEPHistoManager->initHist_FvtxEP();
     mRecoEPHistoManager->initHist_DiMuonSpec();
-    mRecoEPHistoManager->initHist_BbcShiftEP();
     mRecoEPProManager->initPro_BbcResolution();
+    mRecoEPProManager->initPro_FvtxResolution();
   }
 
   return EVENT_OK;
@@ -216,12 +219,27 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   {
     for(int i_order = 0; i_order < 3; ++i_order) // Event Plane QA
     {
+      // BBC Event Plane
       mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, i_order));
       float Psi_BbcSouth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
       mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 1, i_order));
       float Psi_BbcNorth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
-      mRecoEPHistoManager->fillHist_BbcShiftEP(Psi_BbcSouth,Psi_BbcNorth,i_order,cent20);
-      mRecoEPProManager->fillPro_BbcResolution(Psi_BbcSouth,Psi_BbcNorth,i_order,mRunIndex,cent20);
+      if(Psi_BbcSouth > -900.0 && Psi_BbcNorth > -900.0)
+      {
+	mRecoEPHistoManager->fillHist_BbcEP(Psi_BbcSouth,Psi_BbcNorth,i_order,cent20);
+	mRecoEPProManager->fillPro_BbcResolution(Psi_BbcSouth,Psi_BbcNorth,i_order,mRunIndex,cent20);
+      }
+
+      // FVTX Event Plane => all sectors w/ eta > 1.0
+      mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 40, i_order));
+      float Psi_FvtxSouth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
+      mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 41, i_order));
+      float Psi_FvtxNorth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
+      if(Psi_FvtxSouth > -900.0 && Psi_FvtxNorth > -900.0)
+      {
+	mRecoEPHistoManager->fillHist_FvtxEP(Psi_FvtxSouth,Psi_FvtxNorth,i_order,cent20);
+	mRecoEPProManager->fillPro_FvtxResolution(Psi_FvtxSouth,Psi_FvtxNorth,i_order,mRunIndex,cent20);
+      }
     }
 
     // di-muon spectra
@@ -246,9 +264,11 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
 
   if(mMode == 0)
   {
+    mRecoEPHistoManager->writeHist_BbcEP();
+    mRecoEPHistoManager->writeHist_FvtxEP();
     mRecoEPHistoManager->writeHist_DiMuonSpec();
-    mRecoEPHistoManager->writeHist_BbcShiftEP();
     mRecoEPProManager->writePro_BbcResolution();
+    mRecoEPProManager->writePro_FvtxResolution();
   }
 
   File_mOutPut->Close();
