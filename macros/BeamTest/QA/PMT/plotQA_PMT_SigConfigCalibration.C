@@ -36,6 +36,7 @@ void plotQA_PMT_SigConfigCalibration(const int runID = 182)
   TH2D *h_mTdcTime_OnBeam = (TH2D*)File_InPut->Get("h_mTdcTime_OnBeam")->Clone();
   TH2D *h_mTdcTime_OffBeam = (TH2D*)File_InPut->Get("h_mTdcTime_OffBeam")->Clone();
   TH3D *h_mTdcTimeRadius = (TH3D*)File_InPut->Get("h_mTdcTimeRadius")->Clone();
+  TH3D *h_mTdcTimeRadius_clone = (TH3D*)File_InPut->Get("h_mTdcTimeRadius")->Clone();
 
   TH1D *h_mNumOfPhotons = (TH1D*)File_InPut->Get("h_mNumOfPhotons")->Clone();
   float NumOfEvents = h_mNumOfPhotons->GetEntries();
@@ -265,4 +266,28 @@ void plotQA_PMT_SigConfigCalibration(const int runID = 182)
 
   string FigName2d = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_SigConfigSumCalibration2D_PMT_%d.png",runID);
   c_tdc->SaveAs(FigName2d.c_str());
+
+  TCanvas *c_radius = new TCanvas("c_radius","c_radius",10,10,800,800);
+  c_radius->cd()->SetLeftMargin(0.15);
+  c_radius->cd()->SetBottomMargin(0.15);
+  c_radius->cd()->SetRightMargin(0.15);
+  c_radius->cd()->SetTicks(1,1);
+  c_radius->cd()->SetGrid(0,0);
+  int binx_Start = h_mTdcTimeRadius_clone->GetXaxis()->FindBin(tdc_Start);
+  int binx_Stop  = h_mTdcTimeRadius_clone->GetXaxis()->FindBin(tdc_Stop);
+  int biny_Start = h_mTdcTimeRadius_clone->GetYaxis()->FindBin(40.0);
+  int biny_Stop  = h_mTdcTimeRadius_clone->GetYaxis()->FindBin(60.0);
+  cout << "biny_Start = " << biny_Start << ", biny_Stop = " << biny_Stop << endl;
+  TH1D *h_mRadius = (TH1D*)h_mTdcTimeRadius_clone->ProjectionZ("h_mRadius",binx_Start,binx_Stop,biny_Start,biny_Stop)->Clone("h_mRadius");
+  h_mRadius->SetTitle("Radius per pixel");
+  h_mRadius->SetStats(0);
+  h_mRadius->GetXaxis()->SetTitle("R (mm)");
+  h_mRadius->GetXaxis()->CenterTitle();
+  h_mRadius->SetLineColor(4);
+  h_mRadius->SetLineWidth(2);
+  h_mRadius->Scale(1.0/NumOfEvents);
+  h_mRadius->DrawCopy("h");
+
+  FigName = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/Proposal_2019/PMT/c_Radius_PMT_%d.png",runID);
+  c_radius->SaveAs(FigName.c_str());
 }

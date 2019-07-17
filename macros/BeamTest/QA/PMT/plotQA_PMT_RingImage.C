@@ -172,6 +172,7 @@ void plotQA_PMT_RingImage(const int runID = 182)
   }
 
   c_RingImage_Display->cd(1);
+  c_RingImage_Display->cd(1)->SetLogz();
   h_mRingImage_on->Draw("colz");
 
   if(mode != "MesonRun")

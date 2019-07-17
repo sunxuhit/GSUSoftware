@@ -60,8 +60,8 @@ int Calibration::Init()
   }
 
   h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
-  h_mRingImage_DisPlay = new TH2D("h_mRingImage_DisPlay","h_mRingImage_DisPlay",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
-  h_mRingImage_DisPlay_beam = new TH2D("h_mRingImage_DisPlay_beam","h_mRingImage_DisPlay_beam",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
+  // h_mRingImage_DisPlay = new TH2D("h_mRingImage_DisPlay","h_mRingImage_DisPlay",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
+  // h_mRingImage_DisPlay_beam = new TH2D("h_mRingImage_DisPlay_beam","h_mRingImage_DisPlay_beam",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
 
   cout << "Initialized QA histograms. " << endl;
 
@@ -373,7 +373,8 @@ int Calibration::Make()
 	if(time_duration > mTime_Low && time_duration < mTime_High)
 	{
 	  h_mRingImage->Fill(pixel_x,pixel_y);
-	  // if(i_event > 1024 && i_event < 1025)
+	  NumOfPhotons++;
+	  /*
 	  if(i_event == 1024)
 	  {
 	    h_mRingImage_DisPlay_beam->Fill(pixel_x,pixel_y);
@@ -387,7 +388,7 @@ int Calibration::Make()
 	      h_mRingImage_DisPlay->Fill(pixel_x,pixel_y);
 	    }
 	  }
-	  NumOfPhotons++;
+	  */
 
 	  // ring finder
 	  float out_x = findPixelCoord(pixel_x);
@@ -440,8 +441,8 @@ int Calibration::Finish()
     }
   }
   h_mRingImage->Write();
-  h_mRingImage_DisPlay->Write();
-  h_mRingImage_DisPlay_beam->Write();
+  // h_mRingImage_DisPlay->Write();
+  // h_mRingImage_DisPlay_beam->Write();
   h_mNumOfPhotons->Write();
   p_mNumOfPhotons->Write();
 

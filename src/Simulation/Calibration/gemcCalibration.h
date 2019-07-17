@@ -40,12 +40,15 @@ class gemcCalibration : public TObject
     int initChain();
     int initHistograms();
     int initGausSmearing();
+    int initSimpleTree();
+    int resetSimpleTree();
 
     int Make();
 
     int Finish();
     int writeHistograms();
     int writeGausSmearing();
+    int writeSimpleTree();
 
     bool isPhoton(int pid, int i_track);
     bool isReflection(double pz_out, int i_track);
@@ -148,6 +151,14 @@ class gemcCalibration : public TObject
     std::vector<double> *trk_out_py  = NULL;
     std::vector<double> *trk_out_pz  = NULL;
     std::vector<double> *trk_out_t   = NULL;
+
+    // simple TTree for Marco
+    TTree *mSimpleTree;
+    int mNumOfPhotons;
+    int mPid[10000];
+    float mWaveLength[10000];
+    float mX_Sensor[10000];
+    float mY_Sensor[10000];
 
     ClassDef(gemcCalibration,1)
 };

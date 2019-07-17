@@ -49,6 +49,10 @@ int gemcCalibration::Init()
   initGausSmearing();
   initRingFinder();
 
+  // Simple TTree for Marco
+  resetSimpleTree();
+  initSimpleTree();
+
   return 0;
 }
 
@@ -181,6 +185,32 @@ int gemcCalibration::initGausSmearing()
   return 0;
 }
 
+int gemcCalibration::initSimpleTree()
+{
+  mSimpleTree = new TTree("GEMC","Simple TTree from GEMC");
+  mSimpleTree->Branch("numofphotons",&mNumOfPhotons,"numofphotons/I");
+  mSimpleTree->Branch("x",mX_Sensor,"x[numofphotons]/F");
+  mSimpleTree->Branch("y",mY_Sensor,"y[numofphotons]/F");
+  mSimpleTree->Branch("wavelength",mWaveLength,"wavelength[numofphotons]/F");
+  mSimpleTree->Branch("pid",mPid,"pid[numofphotons]/I");
+
+  return 1;
+}
+
+int gemcCalibration::resetSimpleTree()
+{
+  mNumOfPhotons = -1;
+  for(int i_photons = 0; i_photons < 10000; ++i_photons)
+  {
+    mPid[i_photons] = -1;
+    mWaveLength[i_photons] = -1;
+    mX_Sensor[i_photons] = -1;
+    mY_Sensor[i_photons] = -1;
+  }
+
+  return 1;
+}
+
 int gemcCalibration::Make()
 {
   // long NumOfEvents = (long)mChainInPut_Events->GetEntries();
@@ -237,6 +267,11 @@ int gemcCalibration::Make()
 	{
 	  double out_x_input = trk_out_x->at(i_track);
 	  double out_y_input = trk_out_y->at(i_track);
+	  mX_Sensor[NumOfPhotons] = out_x_input;
+	  mY_Sensor[NumOfPhotons] = out_y_input;
+	  mWaveLength[NumOfPhotons] = wavelength;
+	  mPid[NumOfPhotons] = pid;
+
 	  double delta_x = GausSmearing(f_mGaus);
 	  double delta_y = GausSmearing(f_mGaus);
 
@@ -262,6 +297,11 @@ int gemcCalibration::Make()
       }
     }
 
+    // Simple TTree for Marco
+    mNumOfPhotons = NumOfPhotons;
+    mSimpleTree->Fill();
+    resetSimpleTree();
+
     // Number of Photons
     h_mNumOfPhotons->Fill(NumOfPhotons);
     p_mNumOfPhotons->Fill(0.0,NumOfPhotons);
@@ -283,8 +323,9 @@ int gemcCalibration::Finish()
   if(File_mOutPut != NULL){
     File_mOutPut->cd();
     writeHistograms();
-    writeGausSmearing();
+    // writeGausSmearing();
     writeRingFinder();
+    writeSimpleTree();
     File_mOutPut->Close();
   }
   return 0;
@@ -307,6 +348,13 @@ int gemcCalibration::writeGausSmearing()
 {
   h_mXGausSmearing->Write();
   h_mYGausSmearing->Write();
+
+  return 0;
+}
+
+int gemcCalibration::writeSimpleTree()
+{
+  mSimpleTree->Write();
 
   return 0;
 }
@@ -445,7 +493,8 @@ bool gemcCalibration::isOnRing(TVector2 photonHit, double x_HoughTransform, doub
 int gemcCalibration::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector<int> xPixel, std::vector<int> yPixel)
 {
   int NumOfPhotons = numOfPhotons;
-  if(NumOfPhotons < 3) return 0;
+  // if(NumOfPhotons < 3) return 0;
+  if(NumOfPhotons < 5) return 0;
   float NumOfCombinations = TMath::Factorial(NumOfPhotons)/(TMath::Factorial(3)*TMath::Factorial(NumOfPhotons-3));
   // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfCombinations = " << NumOfCombinations << endl;
   for(int i_hit_1st = 0; i_hit_1st < NumOfPhotons-2; ++i_hit_1st)

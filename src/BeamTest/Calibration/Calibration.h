@@ -54,6 +54,11 @@ class Calibration : public TObject
     bool isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform);
     float findPixelCoord(int pixel); // return correspoding pixel coordinate
 
+    // beam finder
+    int initBeamFinder();
+    int writeBeamFinder();
+    int clearBeamFinder(); 
+
   private:
     PixelMap *pixel_map;
     std::string mDet, mHome;
@@ -101,6 +106,16 @@ class Calibration : public TObject
     TH3D *h_mHoughTransform; // x | y | R
     TH3D *h_mQA_HT; // QA for hough transform
     TH2D *h_mRingFinder_Display; // QA for ring finder
+    TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
+
+    TH3D *h_mCherenkovRing; // x | y | R
+    TH3D *h_mNumOfCherenkovPhotons; // number of photons | number of photons on ring | ring radius
+
+    // beam finder
+    std::vector<int> mXBeamMap; // corresponding binX number for each photon hit
+    std::vector<int> mYBeamMap; // corresponding binY number for each photon hit
+
+    TH2D *h_mRingFinder; // x: photon out_x | y: photon out_y with detector effect
     TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
 
     TH3D *h_mCherenkovRing; // x | y | R
