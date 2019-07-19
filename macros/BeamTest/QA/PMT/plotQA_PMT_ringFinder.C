@@ -71,7 +71,7 @@ int plotQA_PMT_ringFinder()
   cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfEntries = " << h_mPhotonDist->GetEntries() << endl;
 
   if(NumOfPhotons < 3) return 0;
-  TH3D *h_HoughTransform = new TH3D("h_HoughTransform","h_HoughTransform",210,-52.5,52.5,210,-52.5,52.5,105,0,52.5);
+  TH3D *h_HoughTransform = new TH3D("h_HoughTransform","h_HoughTransform",105,-52.5,52.5,105,-52.5,52.5,105,0,52.5);
   float NumOfCombinations = TMath::Factorial(NumOfPhotons)/(TMath::Factorial(3)*TMath::Factorial(NumOfPhotons-3));
   cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfCombinations = " << NumOfCombinations << endl;
   TEllipse *circle[(int)NumOfCombinations];

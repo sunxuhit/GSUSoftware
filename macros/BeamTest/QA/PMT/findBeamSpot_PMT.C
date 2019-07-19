@@ -46,7 +46,7 @@ void GenCoord_mRICH(int ipmt, int x1, int y1);
 int GetPixel_mRICH(int fiber, int asic, int maroc_channel); // return pixel number
 float findPixelCoord(int pixel); // return pixel position
 
-void findBeamSpot_PMT(const int runID = 24)
+void findBeamSpot_PMT(const int runID = 182, const int eventID = 120)
 {
   int debug = 1;
   string mode = "Calibration";
@@ -184,7 +184,7 @@ void findBeamSpot_PMT(const int runID = 24)
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
     // if(i_event != 1024 && i_event != 4096 && i_event != 18134) continue;
-    if(i_event != 18134) continue;
+    if(i_event != eventID) continue;
 
     mXBeamMap.clear(); // clear beam finder
     mYBeamMap.clear();
@@ -260,7 +260,7 @@ void findBeamSpot_PMT(const int runID = 24)
       cout << "pixel_x = " << mXBeamMap[i_pixel] << ", pixel_y = " << mYBeamMap[i_pixel] << ", time = " << mTimeDuration[i_pixel] << endl;
     }
     */
-    cout << "i_event = " << i_event << ", number of photons = " << NumOfPhotons << ", number of pixels = " << mTimeDuration.size() << endl;
+    // cout << "i_event = " << i_event << ", number of photons = " << NumOfPhotons << ", number of pixels = " << mTimeDuration.size() << endl;
     const int mNumOfPhotons = NumOfPhotons;
     int beam_counter[mNumOfPhotons];
     int mNumOfCluster = 0;
@@ -285,7 +285,6 @@ void findBeamSpot_PMT(const int runID = 24)
 	  beam_counter[i_beam]++;
 	}
       }
-      cout << "beam_counter = " << beam_counter[i_beam] << endl;
       if(beam_counter[i_beam] > 4)
       {
 	mXClusterMap.push_back(mXBeamMap[i_beam]);
@@ -307,8 +306,8 @@ void findBeamSpot_PMT(const int runID = 24)
 
     std::vector<int>::iterator it_max_1st = max_element(std::begin(mRankMap),std::end(mRankMap)); // most ranked pixel
     int cluster_1st = std::distance(mRankMap.begin(), it_max_1st);
-    std::cout << "max element at: " << cluster_1st << endl;
-    cout << "max rank = " << mRankMap[cluster_1st] << endl;
+    // std::cout << "max element at: " << cluster_1st << endl;
+    // cout << "max rank = " << mRankMap[cluster_1st] << endl;
 
     std::vector<int> mXCluster_1st;
     std::vector<int> mYCluster_1st;
@@ -368,8 +367,8 @@ void findBeamSpot_PMT(const int runID = 24)
     {
       std::vector<int>::iterator it_max_2nd = max_element(std::begin(mRank_rest),std::end(mRank_rest)); // most ranked pixel in 2nd cluster
       int cluster_2nd = std::distance(mRank_rest.begin(), it_max_2nd);
-      std::cout << "max element at: " << cluster_2nd << endl;
-      cout << "max rank = " << mRank_rest[cluster_2nd] << endl;
+      // std::cout << "max element at: " << cluster_2nd << endl;
+      // cout << "max rank = " << mRank_rest[cluster_2nd] << endl;
 
       for(int i_cluster = 0; i_cluster < mXCluster_rest.size(); ++i_cluster)
       {
