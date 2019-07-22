@@ -227,11 +227,11 @@ void RecoEPHistoManager::initHist_MuonTrkSpec()
   std::cout << "initialize Single Muon Spectra Histograms!" << std::endl;
   h_mPt_Tr0 = new TH2F("h_mPt_Tr0","h_mPt_Tr0",100,-5.0,5.0,100,0.0,10.0); 
   h_mPhi_Tr0 = new TH2F("h_mPhi_Tr0","h_mPhi_Tr0",100,-5.0,5.0,100,-TMath::Pi(),TMath::Pi());
-  h_mPz_Tr0 = new TH2F("h_mPz_Tr0","h_mPz_Tr0",100,-5.0,5.0,100,-20.0,0.0);
+  h_mPz_Tr0 = new TH2F("h_mPz_Tr0","h_mPz_Tr0",100,-5.0,5.0,200,-20.0,20.0);
 
   h_mPt_Tr1 = new TH2F("h_mPt_Tr1","h_mPt_Tr1",100,-5.0,5.0,100,0.0,10.0); 
   h_mPhi_Tr1 = new TH2F("h_mPhi_Tr1","h_mPhi_Tr1",100,-5.0,5.0,100,-TMath::Pi(),TMath::Pi());
-  h_mPz_Tr1 = new TH2F("h_mPz_Tr1","h_mPz_Tr1",100,-5.0,5.0,100,-20.0,0.0);
+  h_mPz_Tr1 = new TH2F("h_mPz_Tr1","h_mPz_Tr1",100,-5.0,5.0,200,-20.0,20.0);
 }
 
 void RecoEPHistoManager::fillHist_MuonTr0Spec(float px, float py, float pz, float rapidity)
