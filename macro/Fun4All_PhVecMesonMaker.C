@@ -1,5 +1,5 @@
 void Fun4All_PhVecMesonMaker(
-    int nEvents = 1000000, //
+    int nEvents = 10000, //
     // char *input_file = "AuAu14_BBCEP_test.list" //
     char *input_file = "picoDst_test.list" //
     )

@@ -167,55 +167,103 @@ void RecoEPHistoManager::writeHist_FvtxEP()
 void RecoEPHistoManager::initHist_DiMuonSpec()
 {
   std::cout << "initialize Di-Muon Spectra Histograms!" << std::endl;
-  for(int i_pt = 0; i_pt < 3; ++i_pt)
-  {
-    std::string HistName;
-    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
-    {
-      HistName = Form("h_mDiMuonSpec_South_Centrality_%d_pt_%d",i_cent,i_pt);
-      h_mDiMuonSpec_South[i_pt][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
-
-      HistName = Form("h_mDiMuonSpec_North_Centrality_%d_pt_%d",i_cent,i_pt);
-      h_mDiMuonSpec_North[i_pt][i_cent] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
-    }
-    HistName = Form("h_mDiMuonInteSpec_South_pt_%d",i_pt);
-    h_mDiMuonInteSpec_South[i_pt] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
-    HistName = Form("h_mDiMuonInteSpec_North_pt_%d",i_pt);
-    h_mDiMuonInteSpec_North[i_pt] = new TH1F(HistName.c_str(),HistName.c_str(),100,0.0,5.0);
-  }
+  h_mInvMass_DiMuon = new TH2F("h_mInvMass_DiMuon","h_mInvMass_DiMuon",100,-5.0,5.0,100,0.0,5.0);
+  h_mPt_DiMuon = new TH2F("h_mPt_DiMuon","h_mPt_DiMuon",100,-5.0,5.0,100,0.0,10.0);
+  h_mPhi_DiMuon = new TH2F("h_mPhi_DiMuon","h_mPhi_DiMuon",100,-5.0,5.0,100,-TMath::Pi(),TMath::Pi());
+  h_mPz_DiMuon = new TH2F("h_mPz_DiMuon","h_mPz_DiMuon",100,-5.0,5.0,100,-20.0,0.0);
 }
 
-void RecoEPHistoManager::fillHist_DiMuonSpec(float invmass, int cent, float pt, float rapidity)
+void RecoEPHistoManager::fillHist_DiMuonSpec(float invmass, float px, float py, float pz, float rapidity)
 {
-  int pt_bin = -1;
-  if(pt > 0 && pt <= 2.0) pt_bin = 0;
-  if(pt > 2.0 && pt <= 6.0) pt_bin = 1;
-  if(pt > 6.0) pt_bin = 2;
-  if(rapidity > 0 && pt > 0)
-  { // North
-    h_mDiMuonSpec_North[pt_bin][cent]->Fill(invmass);
-    h_mDiMuonInteSpec_North[pt_bin]->Fill(invmass);
-  }
-  if(rapidity < 0 && pt > 0)
-  { // South
-    h_mDiMuonSpec_South[pt_bin][cent]->Fill(invmass);
-    h_mDiMuonInteSpec_South[pt_bin]->Fill(invmass);
-  }
+  float pt = TMath::Sqrt(px*px+py*py);
+  float phi = TMath::ATan2(py,px);
+  h_mInvMass_DiMuon->Fill(rapidity,invmass);
+  h_mPt_DiMuon->Fill(rapidity,pt);
+  h_mPhi_DiMuon->Fill(rapidity,phi);
+  h_mPz_DiMuon->Fill(rapidity,pz);
 }
 
 void RecoEPHistoManager::writeHist_DiMuonSpec()
 {
-  for(int i_pt = 0; i_pt < 3; ++i_pt)
-  {
-    for(int i_cent = 0; i_cent < vecMesonFlow::mNumOfCentrality20; ++i_cent)
-    {
-      h_mDiMuonSpec_South[i_pt][i_cent]->Write();
-      h_mDiMuonSpec_North[i_pt][i_cent]->Write();
-    }
-    h_mDiMuonInteSpec_South[i_pt]->Write();
-    h_mDiMuonInteSpec_North[i_pt]->Write();
-  }
+  std::cout << "write Di-Muon Spectra Histograms!" << std::endl;
+  h_mInvMass_DiMuon->Write();
+  h_mPt_DiMuon->Write();
+  h_mPhi_DiMuon->Write();
+  h_mPz_DiMuon->Write();
 }
 //===============Di-Muon Spectra=========================
+
+//===============Di-Muon QA=========================
+void RecoEPHistoManager::initHist_DiMuonQA()
+{
+  std::cout << "initialize Di-Muon QA Histograms!" << std::endl;
+  h_mCharge_DiMuon = new TH2F("h_mCharge_DiMuon","h_mCharge_DiMuon",100,-5.0,5.0,7,-3.5,3.5);
+  h_mDcaR_DiMuon = new TH2F("h_mDcaR_DiMuon","h_mDcaR_DiMuon",100,0.0,5.0,100,-5.0,5.0);
+  h_mDcaZ_DiMuon = new TH2F("h_mDcaZ_DiMuon","h_mDcaZ_DiMuon",100,-5.0,5.0,100,-5.0,5.0);
+  h_mEvtVtxChi2_DiMuon = new TH2F("h_mEvtVtxChi2_DiMuon","h_mEvtVtxChi2_DiMuon",100,-5.0,5.0,100,0.0,20.0);
+}
+
+void RecoEPHistoManager::fillHist_DiMuonQA(short charge, float dca_r, float dca_z, float vtx_chi2, float rapidity)
+{
+  h_mCharge_DiMuon->Fill(rapidity,charge);
+  h_mDcaR_DiMuon->Fill(rapidity,dca_r);
+  h_mDcaZ_DiMuon->Fill(rapidity,dca_z);
+  h_mEvtVtxChi2_DiMuon->Fill(rapidity,vtx_chi2);
+}
+
+void RecoEPHistoManager::writeHist_DiMuonQA()
+{
+  std::cout << "write Di-Muon QA Histograms!" << std::endl;
+  h_mCharge_DiMuon->Write();
+  h_mDcaR_DiMuon->Write();
+  h_mDcaZ_DiMuon->Write();
+  h_mEvtVtxChi2_DiMuon->Write();
+}
+//===============Di-Muon QA=========================
+
+//===============Single Muon Spectra=========================
+void RecoEPHistoManager::initHist_MuonTrkSpec()
+{
+  std::cout << "initialize Single Muon Spectra Histograms!" << std::endl;
+  h_mPt_Tr0 = new TH2F("h_mPt_Tr0","h_mPt_Tr0",100,-5.0,5.0,100,0.0,10.0); 
+  h_mPhi_Tr0 = new TH2F("h_mPhi_Tr0","h_mPhi_Tr0",100,-5.0,5.0,100,-TMath::Pi(),TMath::Pi());
+  h_mPz_Tr0 = new TH2F("h_mPz_Tr0","h_mPz_Tr0",100,-5.0,5.0,100,-20.0,0.0);
+
+  h_mPt_Tr1 = new TH2F("h_mPt_Tr1","h_mPt_Tr1",100,-5.0,5.0,100,0.0,10.0); 
+  h_mPhi_Tr1 = new TH2F("h_mPhi_Tr1","h_mPhi_Tr1",100,-5.0,5.0,100,-TMath::Pi(),TMath::Pi());
+  h_mPz_Tr1 = new TH2F("h_mPz_Tr1","h_mPz_Tr1",100,-5.0,5.0,100,-20.0,0.0);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr0Spec(float px, float py, float pz, float rapidity)
+{
+  float pt = TMath::Sqrt(px*px+py*py);
+  float phi = TMath::ATan2(py,px);
+  h_mPt_Tr0->Fill(rapidity,pt);
+  h_mPhi_Tr0->Fill(rapidity,phi);
+  h_mPz_Tr0->Fill(rapidity,pz);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr1Spec(float px, float py, float pz, float rapidity)
+{
+  float pt = TMath::Sqrt(px*px+py*py);
+  float phi = TMath::ATan2(py,px);
+  h_mPt_Tr1->Fill(rapidity,pt);
+  h_mPhi_Tr1->Fill(rapidity,phi);
+  h_mPz_Tr1->Fill(rapidity,pz);
+}
+
+void RecoEPHistoManager::writeHist_MuonTrkSpec()
+{
+  std::cout << "write Single Muon Spectra Histograms!" << std::endl;
+  h_mPt_Tr0->Write();
+  h_mPhi_Tr0->Write();
+  h_mPz_Tr0->Write();
+
+  h_mPt_Tr1->Write();
+  h_mPhi_Tr1->Write();
+  h_mPz_Tr1->Write();
+}
+
+//===============Single Muon Spectra=========================
 
 //------------------------------------------------------------

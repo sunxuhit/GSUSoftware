@@ -34,9 +34,26 @@ class RecoEPHistoManager : public TObject
 
     //===============di-muon spectra==============
     void initHist_DiMuonSpec();
-    void fillHist_DiMuonSpec(float invmass, int cent, float pt, float rapidity);
+    void fillHist_DiMuonSpec(float invmass, float px, float py, float pz, float rapidity);
     void writeHist_DiMuonSpec();
+
+    void initHist_DiMuonQA();
+    void fillHist_DiMuonQA(short charge, float dca_r, float dca_z, float vtx_chi2, float rapidity);
+    void writeHist_DiMuonQA();
     //===============di-muon spectra==============
+
+    //===============single muon spectra==============
+    void initHist_MuonTrkSpec();
+    void fillHist_MuonTr0Spec(float px, float py, float pz, float rapidity);
+    void fillHist_MuonTr1Spec(float px, float py, float pz, float rapidity);
+    void writeHist_MuonTrkSpec();
+
+    /*
+    void initHist_MuonTrkQA();
+    // void fillHist_MuonTr0(float rapidity);
+    void writeHist_MuonTrkQA();
+    //===============single muon spectra==============
+    */
 
   private:
 
@@ -64,10 +81,51 @@ class RecoEPHistoManager : public TObject
     TH2F *h_mEP_FvtxCorrelation[3][vecMesonFlow::mNumOfCentrality20];
 
     // DiMuon Spectra
-    TH1F *h_mDiMuonSpec_South[3][vecMesonFlow::mNumOfCentrality20];
-    TH1F *h_mDiMuonSpec_North[3][vecMesonFlow::mNumOfCentrality20];
-    TH1F *h_mDiMuonInteSpec_South[3];
-    TH1F *h_mDiMuonInteSpec_North[3];
+    TH2F *h_mInvMass_DiMuon; // rapidity vs. inv mass
+    TH2F *h_mPt_DiMuon;
+    TH2F *h_mPz_DiMuon;
+    TH2F *h_mPhi_DiMuon;
+
+    // DiMuon QA 
+    TH2F *h_mCharge_DiMuon;
+    TH2F *h_mDcaR_DiMuon;
+    TH2F *h_mDcaZ_DiMuon;
+    TH2F *h_mEvtVtxChi2_DiMuon;
+
+    // Single Muon Spectra
+    TH2F *h_mPt_Tr0; // rapidity vs. pT
+    TH2F *h_mPhi_Tr0;
+    TH2F *h_mPz_Tr0;
+    TH2F *h_mTrhits_Tr0;
+    TH2F *h_mIdhits_Tr0;
+    TH2F *h_mDG0_Tr0;
+    TH2F *h_mDDG0_Tr0;
+    TH2F *h_mTrchi2_Tr0;
+    TH2F *h_mIdchi2_Tr0;
+    TH2F *h_mNtrhits_Tr0;
+    TH2F *h_mNidhits_Tr0;
+    TH2F *h_mLastgap_Tr0;
+    TH2F *h_mIdx_Tr0;
+    TH2F *h_mIdy_Tr0;
+    TH2F *h_mDcaR_Tr0;
+    TH2F *h_mDcaZ_Tr0;
+
+    TH2F *h_mPt_Tr1;
+    TH2F *h_mPhi_Tr1;
+    TH2F *h_mPz_Tr1;
+    TH2F *h_mTrhits_Tr1;
+    TH2F *h_mIdhits_Tr1;
+    TH2F *h_mDG0_Tr1;
+    TH2F *h_mDDG0_Tr1;
+    TH2F *h_mTrchi2_Tr1;
+    TH2F *h_mIdchi2_Tr1;
+    TH2F *h_mNtrhits_Tr1;
+    TH2F *h_mNidhits_Tr1;
+    TH2F *h_mLastgap_Tr1;
+    TH2F *h_mIdx_Tr1;
+    TH2F *h_mIdy_Tr1;
+    TH2F *h_mDcaR_Tr1;
+    TH2F *h_mDcaZ_Tr1;
 
     ClassDef(RecoEPHistoManager,1)
 };

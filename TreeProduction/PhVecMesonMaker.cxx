@@ -129,9 +129,11 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
     mRecoEPHistoManager->initQA_Global();
     mRecoEPHistoManager->initHist_BbcEP();
     mRecoEPHistoManager->initHist_FvtxEP();
-    mRecoEPHistoManager->initHist_DiMuonSpec();
     mRecoEPProManager->initPro_BbcResolution();
     mRecoEPProManager->initPro_FvtxResolution();
+    mRecoEPHistoManager->initHist_DiMuonSpec();
+    mRecoEPHistoManager->initHist_DiMuonQA();
+    mRecoEPHistoManager->initHist_MuonTrkSpec();
   }
 
   return EVENT_OK;
@@ -217,7 +219,8 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
   if(mMode == 0)  // Di-Muon TTree Production
   {
-    for(int i_order = 0; i_order < 3; ++i_order) // Event Plane QA
+    // Event Plane QA
+    for(int i_order = 0; i_order < 3; ++i_order) 
     {
       // BBC Event Plane
       mReactionPlaneSngl = mReactionPlaneObject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, i_order));
@@ -245,12 +248,34 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
     // di-muon spectra
     for(unsigned int i_dimuon = 0; i_dimuon < mDiMuonContainer->get_nDiMuons(); ++i_dimuon) 
     {
+      // di-muon spectra
       DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
       float InvMass = dimuon->get_mass();
+      // float pt = dimuon->get_pT();
+      float px = dimuon->get_px();
+      float py = dimuon->get_py();
+      float pz = dimuon->get_pz();
       float rapidity = dimuon->get_rapidity(); // > 0 => north
-      float pt = dimuon->get_pT();
+      mRecoEPHistoManager->fillHist_DiMuonSpec(InvMass,px,py,pz,rapidity);
 
-      mRecoEPHistoManager->fillHist_DiMuonSpec(InvMass,cent20,pt,rapidity);
+      short charge = dimuon->get_charge();
+      float dca_r = dimuon->get_dca_r();
+      float dca_z = dimuon->get_dca_z();
+      float vtx_chi2 = dimuon->get_Evt_vtxchi2();
+      mRecoEPHistoManager->fillHist_DiMuonQA(charge,dca_r,dca_z,vtx_chi2,rapidity);
+
+      // single muon spectra
+      float px_tr0 = dimuon->get_Tr0_px();
+      float py_tr0 = dimuon->get_Tr0_py();
+      float pz_tr0 = dimuon->get_Tr0_pz();
+      float rapidity_tr0 = dimuon->get_Tr0_rapidity(); // > 0 => north
+      mRecoEPHistoManager->fillHist_MuonTr0Spec(px_tr0,py_tr0,pz_tr0,rapidity_tr0);
+
+      float px_tr1 = dimuon->get_Tr1_px();
+      float py_tr1 = dimuon->get_Tr1_py();
+      float pz_tr1 = dimuon->get_Tr1_pz();
+      float rapidity_tr1 = dimuon->get_Tr1_rapidity(); // > 0 => north
+      mRecoEPHistoManager->fillHist_MuonTr1Spec(px_tr1,py_tr1,pz_tr1,rapidity_tr1);
     }
   }
 
@@ -266,9 +291,12 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
   {
     mRecoEPHistoManager->writeHist_BbcEP();
     mRecoEPHistoManager->writeHist_FvtxEP();
-    mRecoEPHistoManager->writeHist_DiMuonSpec();
     mRecoEPProManager->writePro_BbcResolution();
     mRecoEPProManager->writePro_FvtxResolution();
+
+    mRecoEPHistoManager->writeHist_DiMuonSpec();
+    mRecoEPHistoManager->writeHist_DiMuonQA();
+    mRecoEPHistoManager->writeHist_MuonTrkSpec();
   }
 
   File_mOutPut->Close();
