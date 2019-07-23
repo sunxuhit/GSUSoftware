@@ -198,7 +198,7 @@ void RecoEPHistoManager::initHist_DiMuonQA()
 {
   std::cout << "initialize Di-Muon QA Histograms!" << std::endl;
   h_mCharge_DiMuon = new TH2F("h_mCharge_DiMuon","h_mCharge_DiMuon",100,-5.0,5.0,7,-3.5,3.5);
-  h_mDcaR_DiMuon = new TH2F("h_mDcaR_DiMuon","h_mDcaR_DiMuon",100,0.0,5.0,100,-5.0,5.0);
+  h_mDcaR_DiMuon = new TH2F("h_mDcaR_DiMuon","h_mDcaR_DiMuon",100,-5.0,5.0,100,0.0,5.0);
   h_mDcaZ_DiMuon = new TH2F("h_mDcaZ_DiMuon","h_mDcaZ_DiMuon",100,-5.0,5.0,100,-5.0,5.0);
   h_mEvtVtxChi2_DiMuon = new TH2F("h_mEvtVtxChi2_DiMuon","h_mEvtVtxChi2_DiMuon",100,-5.0,5.0,100,0.0,20.0);
 }
@@ -265,5 +265,121 @@ void RecoEPHistoManager::writeHist_MuonTrkSpec()
 }
 
 //===============Single Muon Spectra=========================
+
+//===============Single Muon QA=========================
+void RecoEPHistoManager::initHist_MuonTrkQA()
+{
+  std::cout << "initialize Single Muon Spectra Histograms!" << std::endl;
+  h_mTrhits_Tr0 = new TH2F("h_mTrhits_Tr0","h_mTrhits_Tr0",100,-5.0,5.0,2000,-1999.5,0.5);
+  h_mIdhits_Tr0 = new TH2F("h_mIdhits_Tr0","h_mIdhits_Tr0",100,-5.0,5.0,2000,-0.5,1999.5);
+  h_mDG0_Tr0 = new TH2F("h_mDG0_Tr0","h_mDG0_Tr0",100,-5.0,5.0,100,-0.5,29.5);
+  h_mDDG0_Tr0 = new TH2F("h_mDDG0_Tr0","h_mDDG0_Tr0",100,-5.0,5.0,100,-0.5,19.5);
+  h_mTrchi2_Tr0 = new TH2F("h_mTrchi2_Tr0","h_mTrchi2_Tr0",100,-5.0,5.0,100,-1.0,20.0);
+  h_mIdchi2_Tr0 = new TH2F("h_mIdchi2_Tr0","h_mIdchi2_Tr0",100,-5.0,5.0,100,-1.0,20.0);
+  h_mNtrhits_Tr0 = new TH2F("h_mNtrhits_Tr0","h_mNtrhits_Tr0",100,-5.0,5.0,20,-0.5,19.5);
+  h_mNidhits_Tr0 = new TH2F("h_mNidhits_Tr0","h_mNidhits_Tr0",100,-5.0,5.0,20,-0.5,19.5);
+  h_mLastgap_Tr0 = new TH2F("h_mLastgap_Tr0","h_mLastgap_Tr0",100,-5.0,5.0,10,-0.5,9.5);
+  h_mIdx_Tr0 = new TH2F("h_mIdx_Tr0","h_mIdx_Tr0",100,-5.0,5.0,100,-50.0,50.0);
+  h_mIdy_Tr0 = new TH2F("h_mIdy_Tr0","h_mIdy_Tr0",100,-5.0,5.0,100,-50.0,50.0);
+  h_mDcaR_Tr0 = new TH2F("h_mDcaR_Tr0","h_mDcaR_Tr0",100,-5.0,5.0,100,0.0,5.0);
+  h_mDcaZ_Tr0 = new TH2F("h_mDcaZ_Tr0","h_mDcaZ_Tr0",100,-5.0,5.0,100,-5.0,5.0);
+
+  h_mTrhits_Tr1 = new TH2F("h_mTrhits_Tr1","h_mTrhits_Tr1",100,-5.0,5.0,2000,-1999.5,0.5);
+  h_mIdhits_Tr1 = new TH2F("h_mIdhits_Tr1","h_mIdhits_Tr1",100,-5.0,5.0,2000,-0.5,1999.5);
+  h_mDG0_Tr1 = new TH2F("h_mDG0_Tr1","h_mDG0_Tr1",100,-5.0,5.0,100,-0.5,29.5);
+  h_mDDG0_Tr1 = new TH2F("h_mDDG0_Tr1","h_mDDG0_Tr1",100,-5.0,5.0,100,-0.5,19.5);
+  h_mTrchi2_Tr1 = new TH2F("h_mTrchi2_Tr1","h_mTrchi2_Tr1",100,-5.0,5.0,100,-1.0,20.0);
+  h_mIdchi2_Tr1 = new TH2F("h_mIdchi2_Tr1","h_mIdchi2_Tr1",100,-5.0,5.0,100,-1.0,20.0);
+  h_mNtrhits_Tr1 = new TH2F("h_mNtrhits_Tr1","h_mNtrhits_Tr1",100,-5.0,5.0,20,-0.5,19.5);
+  h_mNidhits_Tr1 = new TH2F("h_mNidhits_Tr1","h_mNidhits_Tr1",100,-5.0,5.0,20,-0.5,19.5);
+  h_mLastgap_Tr1 = new TH2F("h_mLastgap_Tr1","h_mLastgap_Tr1",100,-5.0,5.0,10,-0.5,9.5);
+  h_mIdx_Tr1 = new TH2F("h_mIdx_Tr1","h_mIdx_Tr1",100,-5.0,5.0,100,-50.0,50.0);
+  h_mIdy_Tr1 = new TH2F("h_mIdy_Tr1","h_mIdy_Tr1",100,-5.0,5.0,100,-50.0,50.0);
+  h_mDcaR_Tr1 = new TH2F("h_mDcaR_Tr1","h_mDcaR_Tr1",100,-5.0,5.0,100,0.0,5.0);
+  h_mDcaZ_Tr1 = new TH2F("h_mDcaZ_Tr1","h_mDcaZ_Tr1",100,-5.0,5.0,100,-5.0,5.0);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr0_hits(short trhits, float trchi2, short ntrhits, float rapidity)
+{
+  h_mTrhits_Tr0->Fill(rapidity,trhits);
+  h_mTrchi2_Tr0->Fill(rapidity,trchi2);
+  h_mNtrhits_Tr0->Fill(rapidity,ntrhits);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr0_id(short idhits, float idchi2, short nidhits, float idx, float idy, float rapidity)
+{
+  h_mIdhits_Tr0->Fill(rapidity,idhits);
+  h_mIdchi2_Tr0->Fill(rapidity,idchi2);
+  h_mNidhits_Tr0->Fill(rapidity,nidhits);
+  h_mIdx_Tr0->Fill(rapidity,idx);
+  h_mIdy_Tr0->Fill(rapidity,idy);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr0_QA(float DG0, float DDG0, short lastgap, float dca_r, float dca_z, float rapidity)
+{
+  h_mDG0_Tr0->Fill(rapidity,DG0);
+  h_mDDG0_Tr0->Fill(rapidity,DDG0);
+  h_mLastgap_Tr0->Fill(rapidity,lastgap);
+  h_mDcaR_Tr0->Fill(rapidity,dca_r);
+  h_mDcaZ_Tr0->Fill(rapidity,dca_z);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr1_hits(short trhits, float trchi2, short ntrhits, float rapidity)
+{
+  h_mTrhits_Tr1->Fill(rapidity,trhits);
+  h_mTrchi2_Tr1->Fill(rapidity,trchi2);
+  h_mNtrhits_Tr1->Fill(rapidity,ntrhits);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr1_id(short idhits, float idchi2, short nidhits, float idx, float idy, float rapidity)
+{
+  h_mIdhits_Tr1->Fill(rapidity,idhits);
+  h_mIdchi2_Tr1->Fill(rapidity,idchi2);
+  h_mNidhits_Tr1->Fill(rapidity,nidhits);
+  h_mIdx_Tr1->Fill(rapidity,idx);
+  h_mIdy_Tr1->Fill(rapidity,idy);
+}
+
+void RecoEPHistoManager::fillHist_MuonTr1_QA(float DG0, float DDG0, short lastgap, float dca_r, float dca_z, float rapidity)
+{
+  h_mDG0_Tr1->Fill(rapidity,DG0);
+  h_mDDG0_Tr1->Fill(rapidity,DDG0);
+  h_mLastgap_Tr1->Fill(rapidity,lastgap);
+  h_mDcaR_Tr1->Fill(rapidity,dca_r);
+  h_mDcaZ_Tr1->Fill(rapidity,dca_z);
+}
+
+void RecoEPHistoManager::writeHist_MuonTrkQA()
+{
+  std::cout << "initialize Single Muon Spectra Histograms!" << std::endl;
+  h_mTrhits_Tr0->Write();
+  h_mIdhits_Tr0->Write();
+  h_mDG0_Tr0->Write();
+  h_mDDG0_Tr0->Write();
+  h_mTrchi2_Tr0->Write();
+  h_mIdchi2_Tr0->Write();
+  h_mNtrhits_Tr0->Write();
+  h_mNidhits_Tr0->Write();
+  h_mLastgap_Tr0->Write();
+  h_mIdx_Tr0->Write();
+  h_mIdy_Tr0->Write();
+  h_mDcaR_Tr0->Write();
+  h_mDcaZ_Tr0->Write();
+
+  h_mTrhits_Tr1->Write();
+  h_mIdhits_Tr1->Write();
+  h_mDG0_Tr1->Write();
+  h_mDDG0_Tr1->Write();
+  h_mTrchi2_Tr1->Write();
+  h_mIdchi2_Tr1->Write();
+  h_mNtrhits_Tr1->Write();
+  h_mNidhits_Tr1->Write();
+  h_mLastgap_Tr1->Write();
+  h_mIdx_Tr1->Write();
+  h_mIdy_Tr1->Write();
+  h_mDcaR_Tr1->Write();
+  h_mDcaZ_Tr1->Write();
+}
+//===============Single Muon QA=========================
 
 //------------------------------------------------------------

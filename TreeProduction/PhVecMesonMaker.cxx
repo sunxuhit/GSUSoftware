@@ -134,6 +134,7 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
     mRecoEPHistoManager->initHist_DiMuonSpec();
     mRecoEPHistoManager->initHist_DiMuonQA();
     mRecoEPHistoManager->initHist_MuonTrkSpec();
+    mRecoEPHistoManager->initHist_MuonTrkQA();
   }
 
   return EVENT_OK;
@@ -276,6 +277,41 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float pz_tr1 = dimuon->get_Tr1_pz();
       float rapidity_tr1 = dimuon->get_Tr1_rapidity(); // > 0 => north
       mRecoEPHistoManager->fillHist_MuonTr1Spec(px_tr1,py_tr1,pz_tr1,rapidity_tr1);
+
+      // single muon QA
+      short trhits_tr0 = dimuon->get_Tr0_trhits();
+      short idhits_tr0 = dimuon->get_Tr0_idhits();
+      float DG0_tr0 = dimuon->get_Tr0_DG0();
+      float DDG0_tr0 = dimuon->get_Tr0_DDG0();
+      float trchi2_tr0 = dimuon->get_Tr0_trchi2();
+      float idchi2_tr0 = dimuon->get_Tr0_idchi2();
+      short ntrhits_tr0 = dimuon->get_Tr0_ntrhits();
+      short nidhits_tr0 = dimuon->get_Tr0_nidhits();
+      short lastgap_tr0 = dimuon->get_Tr0_lastgap();
+      float idx_tr0 = dimuon->get_Tr0_idx();
+      float idy_tr0 = dimuon->get_Tr0_idy();
+      float dca_r_tr0 = dimuon->get_Tr0_dca_r();
+      float dca_z_tr0 = dimuon->get_Tr0_dca_z();
+      mRecoEPHistoManager->fillHist_MuonTr0_hits(trhits_tr0,trchi2_tr0,ntrhits_tr0,rapidity_tr0);
+      mRecoEPHistoManager->fillHist_MuonTr0_id(idhits_tr0,idchi2_tr0,nidhits_tr0,idx_tr0,idy_tr0,rapidity_tr0);
+      mRecoEPHistoManager->fillHist_MuonTr0_QA(DG0_tr0,DDG0_tr0,lastgap_tr0,dca_r_tr0,dca_z_tr0,rapidity_tr0);
+
+      short trhits_tr1 = dimuon->get_Tr1_trhits();
+      short idhits_tr1 = dimuon->get_Tr1_idhits();
+      float DG0_tr1 = dimuon->get_Tr1_DG0();
+      float DDG0_tr1 = dimuon->get_Tr1_DDG0();
+      float trchi2_tr1 = dimuon->get_Tr1_trchi2();
+      float idchi2_tr1 = dimuon->get_Tr1_idchi2();
+      short ntrhits_tr1 = dimuon->get_Tr1_ntrhits();
+      short nidhits_tr1 = dimuon->get_Tr1_nidhits();
+      short lastgap_tr1 = dimuon->get_Tr1_lastgap();
+      float idx_tr1 = dimuon->get_Tr1_idx();
+      float idy_tr1 = dimuon->get_Tr1_idy();
+      float dca_r_tr1 = dimuon->get_Tr1_dca_r();
+      float dca_z_tr1 = dimuon->get_Tr1_dca_z();
+      mRecoEPHistoManager->fillHist_MuonTr1_hits(trhits_tr1,trchi2_tr1,ntrhits_tr1,rapidity_tr1);
+      mRecoEPHistoManager->fillHist_MuonTr1_id(idhits_tr1,idchi2_tr1,nidhits_tr1,idx_tr1,idy_tr1,rapidity_tr1);
+      mRecoEPHistoManager->fillHist_MuonTr1_QA(DG0_tr1,DDG0_tr1,lastgap_tr1,dca_r_tr1,dca_z_tr1,rapidity_tr1);
     }
   }
 
@@ -297,6 +333,7 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
     mRecoEPHistoManager->writeHist_DiMuonSpec();
     mRecoEPHistoManager->writeHist_DiMuonQA();
     mRecoEPHistoManager->writeHist_MuonTrkSpec();
+    mRecoEPHistoManager->writeHist_MuonTrkQA();
   }
 
   File_mOutPut->Close();

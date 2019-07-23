@@ -48,12 +48,17 @@ class RecoEPHistoManager : public TObject
     void fillHist_MuonTr1Spec(float px, float py, float pz, float rapidity);
     void writeHist_MuonTrkSpec();
 
-    /*
     void initHist_MuonTrkQA();
-    // void fillHist_MuonTr0(float rapidity);
+
+    void fillHist_MuonTr0_hits(short trhits, float trchi2, short ntrhits, float rapidity);
+    void fillHist_MuonTr0_id(short idhits, float idchi2, short nidhits, float idx, float idy, float rapidity);
+    void fillHist_MuonTr0_QA(float DG0, float DDG0, short lastgap, float dca_r, float dca_z, float rapidity);
+    void fillHist_MuonTr1_hits(short trhits, float trchi2, short ntrhits, float rapidity);
+    void fillHist_MuonTr1_id(short idhits, float idchi2, short nidhits, float idx, float idy, float rapidity);
+    void fillHist_MuonTr1_QA(float DG0, float DDG0, short lastgap, float dca_r, float dca_z, float rapidity);
+
     void writeHist_MuonTrkQA();
     //===============single muon spectra==============
-    */
 
   private:
 
