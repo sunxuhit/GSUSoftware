@@ -11,6 +11,7 @@ class PHCompositeNode;
 class PHGlobal;
 class TrigLvl1;
 class RunHeader;
+class EventHeader;
 class BbcCalib;
 class BbcGeo;
 class VtxOut;
@@ -27,6 +28,8 @@ class TProfile2D;
 class RecoEPHistoManager;
 class RecoEPProManager;
 class RecoEPUtility;
+class PhDiMuonEvent;
+class PhDiMuonTrack;
 
 class PhVecMesonMaker: public SubsysReco {
   public:
@@ -58,6 +61,8 @@ class PhVecMesonMaker: public SubsysReco {
     int mRunId;
     int mRunIndex;
 
+    EventHeader* mEventHeader;
+
     VtxOut* mVtxOut;
 
     BbcCalib* mBbcCalib;
@@ -84,6 +89,11 @@ class PhVecMesonMaker: public SubsysReco {
     RecoEPHistoManager *mRecoEPHistoManager;
     RecoEPProManager *mRecoEPProManager;
     RecoEPUtility *mRecoEPUtility;
+
+    // di-muon TTree
+    TTree *mTree_DiMuon;
+    PhDiMuonEvent *mDiMuonEvent;
+    PhDiMuonTrack *mDiMuonTrack;
 };
 
 #endif

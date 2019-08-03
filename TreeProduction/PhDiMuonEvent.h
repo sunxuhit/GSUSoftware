@@ -216,6 +216,7 @@ class PhDiMuonEvent : public TObject
     TVector3 mVtx_Bbc;
     TVector3 mVtx_Fvtx;
     int mRunId;
+    int mRunIndex;
     int mEventId;
     int mCentrality;
 
@@ -245,10 +246,11 @@ class PhDiMuonEvent : public TObject
 
     PhDiMuonEvent()
     {
-      mVtx_Bbc.Set(-999.9,-999.9,-999.9); // vtx BBC
-      mVtx_Fvtx.Set(-999.9,-999.9,-999.9); // vtx FVTX
+      mVtx_Bbc.SetXYZ(-999.9,-999.9,-999.9); // vtx BBC
+      mVtx_Fvtx.SetXYZ(-999.9,-999.9,-999.9); // vtx FVTX
 
       mRunId = -1;
+      mRunIndex = -1;
       mEventId = -1;
       mCentrality = -1;
 
@@ -289,6 +291,9 @@ class PhDiMuonEvent : public TObject
 
     void setRunId(int r)        { mRunId = r; }
     int getRunId() const        { return mRunId; }
+
+    void setRunIndex(int r)     { mRunIndex = r; }
+    int getRunIndex() const     { return mRunIndex; }
 
     void setEventId(int  r)     { mEventId = r; }
     int getEventId() const      { return mEventId; }
@@ -340,7 +345,7 @@ class PhDiMuonEvent : public TObject
     // -----------------------------------Number of Tracks----------------------------------------
     // Full
     void setNumOfDiMuons(int r)      { mNumOfDiMuons = r; }
-    int getNumTrackEast() const      { return mNumTrackEast; }
+    int getNumOfDiMuons() const      { return mNumOfDiMuons; }
     // South
     void setNumOfDiMuonsSouth(int r) { mNumOfDiMuonsSouth = r; }
     int getNumOfDiMuonsSouth() const { return mNumOfDiMuonsSouth; }

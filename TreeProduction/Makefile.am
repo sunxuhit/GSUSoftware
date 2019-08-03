@@ -10,14 +10,13 @@ AM_CPPFLAGS = -I$(ROOTSYS)/include -I$(OFFLINE_MAIN)/include -I$(OPT_PHENIX)/inc
 dist_pkgdata_DATA = \
 runIndex.txt \
 BbcRecalConsts.txt \
-BbcPhiWeightCorrection.txt \
-file_AuAu200GeV_ReCenterPar.root \
-file_AuAu200GeV_ShiftPar.root
+BbcPhiWeightCorrection.txt
 
 lib_LTLIBRARIES = libPhVecMesonMaker.la
 
 noinst_HEADERS = \
 PhVecMesonMakerLinkDef.h \
+PhDiMuonEventLinkDef.h \
 RecoEPHistoManagerLinkDef.h \
 RecoEPProManagerLinkDef.h \
 RecoEPUtilityLinkDef.h
@@ -27,6 +26,7 @@ RecoEPUtilityLinkDef.h
 
 pkginclude_HEADERS = \
 	PhVecMesonMaker.h \
+	PhDiMuonEvent.h \
 	RecoEPHistoManager.h \
 	RecoEPProManager.h \
 	Run14AuAuList.h \
@@ -39,6 +39,8 @@ pkginclude_HEADERS = \
 libPhVecMesonMaker_la_SOURCES = \
   PhVecMesonMaker_Dict.C \
   PhVecMesonMaker.cxx \
+  PhDiMuonEvent_Dict.C \
+  PhDiMuonEvent.cxx \
   RecoEPHistoManager_Dict.C \
   RecoEPHistoManager.cxx \
   RecoEPProManager_Dict.C \
@@ -83,6 +85,11 @@ clean-local:
 PhVecMesonMaker_Dict.C: \
 	PhVecMesonMaker.h \
 	PhVecMesonMakerLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+PhDiMuonEvent_Dict.C: \
+	PhDiMuonEvent.h \
+	PhDiMuonEventLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 RecoEPHistoManager_Dict.C: \
