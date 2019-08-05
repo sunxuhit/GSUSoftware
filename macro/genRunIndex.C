@@ -15,7 +15,7 @@ int genRunIndex()
     runIndex[i_run] = -999;
   }
 
-  std::string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/macro/allRuns.list";
+  std::string inputfile = "/direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/macro/list/allRuns.list";
   std::cout << "inputfile = " << inputfile.c_str() << std::endl;
   std::ifstream file_runList ( inputfile.c_str() );
   if ( !file_runList.is_open() )

@@ -82,3 +82,6 @@ tmtags
 
 # For rubinius:
 *.rbc
+
+# for submit
+condor/tmp/*.job

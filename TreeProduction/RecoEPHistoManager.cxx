@@ -269,7 +269,7 @@ void RecoEPHistoManager::writeHist_MuonTrkSpec()
 //===============Single Muon QA=========================
 void RecoEPHistoManager::initHist_MuonTrkQA()
 {
-  std::cout << "initialize Single Muon Spectra Histograms!" << std::endl;
+  std::cout << "initialize Single Muon QA Histograms!" << std::endl;
   h_mTrhits_Tr0 = new TH2F("h_mTrhits_Tr0","h_mTrhits_Tr0",100,-5.0,5.0,2000,-1999.5,0.5);
   h_mIdhits_Tr0 = new TH2F("h_mIdhits_Tr0","h_mIdhits_Tr0",100,-5.0,5.0,2000,-0.5,1999.5);
   h_mDG0_Tr0 = new TH2F("h_mDG0_Tr0","h_mDG0_Tr0",100,-5.0,5.0,100,-0.5,29.5);
@@ -351,7 +351,7 @@ void RecoEPHistoManager::fillHist_MuonTr1_QA(float DG0, float DDG0, short lastga
 
 void RecoEPHistoManager::writeHist_MuonTrkQA()
 {
-  std::cout << "initialize Single Muon Spectra Histograms!" << std::endl;
+  std::cout << "write Single Muon QA Histograms!" << std::endl;
   h_mTrhits_Tr0->Write();
   h_mIdhits_Tr0->Write();
   h_mDG0_Tr0->Write();

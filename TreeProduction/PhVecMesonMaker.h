@@ -12,8 +12,8 @@ class PHGlobal;
 class TrigLvl1;
 class RunHeader;
 class EventHeader;
-class BbcCalib;
-class BbcGeo;
+// class BbcCalib;
+// class BbcGeo;
 class VtxOut;
 class DiMuonContainer;
 class ReactionPlaneObject;
@@ -48,11 +48,8 @@ class PhVecMesonMaker: public SubsysReco {
     // RC flags
     int mRunSelection;
     int mSystemSelection;
-    double mBbczCut_val;
-    int mBbcPmt_flag;
     int mMode;
-    int mQA_Bbc;
-    int mDebug_Bbc;
+    double mBbczCut_val;
 
     PHGlobal* mPHGlobal;
     TrigLvl1* mTrigLvl1;
@@ -65,8 +62,8 @@ class PhVecMesonMaker: public SubsysReco {
 
     VtxOut* mVtxOut;
 
-    BbcCalib* mBbcCalib;
-    BbcGeo* mBbcGeo;
+    // BbcCalib* mBbcCalib;
+    // BbcGeo* mBbcGeo;
 
     DiMuonContainer *mDiMuonContainer;
 

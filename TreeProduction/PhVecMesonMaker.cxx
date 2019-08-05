@@ -16,11 +16,11 @@
 #include <RunToTime.hh>
 #include <EventHeader.h>
 
-#include <Bbc.hh>
-#include <BbcRaw.h>
-#include <BbcOut.h>
-#include <BbcCalib.hh>
-#include <BbcGeo.hh>
+// #include <Bbc.hh>
+// #include <BbcRaw.h>
+// #include <BbcOut.h>
+// #include <BbcCalib.hh>
+// #include <BbcGeo.hh>
 
 #include <VtxOut.h>
 #include <PHPoint.h>
@@ -62,11 +62,8 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   // RC flags
   mRunSelection    = 0;
   mSystemSelection = 0;
-  mBbczCut_val     = 10.0;
-  mBbcPmt_flag     = 0;
   mMode            = 0;
-  mDebug_Bbc       = 0;
-  mQA_Bbc          = 0;
+  mBbczCut_val     = 10.0;
 
   // PH class
   mPHGlobal  = NULL;
@@ -75,11 +72,13 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
   mRunId     = -999;
   mRunIndex  = -999;
   mVtxOut    = NULL; // vertex
-  mBbcCalib  = NULL;
-  mBbcGeo    = NULL;
+  // mBbcCalib  = NULL;
+  // mBbcGeo    = NULL;
 
   mOutPutFile  = outputfile;
   File_mOutPut = NULL; // output file
+  mTree_DiMuon = NULL;
+  mDiMuonEvent = NULL;
 
   mNumOfEvents = 0; // number of events
 
@@ -90,18 +89,20 @@ PhVecMesonMaker::PhVecMesonMaker(const char*outputfile)
 
 PhVecMesonMaker::~PhVecMesonMaker()
 {
-  delete mBbcCalib;
-  delete mBbcGeo;
+  // delete mBbcCalib;
+  // delete mBbcGeo;
 
   delete mRecoEPUtility; // delete utilities
   delete mRecoEPHistoManager; // delete histograms manager
   delete mRecoEPProManager; // delete  profiles manager
 
+  /*
   if(mMode == 1)
   {
     delete mTree_DiMuon;
     delete mDiMuonEvent;
   }
+  */
 }
 
 int PhVecMesonMaker::Init(PHCompositeNode *topNode) 
@@ -112,11 +113,8 @@ int PhVecMesonMaker::Init(PHCompositeNode *topNode)
   mRC              = recoConsts::instance();
   mRunSelection    = mRC->get_IntFlag("RUN_SELECTION", 0);
   mSystemSelection = mRC->get_IntFlag("SYSTEM_SELECTION", 0);
-  mBbczCut_val     = mRC->get_DoubleFlag("BBCZCUT_VAL", 10);
-  mBbcPmt_flag     = mRC->get_IntFlag("EP_BBC", 0);
   mMode            = mRC->get_IntFlag("ANA_MODE", 0);
-  mQA_Bbc          = mRC->get_IntFlag("QA_BBC", 1);
-  mDebug_Bbc       = mRC->get_IntFlag("DEBUG_BBC", 0);
+  mBbczCut_val     = mRC->get_DoubleFlag("BBCZCUT_VAL", 10);
 
   cout << "run " << mRunSelection << " @ system ";
   if(mRunSelection == 14 && mSystemSelection == 0) cout << "Au+Au" << endl;
@@ -190,6 +188,7 @@ int PhVecMesonMaker::InitRun(PHCompositeNode *topNode)
     cout << "PhVecMesonMaker -> runId: " << mRunId << " => runIndex: " << mRunIndex << endl;
   }
 
+  /*
   // set BbcCalib
   mBbcCalib = new BbcCalib();
   mBbcGeo   = new BbcGeo();
@@ -202,6 +201,7 @@ int PhVecMesonMaker::InitRun(PHCompositeNode *topNode)
   
   mBbcCalib->restore(tstart, bbccalib_version);
   delete ts;
+  */
 
   return EVENT_OK;
 }
@@ -542,6 +542,7 @@ int PhVecMesonMaker::End(PHCompositeNode *topNode)
 
   if(mMode == 1) // Produce di-muon TTree
   {
+    cout << "Write Di-Muon TTree!" << endl;
     mTree_DiMuon->Write("",TObject::kOverwrite);
   }
 
