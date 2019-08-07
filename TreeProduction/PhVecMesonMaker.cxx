@@ -413,7 +413,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
 
       // di-muon spectra
       DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
-      float InvMass = dimuon->get_mass(); // get di-muon info from DiMuonContainer
+      float invmass = dimuon->get_mass(); // get di-muon info from DiMuonContainer
       float px = dimuon->get_px();
       float py = dimuon->get_py();
       float pz = dimuon->get_pz();
@@ -421,9 +421,16 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       short charge = dimuon->get_charge();
       float dca_r = dimuon->get_dca_r();
       float dca_z = dimuon->get_dca_z();
-      float vtx_chi2 = dimuon->get_Evt_vtxchi2();
+      float vtxchi2 = dimuon->get_Evt_vtxchi2();
+      float invmass_fvtx = dimuon->get_mass_fvtx(); // fvtx
+      float invmass_fvtxmutr = dimuon->get_mass_fvtxmutr(); // fvtxmutr
+      // float px_fvtxmutr = dimuon->get_Px_fvtxmutr();
+      // float py_fvtxmutr = dimuon->get_Py_fvtxmutr();
+      // float pz_fvtxmutr = dimuon->get_Py_fvtxmutr();
+      // float rapidity_fvtxmutr = dimuon->get_rapidity_fvtxmutr();
+      // float vtxchi2_fvtxmutr = dimuon->get_Evt_vtxchi2_fvtxmutr();
 
-      mDiMuonTrack->setInvMass(InvMass); // set di-muon info to mTree_DiMuon
+      mDiMuonTrack->setInvMass(invmass); // set di-muon info to mTree_DiMuon
       mDiMuonTrack->setPx(px);
       mDiMuonTrack->setPy(py);
       mDiMuonTrack->setPz(pz);
@@ -431,7 +438,14 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       mDiMuonTrack->setCharge(charge);
       mDiMuonTrack->setDcaR(dca_r);
       mDiMuonTrack->setDcaZ(dca_z);
-      mDiMuonTrack->setVtxChi2(vtx_chi2);
+      mDiMuonTrack->setVtxChi2(vtxchi2);
+      mDiMuonTrack->setInvMass_fvtx(invmass_fvtx); // fvtx
+      mDiMuonTrack->setInvMass_fvtxmutr(invmass_fvtxmutr); // fvtxmutr
+      // mDiMuonTrack->setPx_fvtxmutr(px_fvtxmutr);
+      // mDiMuonTrack->setPy_fvtxmutr(py_fvtxmutr);
+      // mDiMuonTrack->setPz_fvtxmutr(pz_fvtxmutr);
+      // mDiMuonTrack->setRapidity_fvtxmutr(rapidity_fvtxmutr);
+      // mDiMuonTrack->setVtxChi2_fvtxmutr(vtxchi2_fvtxmutr);
 
       NumOfDiMuons++;
       if(rapidity < 0) NumOfDiMuonsSouth++;
@@ -456,6 +470,17 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float idx_tr0 = dimuon->get_Tr0_idx();
       float idy_tr0 = dimuon->get_Tr0_idy();
       short lastgap_tr0 = dimuon->get_Tr0_lastgap();
+      float px_fvtx_tr0 = dimuon->get_Tr0_px_fvtx(); // fvtx
+      float py_fvtx_tr0 = dimuon->get_Tr0_py_fvtx();
+      float pz_fvtx_tr0 = dimuon->get_Tr0_pz_fvtx();
+      float dphi_fvtx_tr0 = dimuon->get_Tr0_dphi_fvtx();
+      float dtheta_fvtx_tr0 = dimuon->get_Tr0_dtheta_fvtx();
+      float dr_fvtx_tr0 = dimuon->get_Tr0_dr_fvtx();
+      float chi2_fvtx_tr0 = dimuon->get_Tr0_chi2_fvtx();
+      float px_fvtxmutr_tr0 = dimuon->get_Tr0_px_fvtxmutr(); // fvtx & mutr
+      float py_fvtxmutr_tr0 = dimuon->get_Tr0_py_fvtxmutr();
+      float pz_fvtxmutr_tr0 = dimuon->get_Tr0_pz_fvtxmutr();
+      float chi2_fvtxmutr_tr0 = dimuon->get_Tr0_chi2_fvtxmutr();
       
       mDiMuonTrack->setPx_tr0(px_tr0); // set Tr0 info to mTree_DiMuon 
       mDiMuonTrack->setPy_tr0(py_tr0); 
@@ -474,6 +499,17 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       mDiMuonTrack->setIdx_tr0(idx_tr0); 
       mDiMuonTrack->setIdy_tr0(idy_tr0); 
       mDiMuonTrack->setLastgap_tr0(lastgap_tr0); 
+      mDiMuonTrack->setPxfvtx_tr0(px_fvtx_tr0); // fvtx
+      mDiMuonTrack->setPyfvtx_tr0(py_fvtx_tr0);
+      mDiMuonTrack->setPzfvtx_tr0(pz_fvtx_tr0);
+      mDiMuonTrack->setDphifvtx_tr0(dphi_fvtx_tr0);
+      mDiMuonTrack->setDthetafvtx_tr0(dtheta_fvtx_tr0);
+      mDiMuonTrack->setDrfvtx_tr0(dr_fvtx_tr0);
+      mDiMuonTrack->setChi2fvtx_tr0(chi2_fvtx_tr0);
+      mDiMuonTrack->setPxfvtxmutr_tr0(px_fvtxmutr_tr0); // fvtxmutr
+      mDiMuonTrack->setPyfvtxmutr_tr0(py_fvtxmutr_tr0);
+      mDiMuonTrack->setPzfvtxmutr_tr0(pz_fvtxmutr_tr0);
+      mDiMuonTrack->setChi2fvtxmutr_tr0(chi2_fvtxmutr_tr0);
 
       // Tr1
       float px_tr1 = dimuon->get_Tr1_px(); // get Tr1 info from DiMuonContainer
@@ -493,6 +529,17 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float idx_tr1 = dimuon->get_Tr1_idx();
       float idy_tr1 = dimuon->get_Tr1_idy();
       short lastgap_tr1 = dimuon->get_Tr1_lastgap();
+      float px_fvtx_tr1 = dimuon->get_Tr1_px_fvtx(); // fvtx
+      float py_fvtx_tr1 = dimuon->get_Tr1_py_fvtx();
+      float pz_fvtx_tr1 = dimuon->get_Tr1_pz_fvtx();
+      float dphi_fvtx_tr1 = dimuon->get_Tr1_dphi_fvtx();
+      float dtheta_fvtx_tr1 = dimuon->get_Tr1_dtheta_fvtx();
+      float dr_fvtx_tr1 = dimuon->get_Tr1_dr_fvtx();
+      float chi2_fvtx_tr1 = dimuon->get_Tr1_chi2_fvtx();
+      float px_fvtxmutr_tr1 = dimuon->get_Tr1_px_fvtxmutr(); // fvtx & mutr
+      float py_fvtxmutr_tr1 = dimuon->get_Tr1_py_fvtxmutr();
+      float pz_fvtxmutr_tr1 = dimuon->get_Tr1_pz_fvtxmutr();
+      float chi2_fvtxmutr_tr1 = dimuon->get_Tr1_chi2_fvtxmutr();
       
       mDiMuonTrack->setPx_tr1(px_tr1); // set Tr1 info to mTree_DiMuon 
       mDiMuonTrack->setPy_tr1(py_tr1); 
@@ -511,6 +558,17 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       mDiMuonTrack->setIdx_tr1(idx_tr1); 
       mDiMuonTrack->setIdy_tr1(idy_tr1); 
       mDiMuonTrack->setLastgap_tr1(lastgap_tr1); 
+      mDiMuonTrack->setPxfvtx_tr1(px_fvtx_tr1); // fvtx
+      mDiMuonTrack->setPyfvtx_tr1(py_fvtx_tr1);
+      mDiMuonTrack->setPzfvtx_tr1(pz_fvtx_tr1);
+      mDiMuonTrack->setDphifvtx_tr1(dphi_fvtx_tr1);
+      mDiMuonTrack->setDthetafvtx_tr1(dtheta_fvtx_tr1);
+      mDiMuonTrack->setDrfvtx_tr1(dr_fvtx_tr1);
+      mDiMuonTrack->setChi2fvtx_tr1(chi2_fvtx_tr1);
+      mDiMuonTrack->setPxfvtxmutr_tr1(px_fvtxmutr_tr1); // fvtxmutr
+      mDiMuonTrack->setPyfvtxmutr_tr1(py_fvtxmutr_tr1);
+      mDiMuonTrack->setPzfvtxmutr_tr1(pz_fvtxmutr_tr1);
+      mDiMuonTrack->setChi2fvtxmutr_tr1(chi2_fvtxmutr_tr1);
     }
     mDiMuonEvent->setNumOfDiMuons(NumOfDiMuons);
     mDiMuonEvent->setNumOfDiMuonsSouth(NumOfDiMuonsSouth);

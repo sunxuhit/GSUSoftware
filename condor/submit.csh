@@ -1,6 +1,6 @@
 #!/bin/csh -f
-if ( $#argv != 4 ) then
-echo "enter script name, number of events per job, analysis mode, and number of jobs!"
+if ( $#argv != 2 ) then
+echo "enter script name, number of events per job (-1 for all events)!"
 exit
 endif
 
@@ -10,12 +10,12 @@ set out =  ` pwd `
 echo "script = $script"
 
 set numOfEvent = $2
-
-set mode = $3
-
+set mode = 0 # 0 for event plane resolution | 1 for di-muon TTree
 set jobId = 0
 
-while ( $jobId < $4 )
+set numOfJobs = 1023 # total number of runs => 1023
+
+while ( $jobId < $numOfJobs )
 
 cp example.job ${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 
