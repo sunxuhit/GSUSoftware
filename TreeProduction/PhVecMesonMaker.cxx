@@ -27,6 +27,8 @@
 
 #include <DiMuonContainer.h>
 #include <DiMuon.h>
+#include <DiMuon_v6.h>
+#include <DiMuon_v12.h>
 
 #include "ReactionPlaneObject.h"
 #include "ReactionPlaneSngl.h"
@@ -412,7 +414,8 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       mDiMuonTrack = mDiMuonEvent->createTrack();
 
       // di-muon spectra
-      DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
+      DiMuon_v6 *dimuon = (DiMuon_v6*)mDiMuonContainer->get_DiMuon(i_dimuon);
+      // DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
       float invmass = dimuon->get_mass(); // get di-muon info from DiMuonContainer
       float px = dimuon->get_px();
       float py = dimuon->get_py();
@@ -424,11 +427,11 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float vtxchi2 = dimuon->get_Evt_vtxchi2();
       float invmass_fvtx = dimuon->get_mass_fvtx(); // fvtx
       float invmass_fvtxmutr = dimuon->get_mass_fvtxmutr(); // fvtxmutr
-      // float px_fvtxmutr = dimuon->get_Px_fvtxmutr();
-      // float py_fvtxmutr = dimuon->get_Py_fvtxmutr();
-      // float pz_fvtxmutr = dimuon->get_Py_fvtxmutr();
-      // float rapidity_fvtxmutr = dimuon->get_rapidity_fvtxmutr();
-      // float vtxchi2_fvtxmutr = dimuon->get_Evt_vtxchi2_fvtxmutr();
+      float px_fvtxmutr = dimuon->get_Px_fvtxmutr();
+      float py_fvtxmutr = dimuon->get_Py_fvtxmutr();
+      float pz_fvtxmutr = dimuon->get_Pz_fvtxmutr();
+      float rapidity_fvtxmutr = dimuon->get_rapidity_fvtxmutr();
+      float vtxchi2_fvtxmutr = dimuon->get_Evt_vtxchi2_fvtxmutr();
 
       mDiMuonTrack->setInvMass(invmass); // set di-muon info to mTree_DiMuon
       mDiMuonTrack->setPx(px);
@@ -441,11 +444,11 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       mDiMuonTrack->setVtxChi2(vtxchi2);
       mDiMuonTrack->setInvMass_fvtx(invmass_fvtx); // fvtx
       mDiMuonTrack->setInvMass_fvtxmutr(invmass_fvtxmutr); // fvtxmutr
-      // mDiMuonTrack->setPx_fvtxmutr(px_fvtxmutr);
-      // mDiMuonTrack->setPy_fvtxmutr(py_fvtxmutr);
-      // mDiMuonTrack->setPz_fvtxmutr(pz_fvtxmutr);
-      // mDiMuonTrack->setRapidity_fvtxmutr(rapidity_fvtxmutr);
-      // mDiMuonTrack->setVtxChi2_fvtxmutr(vtxchi2_fvtxmutr);
+      mDiMuonTrack->setPx_fvtxmutr(px_fvtxmutr);
+      mDiMuonTrack->setPy_fvtxmutr(py_fvtxmutr);
+      mDiMuonTrack->setPz_fvtxmutr(pz_fvtxmutr);
+      mDiMuonTrack->setRapidity_fvtxmutr(rapidity_fvtxmutr);
+      mDiMuonTrack->setVtxChi2_fvtxmutr(vtxchi2_fvtxmutr);
 
       NumOfDiMuons++;
       if(rapidity < 0) NumOfDiMuonsSouth++;
