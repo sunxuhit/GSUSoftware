@@ -25,7 +25,7 @@ Calibration::~Calibration()
 
 int Calibration::Init()
 {
-  mOutPutFile = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/OutPut/BeamTest/%s/BeamTest_Calibration.root",mHome.c_str(),mDet.c_str());
+  mOutPutFile = Form("%s/WorkSpace/EICPID/OutPut/BeamTest/%s/BeamTest_Calibration.root",mHome.c_str(),mDet.c_str());
   cout << "Calibration::Init(), create output file: "<< mOutPutFile.c_str() <<endl;
   mFile_OutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
 
@@ -250,12 +250,12 @@ int Calibration::Make()
 {
   cout << " this is Calibration::Make" << endl;
 
-  long NumOfEvents = (long)mChainInPut->GetEntries();
-  // long NumOfEvents = 1000;
+  // long NumOfEvents = (long)mChainInPut->GetEntries();
+  long NumOfEvents = 50000;
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
-    if(i_event%100==0) cout << "processing events:  " << i_event << "/" << NumOfEvents << endl;
+    if(i_event%1000==0) cout << "processing events:  " << i_event << "/" << NumOfEvents << endl;
     ResetEventData();
     mChainInPut->GetEntry(i_event);
 
@@ -549,7 +549,7 @@ int Calibration::initRingFinder()
   h_mRingFinder_SingleEvent = new TH2D("h_mRingFinder_SingleEvent","h_mRingFinder_SingleEvent",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
   h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
-  h_mNumOfCherenkovPhotons = new TH3D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",50,-0.5,49.5,50,-0.5,49.5,105,0,2.0*mRICH::mHalfWidth);
+  h_mNumOfCherenkovPhotons = new TH3D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
   h_mNumOfPhotons_OnRing = new TH1D("h_mNumOfPhotons_OnRing","h_mNumOfPhotons_OnRing",50,-0.5,49.5);
   h_mNumOfPhotons_OffRing = new TH1D("h_mNumOfPhotons_OffRing","h_mNumOfPhotons_OffRing",50,-0.5,49.5);
 

@@ -99,6 +99,8 @@ class gemcCalibration : public TObject
 
     TH3D *h_mCherenkovRing; // x | y | R
     TH3D *h_mNumOfCherenkovPhotons;
+    TH1D *h_mNumOfPhotons_OnRing;
+    TH1D *h_mNumOfPhotons_OffRing;
 
     // chain for generated protons
     TChain *mChainInPut_Events;
