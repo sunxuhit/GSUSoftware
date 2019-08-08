@@ -414,7 +414,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       mDiMuonTrack = mDiMuonEvent->createTrack();
 
       // di-muon spectra
-      DiMuon_v6 *dimuon = (DiMuon_v6*)mDiMuonContainer->get_DiMuon(i_dimuon);
+      DiMuon_v12 *dimuon = (DiMuon_v12*)mDiMuonContainer->get_DiMuon(i_dimuon);
       // DiMuon *dimuon = mDiMuonContainer->get_DiMuon(i_dimuon);
       float invmass = dimuon->get_mass(); // get di-muon info from DiMuonContainer
       float px = dimuon->get_px();
