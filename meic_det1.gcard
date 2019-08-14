@@ -17,12 +17,15 @@
 <option name="MAX_Z_POS" value="100000"/>
 <option name="HALL_DIMENSIONS" value="10*m,10*m,100*m"/>
 
-<option name="BEAM_P"   value="proton, 120.0*GeV, 12.09*deg, 271.0*deg"/>
+<option name="BEAM_P"   value="proton, 120.0*GeV, 0.0*deg, 0.0*deg"/>
 <option name="SPREAD_P" value="2.25*eV,0*deg,0*deg"/>
-<option name="BEAM_V"   value="(0.0, 2.649, 0.0)mm"/>
+<option name="BEAM_V"   value="(0.0, 0.0, 0.0)mm"/>
 <option name="SPREAD_V" value="(6.0,0.0)mm"/>
 
 <!-- 
+<option name="BEAM_P"   value="proton, 120.0*GeV, 12.09*deg, 271.0*deg"/>
+<option name="BEAM_V"   value="(0.0, 2.649, 0.0)mm"/>
+
 <option name="BEAM_P"   value="opticalphoton, 3.95*eV, 0*rad, 0*deg"/>
 <option name="SPREAD_P" value="2.25*eV,0*deg,0*deg"/>
 <option name="BEAM_V"   value="(0, 0, 64.585)mm"/> 
