@@ -257,7 +257,7 @@ sub build_foamHolder()
     $detector{"color"} = "00ff00";
     #$detector{"style"} = "1";
     $detector{"type"} = "Pgon";    ### Polyhedra                                                                            
-    $detector{"visible"} = "1";
+    $detector{"visible"} = "0";
     my $dimen = "45*deg 360*deg 4*counts 2*counts";
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_rinner[$i]*mm";}
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_router[$i]*mm";}
@@ -528,7 +528,7 @@ sub build_box_airgap()
     $detector{"type"} = "Box";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$airgap_halfx*mm $airgap_halfy*mm $airgap_halfz*mm";
-    $detector{"material"} = "$air_mat";
+    $detector{"material"} = "$airgap_mat";
     $detector{"sensitivity"} = "no";
     $detector{"hit_type"}    = "no";
     $detector{"identifiers"} = "no";
