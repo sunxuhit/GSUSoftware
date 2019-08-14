@@ -31,7 +31,7 @@ my $hittype="eic_rich";
 my $inch_to_mm = 25.4; # 1" = 25.4mm
 my $BoxDelz = 2.0;   #gap ?
 
-#========================================#
+#===================================================================================================#
 #---- Fresnel lens dimension and info ---#
 my $fresnelLens_focalLength = 6.0*$inch_to_mm; #=6"
 my $fresnelLensEffDiameter = 6.0*$inch_to_mm;   #effective diameter in mm.
@@ -46,15 +46,12 @@ my $fresnelLens_halfx = 5.0*$inch_to_mm/2.0; # effect area in simulation: 5"*5" 
 my $fresnelLens_halfy = $fresnelLens_halfx;
 my $fresnelLens_halfz = (GetSagita($R_max)-GetSagita($R_min)+$centerThickness)/2.0; #dZ + center thickness
 my $fresnelLensDiameter = 2.0*sqrt(2.0)*$fresnelLens_halfx;
-#---- Fresnel lens dimension and info ---#
-
-my $lens_gap=25.4/8.0;
 
 my $focalLength = $fresnelLens_focalLength; # 6"
 my $lens_halfz = $fresnelLens_halfz;
-#========================================#
+my $lens_gap=25.4/8.0;
+#---- Fresnel lens dimension and info ---#
 
-#========================================#
 #------------- Detector box -------------#
 my $box_thicknessX = (1.0/4.0)*$inch_to_mm;    #1/4 inches aluminum sheet
 my $box_thicknessZ = (1.0/16.0)*$inch_to_mm;
@@ -70,9 +67,8 @@ my $offset = $box_halfz;     #detector box pos_z
 my $hollow_halfx=$box_halfx-$box_thicknessX; # hollow volume
 my $hollow_halfy=$hollow_halfx;
 my $hollow_halfz=(2.0*$box_halfz-$box_thicknessZ)/2.0;
-#========================================#
+#------------- Detector box -------------#
 
-#========================================#
 #---------------  Aerogel ---------------#
 my $agel_halfx = 55.25;
 my $agel_halfy = $agel_halfx;
@@ -83,9 +79,43 @@ my $foamHolderThicknessZ = $box_chamber-$lens_halfz*2.0 - $agel_halfz*2.0; # box
 my $foamHolder_halfx = $agel_halfx+$foamHolderThicknessX;
 my $foamHolder_halfy = $foamHolder_halfx;
 my $foamHolder_halfz = $foamHolderThicknessZ/2.0;
-#========================================#
+#---------------  Aerogel ---------------#
 
-#========================================#
+#---------------  Mirrors ---------------#
+my $mirror_gap_front = (1.0/16.0)*$inch_to_mm; # 1"/16
+my $mirror_gap_back  = (1.0/8.0)*$inch_to_mm; # 1"/8
+my $mirrorFront_halfx = 4.5*$inch_to_mm/2.0; # front mirrors open area 4.5"*4.5"
+my $mirrorFront_halfy = $mirrorFront_halfx;
+my $mirrorBack_halfx = 4.0*$inch_to_mm/2.0; # back mirrors open area 4"*4"
+my $mirrorBack_halfy = $mirrorBack_halfx;
+my $mirror_halfz = ($focalLength-$mirror_gap_front-$mirror_gap_back)/2.0;
+# print"\t",'mirrorlength in z direction =',$mirror_halfz*2.0,"\n";
+# print"\t",'mirror_ set: total length in z direction =', ($mirror_gap_front+$mirror_halfz*2.0+$mirror_gap_back)/$inch_to_mm,"\n";
+#---------------  Mirrors ---------------#
+#===================================================================================================#
+
+#===================================================================================================#
+#---------- Readout electronics ---------#
+my $readout_thicknessZ    = 3.0*$inch_to_mm; # Xu's guess
+my $readout_halfx        = 5.5*$inch_to_mm/2.0; # 5.5" => same as holder box
+my $readout_halfy        = $readout_halfx;
+my $readout_halfz        = $readout_thicknessZ/2.0;
+
+my $readout_hollow_halfx = 4.0*$inch_to_mm/2.0; # 4" hollow volume for readbout
+my $readout_hollow_halfy = $readout_hollow_halfx;
+my $readout_hollow_halfz = $readout_halfz;
+
+my $readout_gap = 30.0;     # 3mm: gap between optical box and readout box
+my $readout_z = $offset + $box_halfz + $readout_gap + $readout_halfz;
+
+my $airgap_thickness    = $readout_gap;
+my $airgap_halfx        = $readout_halfx; # air gap to let photon reach readout box
+my $airgap_halfy        = $readout_halfy;
+my $airgap_halfz        = $airgap_thickness/2.0;
+my $airgap_z = $offset + $box_halfz + $airgap_halfz;
+
+#---------- Readout electronics ---------#
+
 #------------ Photon Sensor -------------#
 my $glassWindow_halfx = 52/2;
 my $glassWindow_halfy = $glassWindow_halfx;
@@ -104,10 +134,8 @@ my $insulation=27.4;          #gap between sensor and metal sheet
 
 my $sensor_total_halfx=2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
 my $build_copper=0;            #1: build copper plate
-#========================================#
-#---------- Readout electronics ---------#
-my $readout_halfz = 4.0;           # I don't like it.
-my $readout_thickness=2.0;
+#------------ Photon Sensor -------------#
+#===================================================================================================#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -119,18 +147,19 @@ my $agel_posz=$foamHolder_posz+$foamHolder_halfz+$agel_halfz; # w.r.t hollow vol
 my $lens_z=$agel_posz+$agel_halfz+$lens_halfz; # w.r.t hollow volume
 #---------- optical---------#
 
+my $readout_hollow_z=-$readout_halfz+$readout_hollow_halfz; # w.r.t readout box
 my $glassWindow_z= $lens_z-$lens_halfz+$focalLength+$phodet_gapz+$glassWindow_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
 
-my @readout_z= ($glassWindow_z-$glassWindow_halfz, $phodet_z+$phodet_halfz);
-if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
+# my @readout_z= ($glassWindow_z-$glassWindow_halfz, $phodet_z+$phodet_halfz);
+# if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
 
 my $hollowOffset=$hollow_z+$offset;   #accumulated offset due to asymmetric detector walls (z-direction)
 my @detposZ = ( $offset, $hollowOffset, $hollowOffset+$foamHolder_posz, $hollowOffset+$agel_posz, $hollowOffset+$lens_z, $hollowOffset+$phodet_z);
 
 my @freslens = ( 2.0*sqrt(2.0)*$fresnelLensDiameter/8.0, 2.0*sqrt(2.0)*$fresnelLensDiameter/8.0, $fresnelLens_halfz );
-my @readoutposZ = ( $hollowOffset+$readout_z[0], $hollowOffset+$readout_z[1]);
+# my @readoutposZ = ( $hollowOffset+$readout_z[0], $hollowOffset+$readout_z[1]);
 sub print_detector()
 {
   my $agelThickness=2*$agel_halfz/10;
@@ -157,7 +186,7 @@ my $box_name = "detector_holder";
 my $box_mat = "G4_Al";
 my $hollow_mat="Air_Opt";
 
-sub build_box()
+sub build_box_optical()
 {
     print"building detector holder box...\n";
 
@@ -165,7 +194,7 @@ sub build_box()
     $detector{"name"} = "$DetectorName\_$box_name";
     $detector{"mother"} = "$DetectorMother";
     $detector{"description"} = "$DetectorName\_$box_name";
-    $detector{"pos"} = "0*mm 0*mm $offset*mm";
+    $detector{"pos"} = "0*mm 0*mm $offset*mm"; # w.r.t mother volume
     $detector{"color"} = "81f7f3";
     $detector{"type"} = "Box";
     $detector{"visible"} = "1";
@@ -208,6 +237,7 @@ sub build_foamHolder()
     $detector{"pos"} = "0*mm 0*mm $foamHolder_posz*mm";
     $detector{"color"} = "00ff00";
     $detector{"type"} = "Box";
+    $detector{"visible"} = "1";
     $detector{"dimensions"} = "$foamHolder_halfx*mm $foamHolder_halfy*mm $foamHolder_halfz*mm";
     $detector{"material"} = "$foamHolder_mat";
     $detector{"sensitivity"} = "no";
@@ -227,6 +257,7 @@ sub build_foamHolder()
     $detector{"color"} = "00ff00";
     #$detector{"style"} = "1";
     $detector{"type"} = "Pgon";    ### Polyhedra                                                                            
+    $detector{"visible"} = "1";
     my $dimen = "45*deg 360*deg 4*counts 2*counts";
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_rinner[$i]*mm";}
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_router[$i]*mm";}
@@ -254,8 +285,9 @@ sub build_aerogel()
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$agel_name";
     $detector{"pos"} = "0*mm 0*mm $agel_posz*mm";
-    $detector{"color"} = "ffa500";
+    $detector{"color"} = "ff0002";
     $detector{"type"} = "Box";
+    $detector{"visible"} = "1";
     $detector{"dimensions"} = "$agel_halfx*mm $agel_halfy*mm $agel_halfz*mm";
     $detector{"material"} = "$agel_mat";
     $detector{"sensitivity"} = "$hittype";
@@ -448,9 +480,9 @@ sub build_mirrors()
     print"building mirror set...\n";
 
     my $mirror_thickness=2;
-    my @mirror_z=($lens_z+$lens_halfz+$lens_gap,$glassWindow_z-$glassWindow_halfz-$phodet_gapz); #introduce gap between photon sensor and mirror sets
-    my @mirror_router = ( $agel_halfx+$mirror_thickness, $sensor_total_halfx+$mirror_thickness );
-    my @mirror_rinner = ( $agel_halfx, $sensor_total_halfx);
+    my @mirror_z=($lens_z+$lens_halfz+$mirror_gap_front,$lens_z+$lens_halfz+$mirror_gap_front+$mirror_halfz*2.0);
+    my @mirror_router = ( $mirrorFront_halfx+$mirror_thickness, $mirrorBack_halfx+$mirror_thickness );
+    my @mirror_rinner = ( $mirrorFront_halfx, $mirrorBack_halfx);
     
     print"\t",'mirror: length in z direction =',$mirror_z[1]-$mirror_z[0],"\n";
 
@@ -462,6 +494,7 @@ sub build_mirrors()
     $detector{"pos"} = "0*mm 0*mm 0*mm";
     $detector{"color"} = "ffff00";
     $detector{"type"} = "Pgon";
+    $detector{"visible"} = "1";
 
     my $dimen = "45*deg 360*deg 4*counts 2*counts";
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_rinner[$i]*mm";}
@@ -476,33 +509,68 @@ sub build_mirrors()
     print_det(\%configuration, \%detector);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ air gap~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+my $airgap_name = "airgap";
+my $airgap_mat="Air_Opt";
+sub build_box_airgap()
+{
+    print"building airgap ...\n";
+
+    my %detector=init_det();
+    $detector{"name"} = "$DetectorName\_$airgap_name";
+    $detector{"mother"} = "$DetectorMother";
+    $detector{"description"} = "$DetectorName\_$airgap_name";
+    $detector{"pos"} = "0*mm 0*mm $airgap_z*mm"; # w.r.t. mother volume
+    $detector{"rotation"} = "0*deg 0*deg 0*deg";
+    $detector{"color"} = "ff0002";
+    # $detector{"color"} = "81f7f3";
+    # $detector{"color"} = "ffffff";
+    $detector{"type"} = "Box";
+    $detector{"visible"} = "1";
+    $detector{"dimensions"} = "$airgap_halfx*mm $airgap_halfy*mm $airgap_halfz*mm";
+    $detector{"material"} = "$air_mat";
+    $detector{"sensitivity"} = "no";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ readout hardware ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $readoutdet_name = "readout";
 my $readout_mat  = "Aluminum";
-my @readoutdet_pos  = ( 0.0, 0.0, 0.0 );
-my @readout_rinner = ( $sensor_total_halfx, $sensor_total_halfx ); 
-my @readout_router = ( $sensor_total_halfx+$readout_thickness, $sensor_total_halfx+$readout_thickness );
-
-sub build_readout()
+my $readout_hollow_mat="Air_Opt";
+sub build_box_readout()
 {
-    print"building readout hardware...\n";
-   
+    print"building readout holder box...\n";
+
     my %detector=init_det();
     $detector{"name"} = "$DetectorName\_$readoutdet_name";
     $detector{"mother"} = "$DetectorMother";
     $detector{"description"} = "$DetectorName\_$readoutdet_name";
-    $detector{"pos"} = "$readoutdet_pos[0]*mm $readoutdet_pos[1]*mm $readoutdet_pos[2]*mm"; #Ping : checked
+    $detector{"pos"} = "0*mm 0*mm $readout_z*mm"; # w.r.t. mother volume
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "ff0000";
-    $detector{"style"} = "0";
-    $detector{"visible"} = "0";
-    $detector{"type"} = "Pgon";    ### Polyhedra
-    my $dimen = "45*deg 360*deg 4*counts 2*counts";
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_rinner[$i]*mm";}
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_router[$i]*mm";}
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_z[$i]*mm";}
-    $detector{"dimensions"} = "$dimen";
+    # $detector{"color"} = "81f7f3";
+    $detector{"color"} = "00ff00";
+    $detector{"type"} = "Box";
+    $detector{"visible"} = "1";
+    $detector{"dimensions"} = "$readout_halfx*mm $readout_halfy*mm $readout_halfz*mm";
     $detector{"material"} = "$readout_mat";
+    $detector{"sensitivity"} = "no";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
+  
+    %detector=init_det();
+    $detector{"name"} = "$DetectorName\_readout_hollow";
+    $detector{"mother"} = "$DetectorName\_$readoutdet_name";
+    $detector{"description"} = "$DetectorName\_readout_hollow";
+    $detector{"pos"} = "0*mm 0*mm $readout_hollow_z*mm";   #w.r.t. readout box
+    $detector{"color"} = "ffffff";
+    $detector{"type"} = "Box";
+    $detector{"style"} = "0";
+    $detector{"visible"} = "1";
+    $detector{"dimensions"} = "$readout_hollow_halfx*mm $readout_hollow_halfy*mm $readout_hollow_halfz*mm";
+    $detector{"material"} = "$readout_hollow_mat";
     $detector{"sensitivity"} = "no";
     $detector{"hit_type"}    = "no";
     $detector{"identifiers"} = "no";
@@ -611,12 +679,13 @@ sub build_detector()
 {
     print_detector();
     print"=====================================================================\n";
-    build_box();
+    build_box_optical();
     build_foamHolder();
     build_aerogel();
     # build_fresnel_lens();
-    # build_mirrors();
-    # build_readout();
+    build_mirrors();
+    build_box_airgap();
+    build_box_readout();
     # build_photondet();
     print"done\n";
     print"=====================================================================\n";
