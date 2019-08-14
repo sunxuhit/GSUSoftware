@@ -28,76 +28,68 @@ my $hittype="eic_rich";
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~ Define detector size and location ~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+my $inch_to_mm = 25.4; # 1" = 25.4mm
 my $BoxDelz = 2.0;   #gap ?
-#========================================#
-#---------------  Aerogel ---------------#
-my $agel_halfx = 55.25;
-my $agel_halfy = $agel_halfx;
-my $agel_halfz = 16.5; #3.3cm thick agel
-
-my $foamHolderThicknessX=10.0;
-my $foamHolderThicknessZ=10.0;
-my $foamHolder_halfx=$agel_halfx+$foamHolderThicknessX;
-my $foamHolder_halfy=$foamHolder_halfx;
-my $foamHolder_halfz=$foamHolderThicknessZ/2.0;
 
 #========================================#
-#---- lens dimension and info ---#
-
 #---- Fresnel lens dimension and info ---#
-my $fresnelLens_focalLength = 152.4;        #=6"
-my $fresnelLensEffDiameter =152.4;   #effective diameter in mm.
-my $grooveDensity=125/25.4;   #100 grooves per inch. converted to grooves per mm.
-my $centerThickness=0.06*25.4;
+my $fresnelLens_focalLength = 6.0*$inch_to_mm; #=6"
+my $fresnelLensEffDiameter = 6.0*$inch_to_mm;   #effective diameter in mm.
+my $grooveDensity = 125/25.4;   #100 grooves per inch. converted to grooves per mm.
+my $centerThickness = 0.06*$inch_to_mm;
 my $lens_numOfGrooves = floor($grooveDensity*($fresnelLensEffDiameter/2));
 my $GrooveWidth=1/$grooveDensity;
 my $R_min = ($lens_numOfGrooves-1)*$GrooveWidth;
 my $R_max = ($lens_numOfGrooves-0)*$GrooveWidth;
 
-my $fresnelLens_halfx=66.675;   #beam test 2016
-my $fresnelLens_halfy=$fresnelLens_halfx;
+my $fresnelLens_halfx = 5.0*$inch_to_mm/2.0; # effect area in simulation: 5"*5"  | real area: (5"+1"/8) * 4.992
+my $fresnelLens_halfy = $fresnelLens_halfx;
 my $fresnelLens_halfz = (GetSagita($R_max)-GetSagita($R_min)+$centerThickness)/2.0; #dZ + center thickness
 my $fresnelLensDiameter = 2.0*sqrt(2.0)*$fresnelLens_halfx;
 #---- Fresnel lens dimension and info ---#
 
-#---- Plano lens dimension and info ---#
-my $planoLens_BFL = 189.0;
-my $planoLens_D = 100.0;
-my $planoLens_CT = 17.0;
-my $planoLens_R = 103.5;
-my $planoLens_ET = $planoLens_CT - $planoLens_R+sqrt($planoLens_R*$planoLens_R-0.5*$planoLens_D*0.5*$planoLens_D);
-my $planoLens_ST = $planoLens_CT - $planoLens_ET;
-my $planoLens_EFL = 200.0;
-
-my $planoLens_halfx = $planoLens_D/2.0;
-my $planoLens_halfy = $planoLens_halfx;
-my $planoLens_halfz = $planoLens_CT/2.0;
-#---- Plano lens dimension and info ---#
-
-my $lensType = 1; # 0 for plano-convex lens | 1 for fresnel lens
 my $lens_gap=25.4/8.0;
 
-my $focalLength;
-my $lens_halfz;
+my $focalLength = $fresnelLens_focalLength; # 6"
+my $lens_halfz = $fresnelLens_halfz;
+#========================================#
 
-if($lensType == 1)
-{
-  $focalLength = $fresnelLens_focalLength; # 6"
-  $lens_halfz = $fresnelLens_halfz;
-}
-if($lensType == 0)
-{
-  $focalLength = $planoLens_BFL; # 8"
-  $lens_halfz = $planoLens_halfz;
-}
-#---- lens dimension and info ---#
+#========================================#
+#------------- Detector box -------------#
+my $box_thicknessX = (1.0/4.0)*$inch_to_mm;    #1/4 inches aluminum sheet
+my $box_thicknessZ = (1.0/16.0)*$inch_to_mm;
+my $box_chamber = 2.0*$inch_to_mm; # 2": cushion: 0.5" & aeorgel+foamHodler: 1"+7"/16 & frensnel lens: 1"/16
+
+my $box_halfx = 5.5*$inch_to_mm/2.0; # 5.5"
+my $box_halfy=$box_halfx;
+my $box_halfz = ($box_thicknessZ+$box_chamber+$focalLength)/2.0; # 8"+1"/16
+my $offset = $box_halfz;     #detector box pos_z
+
+# if ($build_copper) { $box_halfz = $box_halfz+(1*$metalSheet_halfz+$insulation)/2.0;}
+
+my $hollow_halfx=$box_halfx-$box_thicknessX; # hollow volume
+my $hollow_halfy=$hollow_halfx;
+my $hollow_halfz=(2.0*$box_halfz-$box_thicknessZ)/2.0;
+#========================================#
+
+#========================================#
+#---------------  Aerogel ---------------#
+my $agel_halfx = 55.25;
+my $agel_halfy = $agel_halfx;
+my $agel_halfz = 15.0; # 3*10mm thick aerogel
+
+my $foamHolderThicknessX = $hollow_halfx-$agel_halfx; # distance between aerogel and holder box
+my $foamHolderThicknessZ = $box_chamber-$lens_halfz*2.0 - $agel_halfz*2.0; # box_chamber - lens thickness - aeorgel thickness
+my $foamHolder_halfx = $agel_halfx+$foamHolderThicknessX;
+my $foamHolder_halfy = $foamHolder_halfx;
+my $foamHolder_halfz = $foamHolderThicknessZ/2.0;
 #========================================#
 
 #========================================#
 #------------ Photon Sensor -------------#
-my $glassWindow_halfx=52/2;
-my $glassWindow_halfy= $glassWindow_halfx;
-my $glassWindow_halfz= 0.75;  #glass window thickness=1.5mm
+my $glassWindow_halfx = 52/2;
+my $glassWindow_halfy = $glassWindow_halfx;
+my $glassWindow_halfz = 0.75;  #glass window thickness=1.5mm
 
 my $sensorGap=0.5;             #half the gap between sensor 
 my $phodet_halfx = 24.0;       #1/2 eff. area of Hamamatsu H12700a
@@ -111,64 +103,33 @@ my $metalSheet_halfz=0.5;     #estimation
 my $insulation=27.4;          #gap between sensor and metal sheet
 
 my $sensor_total_halfx=2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
-my $build_copper=1;            #1: build copper plate
+my $build_copper=0;            #1: build copper plate
 #========================================#
 #---------- Readout electronics ---------#
 my $readout_halfz = 4.0;           # I don't like it.
 my $readout_thickness=2.0;
-#========================================#
-#------------- Detector box -------------#
-my @all_halfx=($foamHolder_halfx,$fresnelLens_halfx,$sensor_total_halfx+$readout_thickness);
-
-my $box_thicknessX=(1.0/4.0)*25.4;    #1/4 inches aluminum sheet
-my $box_thicknessZ1=(1.0/16.0)*25.4;
-my $box_thicknessZ2=(1.0/4.0)*25.4;
-
-my $box_halfx = max(@all_halfx) + $box_thicknessX+1.0;
-my $box_halfy=$box_halfx;
-my $box_halfz = ($BoxDelz+2*$foamHolder_halfz+2*$agel_halfz
-		 +$lens_gap+2*$lens_halfz+$focalLength+$phodet_gapz
-		 +2*$glassWindow_halfz+2*$phodet_halfz+(2*$readout_halfz+$BoxDelz)
-		 +$box_thicknessZ1+$box_thicknessZ2)/2.0;
-
-if ($build_copper) { $box_halfz = $box_halfz+(1*$metalSheet_halfz+$insulation)/2.0;}
-
-my $offset = $box_halfz+50;     #detector box pos_z
-
-my $hollow_halfx=$box_halfx-$box_thicknessX;
-my $hollow_halfy=$hollow_halfx;
-my $hollow_halfz=(2.0*$box_halfz-$box_thicknessZ1-$box_thicknessZ2)/2.0;
-#========================================#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Print detector information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-my $hollow_z=-$box_halfz+$hollow_halfz+$box_thicknessZ1;
+#---------- optical---------#
+my $hollow_z=-$box_halfz+$box_thicknessZ+$hollow_halfz; # w.r.t holder box
 
-my $foamHolder_posz=-$hollow_halfz+$BoxDelz+$foamHolder_halfz;
-my $agel_posz=$foamHolder_posz+$foamHolder_halfz+$agel_halfz;
+my $foamHolder_posz=-$hollow_halfz+$foamHolder_halfz; # w.r.t hollow volume
+my $agel_posz=$foamHolder_posz+$foamHolder_halfz+$agel_halfz; # w.r.t hollow volume
+my $lens_z=$agel_posz+$agel_halfz+$lens_halfz; # w.r.t hollow volume
+#---------- optical---------#
 
-my $lens_z=$agel_posz+$agel_halfz+$lens_gap+$lens_halfz;
-my $glassWindow_z;
-if($lensType == 1)
-{
-  $glassWindow_z= $lens_z-$lens_halfz+$focalLength+$phodet_gapz+$glassWindow_halfz;
-}
-if($lensType == 0)
-{
-  $glassWindow_z= $lens_z+$lens_halfz+$focalLength+$phodet_gapz+$glassWindow_halfz;
-}
-
+my $glassWindow_z= $lens_z-$lens_halfz+$focalLength+$phodet_gapz+$glassWindow_halfz;
 my $phodet_z =$glassWindow_z+$glassWindow_halfz+$phodet_halfz;
 my $metalSheet_z=$phodet_z-$phodet_halfz+$insulation-$metalSheet_halfz;
-		     
+
 my @readout_z= ($glassWindow_z-$glassWindow_halfz, $phodet_z+$phodet_halfz);
 if ($build_copper) {$readout_z[1]=$metalSheet_z+$metalSheet_halfz+$readout_halfz;}
 
 my $hollowOffset=$hollow_z+$offset;   #accumulated offset due to asymmetric detector walls (z-direction)
-my @detposZ = ( $offset, $hollowOffset,$hollowOffset+$agel_posz, $hollowOffset+$lens_z, $hollowOffset+$phodet_z);
+my @detposZ = ( $offset, $hollowOffset, $hollowOffset+$foamHolder_posz, $hollowOffset+$agel_posz, $hollowOffset+$lens_z, $hollowOffset+$phodet_z);
 
 my @freslens = ( 2.0*sqrt(2.0)*$fresnelLensDiameter/8.0, 2.0*sqrt(2.0)*$fresnelLensDiameter/8.0, $fresnelLens_halfz );
-my @planolens = ( $planoLens_halfx, , $planoLens_halfy, $planoLens_halfz);
 my @readoutposZ = ( $hollowOffset+$readout_z[0], $hollowOffset+$readout_z[1]);
 sub print_detector()
 {
@@ -181,18 +142,12 @@ sub print_detector()
   
   print"hold box       position=(0.0, 0.0, $detposZ[0])mm, half size in XYZ=($box_halfx, $box_halfy, $box_halfz)mm\n";
   print"hollowVol      position=(0.0, 0.0, $detposZ[1])mm, half size in XYZ=($hollow_halfx, $hollow_halfy, $hollow_halfz)mm\n";
-  print"aerogel        position=(0.0, 0.0, $detposZ[2])mm, half size in XYZ=($agel_halfx, $agel_halfy, $agel_halfz)mm\n";
-  if($lensType == 1) 
-  {
-    print"fresnel lens   position=(0.0, 0.0, $detposZ[3])mm, half size in XYZ=($freslens[0], $freslens[1], $freslens[2])mm\n";
-  }
-  if($lensType == 0) 
-  {
-    print"plano-convex lens   position=(0.0, 0.0, $detposZ[3])mm, half size in XYZ=($planolens[0], $planolens[1], $planolens[2])mm\n";
-  }
-  print"photon sensor  position=(0.0, 0.0, $detposZ[4])mm, half size in XYZ=($phodet_halfx, $phodet_halfy, $phodet_halfz)mm\n";
-  print'glass window   pos_z=',$hollowOffset+$glassWindow_z,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
-  print"readout        position=(0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
+  print"foamHolder     position=(0.0, 0.0, $detposZ[2])mm, half size in XYZ=($foamHolder_halfx, $foamHolder_halfy, $foamHolder_halfz)mm\n";
+  print"aerogel        position=(0.0, 0.0, $detposZ[3])mm, half size in XYZ=($agel_halfx, $agel_halfy, $agel_halfz)mm\n";
+  print"fresnel lens   position=(0.0, 0.0, $detposZ[4])mm, half size in XYZ=($freslens[0], $freslens[1], $freslens[2])mm\n";
+  # print"photon sensor  position=(0.0, 0.0, $detposZ[5])mm, half size in XYZ=($phodet_halfx, $phodet_halfy, $phodet_halfz)mm\n";
+  # print'glass window   pos_z=',$hollowOffset+$glassWindow_z,'mm, half_z=',$glassWindow_halfz,'mm',"\n";
+  # print"readout        position=(0.0, 0.0, $readoutposZ[0] mm, and $readoutposZ[1] mm )\n";
   print"=====================================================================\n";
   print"sensor_total_halfx= $sensor_total_halfx mm\n";
 }
@@ -200,9 +155,6 @@ sub print_detector()
 #~~~~~~~~~~~~~~~~~~~~~~~~~ Define the holder Box for Detectors ~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $box_name = "detector_holder";
 my $box_mat = "G4_Al";
-#my $box_mat = "Air_Opt";
-#my $box_mat = "holder_acrylic";
-
 my $hollow_mat="Air_Opt";
 
 sub build_box()
@@ -239,7 +191,6 @@ sub build_box()
     $detector{"hit_type"}    = "no";
     $detector{"identifiers"} = "no";
     print_det(\%configuration, \%detector);
-
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Foam holder ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -270,7 +221,7 @@ sub build_foamHolder()
 
     $detector{"name"} = "$DetectorName\_$foamHolder_name\_1";
     $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_foamHolder_name";
+    $detector{"description"} = "$DetectorName\_$foamHolder_name";
     $detector{"pos"} = "0*mm 0*mm 0*mm";
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
     $detector{"color"} = "00ff00";
@@ -294,9 +245,6 @@ my $agel_name = "Aerogel";
 my $agel_mat  = "aerogel";
 #my $agel_mat  = "G4_WATER";
 
-my $agel_posx=0;
-my $agel_posy=0;
-
 sub build_aerogel()
 {
     print"building aerogel block...\n";
@@ -305,7 +253,7 @@ sub build_aerogel()
     $detector{"name"} = "$DetectorName\_$agel_name";
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$agel_name";
-    $detector{"pos"} = "$agel_posx*mm $agel_posy*mm $agel_posz*mm";
+    $detector{"pos"} = "0*mm 0*mm $agel_posz*mm";
     $detector{"color"} = "ffa500";
     $detector{"type"} = "Box";
     $detector{"dimensions"} = "$agel_halfx*mm $agel_halfy*mm $agel_halfz*mm";
@@ -492,149 +440,74 @@ sub GetSagita
   my $Sagita_value = $Curvature*($_[0]**2)/(1.0+sqrt($ArgSqrt)) + $TotAspher;
   return $Sagita_value ;
 }
-
-#---------- build plano convex Lens ----------#
-
-my $planoLens_holdbox_name="$DetectorName\_planoLensHoldBox";
-my $planoLens_holdbox_mat  = "Air_Opt";
-
-sub build_plano_lens()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ reflection mirrors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+my $mirror_mat  = "Aluminum";
+sub build_mirrors()
 {
-  print"building Plano Convex Lens... \n";
-  print"\tPlano Convex Lens: Lens Diameter = $planoLens_D\n";
-  print"\tPlano Convex Lens: Lens Center Thickness = $planoLens_CT\n";
-  print"\tPlano Convex Lens: Lens Back Focal Length = $planoLens_BFL\n";
-  # print"\tPlano Convex Lens: Lens Effictive Thickness = $planoLens_ET\n";
-  # print"\tholdbox half thickness= ",$planoLens_holdbox_halfz,"\n";
+    print"building mirror set...\n";
 
-  my $planoLens_holdbox_halfx = $planoLens_halfx;
-  my $planoLens_holdbox_halfy = $planoLens_halfy;
-  my $planoLens_holdbox_halfz = $planoLens_halfz;
+    my $mirror_thickness=2;
+    my @mirror_z=($lens_z+$lens_halfz+$lens_gap,$glassWindow_z-$glassWindow_halfz-$phodet_gapz); #introduce gap between photon sensor and mirror sets
+    my @mirror_router = ( $agel_halfx+$mirror_thickness, $sensor_total_halfx+$mirror_thickness );
+    my @mirror_rinner = ( $agel_halfx, $sensor_total_halfx);
+    
+    print"\t",'mirror: length in z direction =',$mirror_z[1]-$mirror_z[0],"\n";
 
-  #----------- build holder box -----------#
-  my %detector; 
-  %detector=init_det();
-  $detector{"name"} = "$planoLens_holdbox_name";
-  $detector{"mother"} = "$DetectorName\_hollow";
-  $detector{"description"} = "$planoLens_holdbox_name";
-  $detector{"pos"} = "0*mm 0*mm $lens_z*mm";
-  $detector{"color"} = "ff0000";
-  $detector{"type"} = "Box";
-  $detector{"dimensions"} = "$planoLens_holdbox_halfx*mm $planoLens_holdbox_halfy*mm $planoLens_holdbox_halfz*mm";
-  $detector{"material"} = $planoLens_holdbox_mat;
-  $detector{"rotation"} = "0*deg 0*deg 0*deg";
-  $detector{"style"} = "0";
-  $detector{"visible"} = "1";
-  $detector{"sensitivity"} = "no";
-  $detector{"hit_type"}    = "no";
-  $detector{"identifiers"} = "no";
-  print_det(\%configuration, \%detector);
-  #----------- build holder box -----------#
+    my $idManual=3;
+    my %detector=init_det();
+    $detector{"name"} = "$DetectorName\_mirror";
+    $detector{"mother"} = "$DetectorName\_hollow";
+    $detector{"description"} = "$DetectorName\_mirror";
+    $detector{"pos"} = "0*mm 0*mm 0*mm";
+    $detector{"color"} = "ffff00";
+    $detector{"type"} = "Pgon";
 
-  # #--------- build plano convex lens -----------#
-  my $pos_z_planoLens_sphere = $planoLens_R - $planoLens_holdbox_halfz;
-  %detector=init_det();
-  $detector{"name"} = "$DetectorName\_planoLens_sphere";
-  $detector{"mother"} = "$planoLens_holdbox_name";
-  $detector{"description"} = "$DetectorName\_planoLens_sphere";
-  $detector{"pos"} = "0*mm 0*mm $pos_z_planoLens_sphere*mm"; # w.r.t plano lens holder box
-  $detector{"rotation"} = "0*deg 0*deg 0*deg";
-  $detector{"color"} = "2eb7ed";
-  $detector{"type"} = "Sphere";
-  $detector{"dimensions"} = "0.0*mm $planoLens_R*mm 0.0*deg 360.0*deg 0.0*deg 180.0*deg";
-  $detector{"material"} = "Component";
-  $detector{"style"} = "0";
-  $detector{"visible"} = "1";
-  $detector{"sensitivity"} = "no";
-  $detector{"hit_type"}    = "no";
-  $detector{"identifiers"} = "no";
-  print_det(\%configuration, \%detector);
+    my $dimen = "45*deg 360*deg 4*counts 2*counts";
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_rinner[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_router[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_z[$i]*mm";}
 
-  my $pos_z_planoLens_box = $pos_z_planoLens_sphere + $planoLens_ST;
-  %detector=init_det();
-  $detector{"name"} = "$DetectorName\_planoLens_box";
-  $detector{"mother"} = "$planoLens_holdbox_name";
-  $detector{"description"} = "$DetectorName\_planoLens_box";
-  $detector{"pos"} = "0*mm 0*mm $pos_z_planoLens_box*mm"; # w.r.t plano lens holder box
-  $detector{"rotation"} = "0*deg 0*deg 0*deg";
-  $detector{"color"} = "2eb7ed";
-  $detector{"type"} = "Box";
-  $detector{"dimensions"} = "$planoLens_R*mm $planoLens_R*mm $planoLens_R*mm";
-  $detector{"material"} = "Component";
-  $detector{"style"} = "0";
-  $detector{"visible"} = "0";
-  $detector{"sensitivity"} = "no";
-  $detector{"hit_type"}    = "no";
-  $detector{"identifiers"} = "no";
-  print_det(\%configuration, \%detector);
-
-  %detector=init_det();
-  $detector{"name"} = "$DetectorName\_planoLens_convex";
-  $detector{"mother"} = "$planoLens_holdbox_name";
-  $detector{"description"} = "$DetectorName\_planoLens_convex";
-  $detector{"pos"} = "0*mm 0*mm $pos_z_planoLens_sphere*mm"; # w.r.t plano lens holder box
-  $detector{"rotation"} = "0*deg 0*deg 0*deg";
-  $detector{"color"} = "2eb7ed";
-  $detector{"type"} = "Operation:@ $DetectorName\_planoLens_sphere - $DetectorName\_planoLens_box";
-  $detector{"dimensions"} = "0";
-  $detector{"material"} = "Component";
-  # $detector{"material"} = "glass";
-  $detector{"style"} = "1";
-  $detector{"visible"} = "1";
-  $detector{"sensitivity"} = "no";
-  $detector{"hit_type"}    = "no";
-  $detector{"identifiers"} = "no";
-  print_det(\%configuration, \%detector);
-  # #--------- build plano convex lens -----------#
-
-  # #--------- build flat lens -----------#
-  my $planoLens_tube_R = $planoLens_D/2.0;
-  my $planoLens_tube_halfz = $planoLens_ET/2.0;
-  my $pos_z_planoLens_tube =  $planoLens_ST - $planoLens_holdbox_halfz + $planoLens_tube_halfz;
-  %detector=init_det();
-  $detector{"name"} = "$DetectorName\_planoLens_tube";
-  $detector{"mother"} = "$planoLens_holdbox_name";
-  $detector{"description"} = "$DetectorName\_planoLens_tube";
-  $detector{"pos"} = "0*mm 0*mm $pos_z_planoLens_tube*mm";
-  $detector{"rotation"} = "0*deg 0*deg 0*deg";
-  $detector{"color"} = "2eb7ed";
-  $detector{"type"} = "Tube";
-  $detector{"dimensions"} = "0.0*mm $planoLens_tube_R*mm $planoLens_tube_halfz*mm 0.0*deg 360.0*deg";
-  $detector{"material"} = "Component";
-  $detector{"style"} = "1";
-  $detector{"visible"} = "1";
-  $detector{"sensitivity"} = "no";
-  $detector{"hit_type"}    = "no";
-  $detector{"identifiers"} = "no";
-  print_det(\%configuration, \%detector);
-  # #--------- build flat lens -----------#
-
-  %detector=init_det();
-  $detector{"name"} = "$DetectorName\_planoLens";
-  $detector{"mother"} = "$planoLens_holdbox_name";
-  $detector{"description"} = "$DetectorName\_planoLens";
-  $detector{"pos"} = "0*mm 0*mm $pos_z_planoLens_sphere*mm"; # w.r.t plano lens holder box
-  $detector{"rotation"} = "0*deg 0*deg 0*deg";
-  $detector{"color"} = "2eb7ed";
-  $detector{"type"} = "Operation:@ $DetectorName\_planoLens_convex + $DetectorName\_planoLens_tube";
-  $detector{"dimensions"} = "0";
-  # $detector{"material"} = "glass";
-  # $detector{"material"} = "$planoLens_holdbox_mat";
-  $detector{"material"} = "acrylic";
-  $detector{"style"} = "1";
-  $detector{"visible"} = "1";
-  $detector{"sensitivity"} = "no";
-  $detector{"hit_type"}    = "no";
-  $detector{"identifiers"} = "no";
-  print_det(\%configuration, \%detector);
+    $detector{"dimensions"} = "$dimen";
+    $detector{"material"} = "$mirror_mat";
+    $detector{"sensitivity"} = "mirror: rich_mirrors";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
 }
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ readout hardware ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+my $readoutdet_name = "readout";
+my $readout_mat  = "Aluminum";
+my @readoutdet_pos  = ( 0.0, 0.0, 0.0 );
+my @readout_rinner = ( $sensor_total_halfx, $sensor_total_halfx ); 
+my @readout_router = ( $sensor_total_halfx+$readout_thickness, $sensor_total_halfx+$readout_thickness );
 
-sub build_lens()
+sub build_readout()
 {
-if($lensType == 1) { build_fresnel_lens() }
-if($lensType == 0) { build_plano_lens() }
+    print"building readout hardware...\n";
+   
+    my %detector=init_det();
+    $detector{"name"} = "$DetectorName\_$readoutdet_name";
+    $detector{"mother"} = "$DetectorMother";
+    $detector{"description"} = "$DetectorName\_$readoutdet_name";
+    $detector{"pos"} = "$readoutdet_pos[0]*mm $readoutdet_pos[1]*mm $readoutdet_pos[2]*mm"; #Ping : checked
+    $detector{"rotation"} = "0*deg 0*deg 0*deg";
+    $detector{"color"} = "ff0000";
+    $detector{"style"} = "0";
+    $detector{"visible"} = "0";
+    $detector{"type"} = "Pgon";    ### Polyhedra
+    my $dimen = "45*deg 360*deg 4*counts 2*counts";
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_rinner[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_router[$i]*mm";}
+    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_z[$i]*mm";}
+    $detector{"dimensions"} = "$dimen";
+    $detector{"material"} = "$readout_mat";
+    $detector{"sensitivity"} = "no";
+    $detector{"hit_type"}    = "no";
+    $detector{"identifiers"} = "no";
+    print_det(\%configuration, \%detector);
 }
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ photon sensor ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 my $photondet_name = "Photondet";
@@ -731,79 +604,7 @@ sub build_photondet()
     }# end of for loop
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ reflection mirrors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-my $mirror_mat  = "Aluminum";
-sub build_mirrors()
-{
-    print"building mirror set...\n";
 
-    my $mirror_thickness=2;
-    my @mirror_z=($lens_z+$lens_halfz+$lens_gap,$glassWindow_z-$glassWindow_halfz-$phodet_gapz); #introduce gap between photon sensor and mirror sets
-    my @mirror_router = ( $agel_halfx+$mirror_thickness, $sensor_total_halfx+$mirror_thickness );
-    my @mirror_rinner = ( $agel_halfx, $sensor_total_halfx);
-    
-    print"\t",'mirror: length in z direction =',$mirror_z[1]-$mirror_z[0],"\n";
-
-    my $idManual=3;
-    my %detector=init_det();
-    $detector{"name"} = "$DetectorName\_mirror";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_mirror";
-    $detector{"pos"} = "0*mm 0*mm 0*mm";
-    $detector{"color"} = "ffff00";
-    $detector{"type"} = "Pgon";
-
-    my $dimen = "45*deg 360*deg 4*counts 2*counts";
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_rinner[$i]*mm";}
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_router[$i]*mm";}
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $mirror_z[$i]*mm";}
-
-    $detector{"dimensions"} = "$dimen";
-    $detector{"material"} = "$mirror_mat";
-    $detector{"sensitivity"} = "mirror: rich_mirrors";
-    $detector{"hit_type"}    = "no";
-    $detector{"identifiers"} = "no";
-    print_det(\%configuration, \%detector);
-    
-
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ readout hardware ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-my $readoutdet_name = "readout";
-my $readout_mat  = "Aluminum";
-my @readoutdet_pos  = ( 0.0, 0.0, 0.0 );
-my @readout_rinner = ( $sensor_total_halfx, $sensor_total_halfx ); 
-my @readout_router = ( $sensor_total_halfx+$readout_thickness, $sensor_total_halfx+$readout_thickness );
-
-
-sub build_readout()
-{
-    print"building readout hardware...\n";
-   
-    my %detector=init_det();
-    $detector{"name"} = "$DetectorName\_$readoutdet_name";
-    $detector{"mother"} = "$DetectorName\_hollow";
-    $detector{"description"} = "$DetectorName\_$readoutdet_name";
-    $detector{"pos"} = "$readoutdet_pos[0]*mm $readoutdet_pos[1]*mm $readoutdet_pos[2]*mm"; #Ping : checked
-    $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "ff0000";
-    $detector{"style"} = "0";
-    $detector{"visible"} = "0";
-    $detector{"type"} = "Pgon";    ### Polyhedra
-    my $dimen = "45*deg 360*deg 4*counts 2*counts";
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_rinner[$i]*mm";}
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_router[$i]*mm";}
-    for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $readout_z[$i]*mm";}
-    $detector{"dimensions"} = "$dimen";
-    $detector{"material"} = "$readout_mat";
-    $detector{"sensitivity"} = "no";
-    $detector{"hit_type"}    = "no";
-    $detector{"identifiers"} = "no";
-    print_det(\%configuration, \%detector);
-    
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Plano convex lens ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Main function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 sub build_detector()
@@ -813,10 +614,10 @@ sub build_detector()
     build_box();
     build_foamHolder();
     build_aerogel();
-    build_lens();
-    build_photondet();
-    build_mirrors();
-    build_readout();
+    # build_fresnel_lens();
+    # build_mirrors();
+    # build_readout();
+    # build_photondet();
     print"done\n";
     print"=====================================================================\n";
 }
