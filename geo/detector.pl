@@ -109,16 +109,21 @@ my $airgap_z         = $offset + $box_halfz + $airgap_halfz; # w.r.t. mother vol
 
 #------------ Photon Sensor -------------#
 # H13700 dimesion: 51.8*51.8*32.1 mm | eff. area: 48.5*48.2mm | glass window thickness 1.5mm
-my $glassWindow_thickness = 1.5;  #glass window thickness = 1.5mm
+my $sensorGap             = 4.0/2.0;             # 4.0mm gap between PMT sensors
+my $glassWindow_thickness = 1.5;  #glass window thickness                                       = 1.5mm
 my $glassWindow_halfx     = 51.8/2.0; # 51.8mm
 my $glassWindow_halfy     = $glassWindow_halfx;
 my $glassWindow_halfz     = $glassWindow_thickness/2.0;
+my $sensor_total_halfx    = 2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
 
-my $sensorGap          = 4.0/2.0;             # 4.0mm gap between PMT sensors
-my $phodet_halfx       = 48.5/2.0;       # 48.5*48.2mm eff. area of Hamamatsu H13700         = > 3*14.0 + last pixel is larger than 3mm*3mm
+my $phodet_thickness   = 1.5;  # readout pixel thickness = 1.5mm
+my $phodet_halfx       = 48.5/2.0;       # 48.5*48.2mm eff. area of Hamamatsu H13700 = > 3*14.0 + last pixel is larger than 3mm*3mm
 my $phodet_halfy       = $phodet_halfx;
-my $phodet_halfz       = (32.1-$glassWindow_thickness)/2.0; #Hamamatsu H13700
-my $sensor_total_halfx = 2*$glassWindow_halfx+$sensorGap;   #Glass window larger than sensor
+my $phodet_halfz       = $phodet_thickness/2.0; #Hamamatsu H13700
+
+my $phoAnode_halfx = $glassWindow_halfx; # anode size is same size as glass window
+my $phoAnode_halfy = $phoAnode_halfx;
+my $phoAnode_halfz = (32.1-$glassWindow_thickness-$phodet_thickness)/2.0; # 32.1mm Hamamatsu H13700 
 #------------ Photon Sensor -------------#
 #===================================================================================================#
 
@@ -134,7 +139,8 @@ my $lens_z          = $agel_posz + $agel_halfz + $lens_halfz; # w.r.t hollow vol
 #---------- readbout ---------#
 my $readout_hollow_z = -$readout_halfz + $readout_hollow_halfz; # w.r.t readout box
 my $glassWindow_z    = -$readout_hollow_halfz + $glassWindow_halfz; # w.r.t. readout hollow volume
-my $phodet_z         = -$readout_hollow_halfz + $glassWindow_halfz + $phodet_halfz; # w.r.t. readout hollow volume
+my $phodet_z         = $glassWindow_z + $glassWindow_halfz + $phodet_halfz; # w.r.t. readout hollow volume
+my $phoAnode_z       = $phodet_z + $phodet_halfz + $phoAnode_halfz; # w.r.t. readout hollow volume
 #---------- readbout ---------#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ detector position information  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -628,6 +634,26 @@ sub build_photondet()
 	$detector{"sensitivity"} = "$hittype";
 	$detector{"hit_type"}    = "$hittype";
 	$detector{"identifiers"} = "id manual 2";
+	print_det(\%configuration, \%detector);
+	
+	#========================================#
+	#------------ build anode --------------#
+	%detector=init_det();
+	$detector{"name"} = "$DetectorName\_Anode$i";
+	$detector{"mother"} = "$DetectorName\_readout_hollow";
+	$detector{"description"} = "$DetectorName\_Anode$i";
+	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $phoAnode_z*mm"; # w.r.t. readout hollow volume
+	$detector{"rotation"} = "0*deg 0*deg 0*deg";
+	$detector{"color"} = "1ABC9C";
+	$detector{"style"} = "0";
+	$detector{"visible"} = "1";
+	$detector{"type"} = "Box";
+	$detector{"dimensions"} = "$phoAnode_halfx*mm $phoAnode_halfy*mm $phoAnode_halfz*mm";
+	$detector{"material"} = "$photondet_mat";
+	$detector{"mfield"} = "no";
+	$detector{"sensitivity"} = "no";
+	$detector{"hit_type"}    = "no";
+	$detector{"identifiers"} = "no";
 	print_det(\%configuration, \%detector);
 
         $last_x=$photondet_x;
