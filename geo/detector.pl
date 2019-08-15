@@ -272,8 +272,9 @@ sub build_aerogel()
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$agel_name";
     $detector{"pos"} = "0*mm 0*mm $agel_posz*mm";
-    $detector{"color"} = "ff0002";
+    $detector{"color"} = "ff00002";
     $detector{"type"} = "Box";
+    $detector{"style"} = "1";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$agel_halfx*mm $agel_halfy*mm $agel_halfz*mm";
     $detector{"material"} = "$agel_mat";
@@ -509,9 +510,7 @@ sub build_box_airgap()
     $detector{"description"} = "$DetectorName\_$airgap_name";
     $detector{"pos"} = "0*mm 0*mm $airgap_z*mm"; # w.r.t. mother volume
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "ff0002";
-    # $detector{"color"} = "81f7f3";
-    # $detector{"color"} = "ffffff";
+    $detector{"color"} = "ffffff";
     $detector{"type"} = "Box";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$airgap_halfx*mm $airgap_halfy*mm $airgap_halfz*mm";
@@ -536,8 +535,7 @@ sub build_box_readout()
     $detector{"description"} = "$DetectorName\_$readoutdet_name";
     $detector{"pos"} = "0*mm 0*mm $readout_z*mm"; # w.r.t. mother volume
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    # $detector{"color"} = "81f7f3";
-    $detector{"color"} = "00ff00";
+    $detector{"color"} = "81f7f3";
     $detector{"type"} = "Box";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$readout_halfx*mm $readout_halfy*mm $readout_halfz*mm";
@@ -624,8 +622,8 @@ sub build_photondet()
 	$detector{"description"} = "$DetectorName\_$photondet_name\_$i";
 	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $phodet_z*mm"; # w.r.t. readout hollow volume
 	$detector{"rotation"} = "0*deg 0*deg 0*deg";
-	$detector{"color"} = "0000A0";
-	$detector{"style"} = "0";
+	$detector{"color"} = "FFFF992";
+	$detector{"style"} = "1";
 	$detector{"visible"} = "1";
 	$detector{"type"} = "Box";
 	$detector{"dimensions"} = "$phodet_halfx*mm $phodet_halfy*mm $phodet_halfz*mm";
