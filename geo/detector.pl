@@ -222,9 +222,10 @@ sub build_foamHolder()
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$foamHolder_name";
     $detector{"pos"} = "0*mm 0*mm $foamHolder_posz*mm";
-    $detector{"color"} = "00ff00";
+    $detector{"color"} = "FFB2664";
     $detector{"type"} = "Box";
-    $detector{"visible"} = "0";
+    $detector{"style"} = "1";
+    $detector{"visible"} = "1";
     $detector{"dimensions"} = "$foamHolder_halfx*mm $foamHolder_halfy*mm $foamHolder_halfz*mm";
     $detector{"material"} = "$foamHolder_mat";
     $detector{"sensitivity"} = "no";
@@ -241,10 +242,10 @@ sub build_foamHolder()
     $detector{"description"} = "$DetectorName\_$foamHolder_name";
     $detector{"pos"} = "0*mm 0*mm 0*mm";
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "00ff00";
-    #$detector{"style"} = "1";
-    $detector{"type"} = "Pgon";    ### Polyhedra                                                                            
-    $detector{"visible"} = "0";
+    $detector{"color"} = "FFB2664";
+    $detector{"type"} = "Pgon";    ### Polyhedra   
+    $detector{"style"} = "1";
+    $detector{"visible"} = "1";
     my $dimen = "45*deg 360*deg 4*counts 2*counts";
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_rinner[$i]*mm";}
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_router[$i]*mm";}
