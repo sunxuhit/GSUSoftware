@@ -17,16 +17,38 @@
 <option name="MAX_Z_POS" value="100000"/>
 <option name="HALL_DIMENSIONS" value="10*m,10*m,100*m"/>
 
+<!-- proton calibration run -->
+<option name="BEAM_P"   value="proton, 120.0*GeV, 0.0*deg, 0.0*deg"/>
+<option name="SPREAD_P" value="2.25*eV,0*deg,0*deg"/>
+<option name="BEAM_V"   value="(0.0, 0.0, 0.0)mm"/>
+<option name="SPREAD_V" value="(6.0,0.0)mm"/>
+
+<!-- proton position scan run
+<option name="BEAM_P"   value="proton, 120.0*GeV, 0.0*deg, 0.0*deg"/>
+<option name="SPREAD_P" value="2.25*eV,0*deg,0*deg"/>
+<option name="BEAM_V"   value="(-25.1, 23.2, 0.0)mm"/>
+<option name="SPREAD_V" value="(6.0,0.0)mm"/>
+-->
+
+<!-- proton angle run
+<option name="BEAM_P"   value="proton, 120.0*GeV, 12.09*deg, 271.0*deg"/>
+<option name="SPREAD_P" value="2.25*eV,0*deg,0*deg"/>
+<option name="BEAM_V"   value="(0.0, 2.649, 0.0)mm"/>
+<option name="SPREAD_V" value="(6.0,0.0)mm"/>
+-->
+
+<!-- optical photon test
 <option name="BEAM_P"   value="opticalphoton, 3.95*eV, 0*rad, 0*deg"/>
 <option name="SPREAD_P" value="2.25*eV,0*deg,0*deg"/>
-<option name="BEAM_V"   value="(0, 0, 64.585)mm"/>
-<option name="SPREAD_V" value="(0.,0)cm"/>
+<option name="BEAM_V"   value="(0, 0, 1)mm"/> 
+<option name="SPREAD_V" value="(0.0,0.0)mm"/>
+-->
 
 <option name="USE_GUI"  value="1"/>
 <option name="SAVE_ALL_MOTHERS" value="1"/>
 <option name="EXEC_MACRO" value="vis.mac"/>
-<option name="N" value="100"/>    <!-- Total simulated events, changed by L. Xue from 1 to 100 -->
-<option name="OUTPUT" value="evio,output_3cm1.03Agel1.7-6.2eV100kphoton_ver2.3_RSoff_HubertAgel.evio"/>  <!-- changed by L. Xue from "txt" to "evio" -->
+<option name="N" value="1"/>    <!-- Total simulated events, changed by L. Xue from 1 to 100 -->
+<option name="OUTPUT" value="evio,output.evio"/>
 
 <option name="RECORD_MIRRORS" value="1"/>
 <option name="RECORD_PASSBY" value="1"/>
