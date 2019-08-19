@@ -1,8 +1,8 @@
 #/vis/viewer/set/viewpointThetaPhi -90 0
 #/vis/viewer/set/viewpointThetaPhi -180 0
 /vis/viewer/set/viewpointThetaPhi 240 -30
-#/vis/viewer/set/background  1. 1. 1.
-/vis/viewer/set/background 0. 0. 0.
+/vis/viewer/set/background  0.65 0.65 0.65
+#/vis/viewer/set/background 0. 0. 0.
 /vis/viewer/set/hiddenMarker 1
 #/vis/drawVolume
 #/vis/scene/add/scale

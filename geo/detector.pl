@@ -182,7 +182,9 @@ sub build_box_optical()
     $detector{"mother"} = "$DetectorMother";
     $detector{"description"} = "$DetectorName\_$box_name";
     $detector{"pos"} = "0*mm 0*mm $offset*mm"; # w.r.t mother volume
-    $detector{"color"} = "81f7f3";
+    # $detector{"color"} = "C0C0C0"; # black bkg
+    $detector{"color"} = "FFFAFA"; # gray bkg
+    # $detector{"color"} = "202020"; # white bkg
     $detector{"type"} = "Box";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$box_halfx*mm $box_halfy*mm $box_halfz*mm";
@@ -197,7 +199,9 @@ sub build_box_optical()
     $detector{"mother"} = "$DetectorName\_$box_name";
     $detector{"description"} = "$DetectorName\_hollow";
     $detector{"pos"} = "0*mm 0*mm $hollow_z*mm";   #w.r.t. detector
-    $detector{"color"} = "ffffff";
+    # $detector{"color"} = "C0C0C0"; # black bkg
+    $detector{"color"} = "FFFAFA"; # gray bkg
+    # $detector{"color"} = "202020"; # white bkg
     $detector{"type"} = "Box";
     $detector{"style"} = "0";
     $detector{"visible"} = "1";
@@ -224,8 +228,8 @@ sub build_foamHolder()
     $detector{"pos"} = "0*mm 0*mm $foamHolder_posz*mm";
     $detector{"color"} = "FFB2664";
     $detector{"type"} = "Box";
-    $detector{"style"} = "1";
-    $detector{"visible"} = "1";
+    $detector{"style"} = "0";
+    $detector{"visible"} = "0";
     $detector{"dimensions"} = "$foamHolder_halfx*mm $foamHolder_halfy*mm $foamHolder_halfz*mm";
     $detector{"material"} = "$foamHolder_mat";
     $detector{"sensitivity"} = "no";
@@ -244,8 +248,8 @@ sub build_foamHolder()
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
     $detector{"color"} = "FFB2664";
     $detector{"type"} = "Pgon";    ### Polyhedra   
-    $detector{"style"} = "1";
-    $detector{"visible"} = "1";
+    $detector{"style"} = "0";
+    $detector{"visible"} = "0";
     my $dimen = "45*deg 360*deg 4*counts 2*counts";
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_rinner[$i]*mm";}
     for(my $i=0; $i<2; $i++) {$dimen = $dimen ." $foamHolder_router[$i]*mm";}
@@ -273,9 +277,10 @@ sub build_aerogel()
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_$agel_name";
     $detector{"pos"} = "0*mm 0*mm $agel_posz*mm";
-    $detector{"color"} = "ff00002";
+    # $detector{"color"} = "ff00002";
+    $detector{"color"} = "FF80002";
     $detector{"type"} = "Box";
-    $detector{"style"} = "1";
+    $detector{"style"} = "0";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$agel_halfx*mm $agel_halfy*mm $agel_halfz*mm";
     $detector{"material"} = "$agel_mat";
@@ -316,12 +321,13 @@ sub build_fresnel_lens()
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$lens_holdbox_name";
     $detector{"pos"} = "0*mm 0*mm $lens_z*mm";
-    $detector{"color"} = "ff0000";
+    $detector{"color"} = "2eb7ed2";
     $detector{"type"} = "Box";
     $detector{"dimensions"} = "$fresnelLens_halfx*mm $fresnelLens_halfy*mm $lens_holdbox_halfz*mm";
     $detector{"material"} = $lens_holdbox_mat;
     $detector{"rotation"} = "0*deg -180*deg 0*deg";
-    $detector{"visible"} = "0";
+    $detector{"style"} = "1";
+    $detector{"visible"} = "1";
     $detector{"sensitivity"} = "no";
     $detector{"hit_type"}    = "no";
     $detector{"identifiers"} = "no";
@@ -376,7 +382,7 @@ sub build_fresnel_lens()
 	}
 	#--------------------------------------------------------#
 	my $repeat=1;
-	my $draw=1;
+	my $draw=0;
 	my $grooveName="$lens_holdbox_name\_groove$igroove";
 	
 	if ($iRmax1>=$fresnelLens_halfx) { $repeat=4; }   #4 edges
@@ -481,7 +487,9 @@ sub build_mirrors()
     $detector{"mother"} = "$DetectorName\_hollow";
     $detector{"description"} = "$DetectorName\_mirror";
     $detector{"pos"} = "0*mm 0*mm 0*mm";
-    $detector{"color"} = "ffff00";
+    # $detector{"color"} = "ffff00";
+    # $detector{"color"} = "3399FF";
+    $detector{"color"} = "CCCC00";
     $detector{"type"} = "Pgon";
     $detector{"visible"} = "1";
 
@@ -511,8 +519,10 @@ sub build_box_airgap()
     $detector{"description"} = "$DetectorName\_$airgap_name";
     $detector{"pos"} = "0*mm 0*mm $airgap_z*mm"; # w.r.t. mother volume
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "ffffff";
+    $detector{"color"} = "E0E0E02"; # black bkg
+    # $detector{"color"} = "66FFFF2"; # white bkg
     $detector{"type"} = "Box";
+    $detector{"style"} = "0";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$airgap_halfx*mm $airgap_halfy*mm $airgap_halfz*mm";
     $detector{"material"} = "$airgap_mat";
@@ -536,8 +546,11 @@ sub build_box_readout()
     $detector{"description"} = "$DetectorName\_$readoutdet_name";
     $detector{"pos"} = "0*mm 0*mm $readout_z*mm"; # w.r.t. mother volume
     $detector{"rotation"} = "0*deg 0*deg 0*deg";
-    $detector{"color"} = "81f7f3";
+    # $detector{"color"} = "C0C0C0"; # black bkg
+    $detector{"color"} = "FFFAFA"; # gray bkg
+    # $detector{"color"} = "202020"; # white bkg
     $detector{"type"} = "Box";
+    $detector{"style"} = "0";
     $detector{"visible"} = "1";
     $detector{"dimensions"} = "$readout_halfx*mm $readout_halfy*mm $readout_halfz*mm";
     $detector{"material"} = "$readout_mat";
@@ -551,7 +564,9 @@ sub build_box_readout()
     $detector{"mother"} = "$DetectorName\_$readoutdet_name";
     $detector{"description"} = "$DetectorName\_readout_hollow";
     $detector{"pos"} = "0*mm 0*mm $readout_hollow_z*mm";   #w.r.t. readout box
-    $detector{"color"} = "ffffff";
+    # $detector{"color"} = "C0C0C0"; # black bkg
+    $detector{"color"} = "FFFAFA"; # gray bkg
+    # $detector{"color"} = "202020"; # white bkg
     $detector{"type"} = "Box";
     $detector{"style"} = "0";
     $detector{"visible"} = "1";
@@ -643,7 +658,7 @@ sub build_photondet()
 	$detector{"description"} = "$DetectorName\_Anode$i";
 	$detector{"pos"} = "$photondet_x*mm $photondet_y*mm $phoAnode_z*mm"; # w.r.t. readout hollow volume
 	$detector{"rotation"} = "0*deg 0*deg 0*deg";
-	$detector{"color"} = "1ABC9C";
+	$detector{"color"} = "0066CC";
 	$detector{"style"} = "0";
 	$detector{"visible"} = "1";
 	$detector{"type"} = "Box";
