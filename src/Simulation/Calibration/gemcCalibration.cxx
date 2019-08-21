@@ -58,8 +58,10 @@ int gemcCalibration::Init()
 
 int gemcCalibration::initChain()
 {
-  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/Calibration/",mHome.c_str());
+  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/Calibration/New/",mHome.c_str());
   string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/Simulation/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
+  // string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/AngleRun/",mHome.c_str());
+  // string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/Simulation/%s/AngleRun/proton_anglerun.list",mHome.c_str(),mDet.c_str());
   
   mChainInPut_Events = new TChain("generated");
   mChainInPut_Tracks = new TChain("eic_rich");
@@ -214,7 +216,7 @@ int gemcCalibration::resetSimpleTree()
 int gemcCalibration::Make()
 {
   // long NumOfEvents = (long)mChainInPut_Events->GetEntries();
-  long NumOfEvents = 50000;
+  long NumOfEvents = 5000;
 
   mChainInPut_Events->GetEntry(0);
   mChainInPut_Tracks->GetEntry(0);
@@ -410,8 +412,7 @@ int gemcCalibration::initRingFinder()
   h_mQA_HT = new TH3D("h_mQA_HT","h_mQA_HT",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
   h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
   h_mNumOfCherenkovPhotons = new TH3D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
-  h_mNumOfPhotons_OnRing = new TH1D("h_mNumOfPhotons_OnRing","h_mNumOfPhotons_OnRing",50,-0.5,49.5);
-  h_mNumOfPhotons_OffRing = new TH1D("h_mNumOfPhotons_OffRing","h_mNumOfPhotons_OffRing",50,-0.5,49.5);
+  h_mNumOfPhotons_OnOffRing = new TH2D("h_mNumOfPhotons_OnOffRing","h_mNumOfPhotons_OnOffRing",50,-0.5,49.5,50,-0.5,49.5);
 
   return 1;
 }
@@ -432,8 +433,7 @@ int gemcCalibration::writeRingFinder()
   h_mQA_HT->Write();
   h_mCherenkovRing->Write();
   h_mNumOfCherenkovPhotons->Write();
-  h_mNumOfPhotons_OnRing->Write();
-  h_mNumOfPhotons_OffRing->Write();
+  h_mNumOfPhotons_OnOffRing->Write();
 
   return 1;
 }
@@ -574,8 +574,7 @@ int gemcCalibration::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::v
     if(NumOfPhotonsOnRing > 4 && TMath::Abs(x_HoughTransform) < 5.5 && TMath::Abs(y_HoughTransform) < 5.5)
     {
       h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing,r_HoughTransform);
-      h_mNumOfPhotons_OnRing->Fill(NumOfPhotonsOnRing);
-      h_mNumOfPhotons_OffRing->Fill(NumOfPhotons-NumOfPhotonsOnRing);
+      h_mNumOfPhotons_OnOffRing->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing);
     }
   }
 

@@ -113,8 +113,7 @@ class Calibration : public TObject
 
     TH3D *h_mCherenkovRing; // x | y | R
     TH3D *h_mNumOfCherenkovPhotons; // number of photons | number of photons on ring | ring radius
-    TH1D *h_mNumOfPhotons_OnRing;
-    TH1D *h_mNumOfPhotons_OffRing;
+    TH2D *h_mNumOfPhotons_OnOffRing;
 
     // beam finder
     // 5*5 cluster finder

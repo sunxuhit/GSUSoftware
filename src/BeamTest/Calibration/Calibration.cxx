@@ -251,7 +251,7 @@ int Calibration::Make()
   cout << " this is Calibration::Make" << endl;
 
   // long NumOfEvents = (long)mChainInPut->GetEntries();
-  long NumOfEvents = 50000;
+  long NumOfEvents = 5000;
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
@@ -550,8 +550,7 @@ int Calibration::initRingFinder()
 
   h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,210,-1.0*mRICH::mHalfWidth,mRICH::mHalfWidth,105,0,2.0*mRICH::mHalfWidth);
   h_mNumOfCherenkovPhotons = new TH3D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
-  h_mNumOfPhotons_OnRing = new TH1D("h_mNumOfPhotons_OnRing","h_mNumOfPhotons_OnRing",50,-0.5,49.5);
-  h_mNumOfPhotons_OffRing = new TH1D("h_mNumOfPhotons_OffRing","h_mNumOfPhotons_OffRing",50,-0.5,49.5);
+  h_mNumOfPhotons_OnOffRing = new TH2D("h_mNumOfPhotons_OnOffRing","h_mNumOfPhotons_OnOffRing",50,-0.5,49.5,50,-0.5,49.5);
 
   return 1;
 }
@@ -574,8 +573,7 @@ int Calibration::writeRingFinder()
   h_mRingFinder_SingleEvent->Write();
   h_mCherenkovRing->Write();
   h_mNumOfCherenkovPhotons->Write();
-  h_mNumOfPhotons_OnRing->Write();
-  h_mNumOfPhotons_OffRing->Write();
+  h_mNumOfPhotons_OnOffRing->Write();
 
   return 1;
 }
@@ -716,8 +714,7 @@ int Calibration::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vecto
     // if(TMath::Abs(x_HoughTransform) < 5.5 && TMath::Abs(y_HoughTransform) < 5.5)
     {
       h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing,r_HoughTransform);
-      h_mNumOfPhotons_OnRing->Fill(NumOfPhotonsOnRing);
-      h_mNumOfPhotons_OffRing->Fill(NumOfPhotons-NumOfPhotonsOnRing);
+      h_mNumOfPhotons_OnOffRing->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing);
     }
   }
 
