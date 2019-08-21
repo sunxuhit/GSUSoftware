@@ -395,8 +395,8 @@ double gemcCalibration::GausSmearing(TF1 *f_gaus)
 
 bool gemcCalibration::isInSensorPlane(double out_x, double out_y)
 {
-  if( !(TMath::Abs(out_x) > 2.5 && TMath::Abs(out_x) < mRICH::mHalfWidth-2.0) ) return false;
-  if( !(TMath::Abs(out_y) > 2.5 && TMath::Abs(out_y) < mRICH::mHalfWidth-2.0) ) return false;
+  if( !(TMath::Abs(out_x) > 3.65 && TMath::Abs(out_x) < 52.15) ) return false;
+  if( !(TMath::Abs(out_y) > 3.65 && TMath::Abs(out_y) < 52.15) ) return false;
   return true;
 }
 
