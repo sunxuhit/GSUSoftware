@@ -3,6 +3,8 @@
 #include <string> 
 #include "./PixelMap.h"
 
+using namespace std;
+
 ClassImp(PixelMap)
 
 PixelMap::PixelMap()

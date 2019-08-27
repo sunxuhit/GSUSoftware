@@ -3,8 +3,6 @@
 
 #include "TObject.h"
 
-using namespace std;
-
 class PixelMap : public TObject
 {
   public:

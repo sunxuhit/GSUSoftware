@@ -32,6 +32,14 @@ include(${ROOT_USE_FILE})
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
 add_subdirectory(src/BeamTest/PixelMap)
 
+# include Beam Finder in BeamTest
+include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/BeamFinder")
+add_subdirectory(src/BeamTest/BeamFinder)
+
+# include Ring Finder in BeamTest
+include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/RingFinder")
+add_subdirectory(src/BeamTest/RingFinder)
+
 # include Calibration in BeamTest
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/Calibration")
 add_subdirectory(src/BeamTest/Calibration)

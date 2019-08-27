@@ -17,6 +17,8 @@
 #include "../PixelMap/mRICH.h"
 
 class PixelMap;
+class BeamFinder;
+class RingFinder;
 
 class Calibration : public TObject
 {
@@ -44,28 +46,16 @@ class Calibration : public TObject
     int Finish();
 
     // ring finder
-    int initRingFinder();
-    int writeRingFinder();
-    int clearRingFinder(); 
-    int HoughTransform(int numOfPhotons, TH2D *h_PhotonDist, std::vector<int> xPixel, std::vector<int> yPixel);
-    bool findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov);
-    bool isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
-    bool isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
-    bool isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform);
-    float findPixelCoord(int pixel); // return correspoding pixel coordinate
-
-    // beam finder
-    int initBeamFinder();
-    int writeBeamFinder();
-    int clearClusterFinder_5by5(); 
-    int clearClusterFinder_3by3(); 
-    int findCluster_5by5(int numOfPhotons, std::vector<int> xPixel, std::vector<int> yPixel);
-    int findCluster_3by3(int numOfPhotons, std::vector<int> xPixel, std::vector<int> yPixel);
+    int initRingImage();
+    int clearRingImage(); 
+    int writeRingImage();
 
   private:
     PixelMap *pixel_map;
-    std::string mDet, mHome;
+    BeamFinder *mBeamFinder; // beam finder
+    RingFinder *mRingFinder; // beam finder
 
+    std::string mDet, mHome;
     bool is_pmt;
 
     std::string mOutPutFile;
@@ -79,8 +69,8 @@ class Calibration : public TObject
     float mTimeDuration[mRICH::mNumOfPixels][mRICH::mNumOfPixels][2];
     TH1D *h_mTDC[mRICH::mNumOfPixels][mRICH::mNumOfPixels]; // 0 for x-pixel | 1 for y-pixel
     TH2D *h_mRingImage;
-    TH2D *h_mRingImage_DisPlay;
-    TH2D *h_mRingImage_DisPlay_beam;
+    TH2D *h_mRingFinder_Display; // QA for ring finder
+    TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
     TH1D *h_mNumOfPhotons;
     TProfile *p_mNumOfPhotons;
 
@@ -104,76 +94,7 @@ class Calibration : public TObject
     // ring finder
     std::vector<int> mXPixelMap; // corresponding binX number for each photon hit
     std::vector<int> mYPixelMap; // corresponding binY number for each photon hit
-
     TH2D *h_mRingFinder; // x: photon out_x | y: photon out_y with detector effect
-    TH3D *h_mHoughTransform; // x | y | R
-    TH3D *h_mQA_HT; // QA for hough transform
-    TH2D *h_mRingFinder_Display; // QA for ring finder
-    TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
-
-    TH3D *h_mCherenkovRing; // x | y | R
-    TH3D *h_mNumOfCherenkovPhotons; // number of photons | number of photons on ring | ring radius
-    TH2D *h_mNumOfPhotons_OnOffRing;
-
-    // beam finder
-    // 5*5 cluster finder
-    std::vector<int> mXClusterMap_5by5; // corresponding binX number for each cluster
-    std::vector<int> mYClusterMap_5by5; // corresponding binY number for each cluster
-    std::vector<int> mRankMap_5by5; // number of surrounding photons 
-
-    std::vector<int> mXCluster_5by5_1st;
-    std::vector<int> mYCluster_5by5_1st;
-    std::vector<int> mRank_5by5_1st;
-    int mMeanX_5by5_1st;
-    int mMeanY_5by5_1st;
-
-    std::vector<int> mXCluster_5by5_2nd;
-    std::vector<int> mYCluster_5by5_2nd;
-    std::vector<int> mRank_5by5_2nd;
-    int mMeanX_5by5_2nd;
-    int mMeanY_5by5_2nd;
-
-    std::vector<int> mXCluster_5by5_3rd;
-    std::vector<int> mYCluster_5by5_3rd;
-    std::vector<int> mRank_5by5_3rd;
-    int mMeanX_5by5_3rd;
-    int mMeanY_5by5_3rd;
-
-    TH2D *h_mBeamFinder_5by5_Display;
-    TH2D *h_mBeamFinder_5by5_1st;
-    TH2D *h_mBeamFinder_5by5_2nd;
-    TH2D *h_mBeamFinder_5by5_3rd;
-
-    // 3*3 cluster finder
-    std::vector<int> mXClusterMap_3by3; // corresponding binX number for each cluster
-    std::vector<int> mYClusterMap_3by3; // corresponding binY number for each cluster
-    std::vector<int> mRankMap_3by3; // number of surrounding photons 
-
-    std::vector<int> mXCluster_3by3_1st;
-    std::vector<int> mYCluster_3by3_1st;
-    std::vector<int> mRank_3by3_1st;
-    int mMeanX_3by3_1st;
-    int mMeanY_3by3_1st;
-
-    std::vector<int> mXCluster_3by3_2nd;
-    std::vector<int> mYCluster_3by3_2nd;
-    std::vector<int> mRank_3by3_2nd;
-    int mMeanX_3by3_2nd;
-    int mMeanY_3by3_2nd;
-
-    std::vector<int> mXCluster_3by3_3rd;
-    std::vector<int> mYCluster_3by3_3rd;
-    std::vector<int> mRank_3by3_3rd;
-    int mMeanX_3by3_3rd;
-    int mMeanY_3by3_3rd;
-
-    TH2D *h_mBeamFinder_3by3_Display;
-    TH2D *h_mBeamFinder_3by3_1st;
-    TH2D *h_mBeamFinder_3by3_2nd;
-    TH2D *h_mBeamFinder_3by3_3rd;
-
-    TH2D *h_mRingImage_on; // Ring Image with Beam hit
-    TH2D *h_mRingImage_off; // Ring Image without Beam hit
 
     ClassDef(Calibration,1)
 };
