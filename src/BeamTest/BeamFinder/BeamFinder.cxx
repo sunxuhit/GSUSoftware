@@ -97,8 +97,8 @@ int BeamFinder::findCluster_5by5(int numOfPhotons, std::vector<int> xPixel, std:
     if(mVerbosity_QA) cout << "beam_counter = " << beam_counter[i_beam] << endl;
     if(beam_counter[i_beam] > 4)
     {
-      mXClusterMap_5by5.push_back(xPixel[i_beam]);
-      mYClusterMap_5by5.push_back(yPixel[i_beam]);
+      mXClusterMap_5by5.push_back(xPixel[i_beam]-1); // convert histogram bin number to pixel id
+      mYClusterMap_5by5.push_back(yPixel[i_beam]-1);
       mRankMap_5by5.push_back(beam_counter[i_beam]);
     }
   }
@@ -223,8 +223,8 @@ int BeamFinder::findCluster_3by3(int numOfPhotons, std::vector<int> xPixel, std:
     if(mVerbosity_QA) cout << "beam_counter = " << beam_counter[i_beam] << endl;
     if(beam_counter[i_beam] > 2)
     {
-      mXClusterMap_3by3.push_back(xPixel[i_beam]);
-      mYClusterMap_3by3.push_back(yPixel[i_beam]);
+      mXClusterMap_3by3.push_back(xPixel[i_beam]-1); // convert histogram bin number to pixel id
+      mYClusterMap_3by3.push_back(yPixel[i_beam]-1);
       mRankMap_3by3.push_back(beam_counter[i_beam]);
     }
   }
@@ -398,7 +398,7 @@ int BeamFinder::fillBeamOn(int numOfPhotons, std::vector<int> xPixel, std::vecto
 {
   for(int i_photon = 0; i_photon < numOfPhotons; ++i_photon)
   {
-    h_mRingImage_on->Fill(xPixel[i_photon],yPixel[i_photon]);
+    h_mRingImage_on->Fill(xPixel[i_photon]-1,yPixel[i_photon]-1);
   }
 
   return 1;
@@ -408,7 +408,7 @@ int BeamFinder::fillBeamOff(int numOfPhotons, std::vector<int> xPixel, std::vect
 {
   for(int i_photon = 0; i_photon < numOfPhotons; ++i_photon)
   {
-    h_mRingImage_off->Fill(xPixel[i_photon],yPixel[i_photon]);
+    h_mRingImage_off->Fill(xPixel[i_photon]-1,yPixel[i_photon]-1);
   }
 
   return 1;
