@@ -393,8 +393,8 @@ int Calibration::Make()
 
 	  // preparation for BeamFinder and RingFinder
 	  h_mRingFinder->Fill(out_x,out_y); // single event distribution => reset for each event
-	  mXPixelMap.push_back(pixel_x);
-	  mYPixelMap.push_back(pixel_y);
+	  mXPixelMap.push_back(pixel_x+1); // convert pixel to histogram bin number
+	  mYPixelMap.push_back(pixel_y+1);
 	}
       }
     }
