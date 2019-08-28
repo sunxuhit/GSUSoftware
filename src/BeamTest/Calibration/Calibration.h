@@ -53,7 +53,7 @@ class Calibration : public TObject
   private:
     PixelMap *pixel_map;
     BeamFinder *mBeamFinder; // beam finder
-    RingFinder *mRingFinder; // beam finder
+    RingFinder *mRingFinder; // ring finder
 
     std::string mDet, mHome;
     bool is_pmt;

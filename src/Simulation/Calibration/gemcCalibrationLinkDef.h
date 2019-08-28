@@ -5,5 +5,6 @@
 
 #pragma link C++ class gemcCalibration+;
 #pragma link C++ class Material+;
+#pragma link C++ class RingFinder+;
 
 #endif /* __CINT__ */

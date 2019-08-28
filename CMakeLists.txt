@@ -48,6 +48,10 @@ add_subdirectory(src/BeamTest/Calibration)
 include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Material")
 add_subdirectory(src/Simulation/Material)
 
+# include Ring Finder in Simulation
+include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/RingFinder")
+add_subdirectory(src/Simulation/RingFinder)
+
 # include gemc Calibration in Simulation
 include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Calibration")
 add_subdirectory(src/Simulation/Calibration)

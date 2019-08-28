@@ -2,9 +2,10 @@ ROOT_GENERATE_DICTIONARY(G__gemcCalibration
   ${CMAKE_CURRENT_SOURCE_DIR}/gemcCalibration.h
   ${CMAKE_SOURCE_DIR}/src/Simulation/Material/Material.h
   ${CMAKE_SOURCE_DIR}/src/Simulation/Material/mRICH.h
+  ${CMAKE_SOURCE_DIR}/src/Simulation/RingFinder/RingFinder.h
   LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/gemcCalibrationLinkDef.h)
 
-add_library(gemcCalibration SHARED gemcCalibration.cxx ${CMAKE_SOURCE_DIR}/src/Simulation/Material/Material.cxx G__gemcCalibration.cxx)
+add_library(gemcCalibration SHARED gemcCalibration.cxx ${CMAKE_SOURCE_DIR}/src/Simulation/Material/Material.cxx ${CMAKE_SOURCE_DIR}/src/Simulation/RingFinder/RingFinder.cxx G__gemcCalibration.cxx)
 target_link_libraries(gemcCalibration ${ROOT_LIBRARIES})
 
 install(TARGETS gemcCalibration DESTINATION lib)
