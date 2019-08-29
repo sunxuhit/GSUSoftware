@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <cmath> 
 #include <math.h> 
+
 #include <TFile.h>
 #include <TF1.h>
 #include <TMath.h>
@@ -10,6 +11,8 @@
 #include <TChain.h>
 #include <TRandom3.h>
 #include <TString.h>
+#include <Fit/Fitter.h>
+#include <Math/Functor.h>
 
 #include "./gemcCalibration.h"
 #include "../Material/Material.h"
@@ -53,7 +56,7 @@ int gemcCalibration::Init()
 
   // ring finder
   mRingFinder = new RingFinder();
-  mRingFinder->initRingFinder();
+  mRingFinder->initRingFinder_HT();
 
   initRingImage();
 
@@ -277,15 +280,59 @@ int gemcCalibration::Make()
     {
       // Hough Transform
       mRingFinder->HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
+      TVector2 RingCenter = mRingFinder->getRingCenter_HT();
+      double RingRadius = mRingFinder->getRingRadius_HT();
 
-      TVector2 RingCenter = mRingFinder->getRingCenter();
-      if(mRingFinder->getNumOfPhotonsOnRing() > 4 && TMath::Abs(RingCenter.X()) < 5.5 && TMath::Abs(RingCenter.Y()) < 5.5)
+
+      auto chi2Function = [&](const Double_t *par) 
       {
-	h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing());
-	p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing());
+	//minimisation function computing the sum of squares of residuals
+	// looping at the graph points
+	int np = mXPixelMap.size();
+	double f = 0;
+	// double *x = gr->GetX();
+	// double *y = gr->GetY();
+	for (int i_photon = 0; i_photon < np;i_photon++) 
+	{
+	  double dx = h_mRingFinder->GetXaxis()->GetBinCenter(mXPixelMap[i_photon]) - par[0];
+	  double dy = h_mRingFinder->GetYaxis()->GetBinCenter(mYPixelMap[i_photon]) - par[1];
+	  double dr = par[2] - std::sqrt(dx*dx+dy*dy);
+	  f += dr*dr;
+	}
+	return f;
+      };
+
+      // wrap chi2 funciton in a function object for the fit
+      // 3 is the number of fit parameters (size of array par)
+      ROOT::Math::Functor fcn(chi2Function,3);
+      ROOT::Fit::Fitter fitter;
+
+      double pStart[3] = {0,0,1};
+      // double pStart[3] = {RingCenter.X(),RingCenter.Y(),RingRadius};
+      fitter.SetFCN(fcn, pStart);
+      fitter.Config().ParSettings(0).SetName("x0");
+      fitter.Config().ParSettings(1).SetName("y0");
+      fitter.Config().ParSettings(2).SetName("R");
+
+      // do the fit 
+      bool ok = fitter.FitFCN();
+      if (!ok) {
+	Error("line3Dfit","Line3D Fit failed");
+      }   
+
+      const ROOT::Fit::FitResult & result = fitter.Result();
+      // result.Print(std::cout);
+      // const double *fitpar = result.GetParams();
+      // cout << "Ring Info from Minuit: X = " << fitpar[0] << ", Y = " << fitpar[1] << ", R = " << fitpar[2] << endl;
+      // cout << "Ring Info from HoughTransform: X = " << RingCenter.X() << ", Y = " << RingCenter.Y() << ", R = " << RingRadius << endl;
+
+      if(mRingFinder->getNumOfPhotonsOnRing_HT() > 4 && TMath::Abs(RingCenter.X()) < 5.5 && TMath::Abs(RingCenter.Y()) < 5.5)
+      {
+	h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_HT());
+	p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_HT());
       }
     }
-    mRingFinder->clearRingFinder();
+    mRingFinder->clearRingFinder_HT();
     clearRingImage();
   }
   cout << "processed events:  " << NumOfEvents << "/" << NumOfEvents << endl;
@@ -302,7 +349,7 @@ int gemcCalibration::Finish()
   {
     File_mOutPut->cd();
     writeRingImage();
-    mRingFinder->writeRingFinder();
+    mRingFinder->writeRingFinder_HT();
     writeSimpleTree();
     File_mOutPut->Close();
   }

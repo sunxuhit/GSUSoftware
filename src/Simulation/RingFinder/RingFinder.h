@@ -16,37 +16,38 @@ class RingFinder : public TObject
     RingFinder();
     ~RingFinder();
 
-    // ring finder
-    int initRingFinder();
-    int writeRingFinder();
-    int clearRingFinder(); 
+    // Hough Transform
+    int initRingFinder_HT();
+    int writeRingFinder_HT();
+    int clearRingFinder_HT(); 
 
     int HoughTransform(int numOfPhotons, TH2D *h_PhotonDist, std::vector<int> xPixel, std::vector<int> yPixel);
     bool findRing(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit, double &x_Cherenkov, double &y_Cherenkov, double &r_Cherenkov);
     bool isSamePosition(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
     bool isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thirdHit);
-    bool isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform);
-    float findPixelCoord(int pixel); // return correspoding pixel coordinate
 
-    TVector2 getRingCenter();
-    float getRingRadius();
-    int getNumOfPhotonsOnRing();
-    int getNumOfPhotonsOffRing();
+    TVector2 getRingCenter_HT();
+    float getRingRadius_HT();
+    int getNumOfPhotonsOnRing_HT();
+    int getNumOfPhotonsOffRing_HT();
+
+    float findPixelCoord(int pixel); // return correspoding pixel coordinate
+    bool isOnRing(TVector2 photonHit, double x0, double y0, double r0);
 
   private:
     // ring parameters
-    TVector2 mRingCenter;
-    float mRadius;
-    int mNumOfPhotonsOnRing;
-    int mNumOfPhotonsOffRing;
+    // Hough Transform
+    TVector2 mRingCenter_HT;
+    float mRadius_HT;
+    int mNumOfPhotonsOnRing_HT;
+    int mNumOfPhotonsOffRing_HT;
 
     TH3D *h_mHoughTransform; // x | y | R
-
     TH3D *h_mQA_HT; // QA for hough transform
 
-    TH3D *h_mCherenkovRing; // x | y | R
-    TH3D *h_mNumOfCherenkovPhotons; // number of photons | number of photons on ring | ring radius
-    TH2D *h_mNumOfPhotons_OnOffRing;
+    TH3D *h_mCherenkovRing_HT; // x | y | R for all rings
+    TH3D *h_mCherenkovPhotons_HT; // number of photons on ring | number of photons off ring | ring radius
+    TH3D *h_mNumOfCherenkovPhotons_HT; // num of photons on ring | num of photons off ring | total num of photons
 
     ClassDef(RingFinder,1)
 };

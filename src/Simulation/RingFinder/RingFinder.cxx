@@ -20,41 +20,37 @@ RingFinder::~RingFinder()
 
 //--------------------------------------------------------------------
 
-int RingFinder::initRingFinder()
+int RingFinder::initRingFinder_HT()
 {
   cout << "initRingFinder: initialized histograms for Ring Finder!" << endl;
   h_mHoughTransform = new TH3D("h_mHoughTransform","h_mHoughTransform",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
 
-  h_mQA_HT = new TH3D("h_mQA_HT","h_mQA_HT",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
+  h_mCherenkovRing_HT = new TH3D("h_mCherenkovRing_HT","h_mCherenkovRing_HT",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
+  h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
+  h_mNumOfCherenkovPhotons_HT = new TH3D("h_mNumOfCherenkovPhotons_HT","h_mNumOfCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,50,-0.5,49.5);
 
-  h_mCherenkovRing = new TH3D("h_mCherenkovRing","h_mCherenkovRing",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
-  h_mNumOfCherenkovPhotons = new TH3D("h_mNumOfCherenkovPhotons","h_mNumOfCherenkovPhotons",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
-  h_mNumOfPhotons_OnOffRing = new TH2D("h_mNumOfPhotons_OnOffRing","h_mNumOfPhotons_OnOffRing",50,-0.5,49.5,50,-0.5,49.5);
-
-  clearRingFinder();
+  clearRingFinder_HT();
 
   return 1;
 }
 
-int RingFinder::clearRingFinder()
+int RingFinder::clearRingFinder_HT()
 {
   h_mHoughTransform->Reset();
 
-  mRingCenter.Set(-999.9,-999.9);
-  mRadius = -999.9;
-  mNumOfPhotonsOnRing = -1;
-  mNumOfPhotonsOffRing = -1;
+  mRingCenter_HT.Set(-999.9,-999.9);
+  mRadius_HT = -999.9;
+  mNumOfPhotonsOnRing_HT = -1;
+  mNumOfPhotonsOffRing_HT = -1;
 
   return 1;
 }
 
-int RingFinder::writeRingFinder()
+int RingFinder::writeRingFinder_HT()
 {
-  h_mQA_HT->Write();
-
-  h_mCherenkovRing->Write();
-  h_mNumOfCherenkovPhotons->Write();
-  h_mNumOfPhotons_OnOffRing->Write();
+  h_mCherenkovRing_HT->Write();
+  h_mCherenkovPhotons_HT->Write();
+  h_mNumOfCherenkovPhotons_HT->Write();
 
   return 1;
 }
@@ -102,22 +98,6 @@ bool RingFinder::isCollinear(TVector2 firstHit, TVector2 secondHit, TVector2 thi
   return false;
 }
 
-bool RingFinder::isOnRing(TVector2 photonHit, double x_HoughTransform, double y_HoughTransform, double r_HoughTransform)
-{
-  double x_diff = photonHit.X() - x_HoughTransform;
-  double y_diff = photonHit.Y() - y_HoughTransform;
-  double r_diff = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff) - r_HoughTransform;
-
-  // double sigma_x = 6.0;
-  // double sigma_y = 6.0;
-  // double sigma_r = TMath::Sqrt(sigma_x*sigma_x+sigma_y*sigma_y);
-  double sigma_r = 6.0;
-
-  if( TMath::Abs(r_diff) < sigma_r) return true;
-
-  return false;
-}
-
 int RingFinder::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector<int> xPixel, std::vector<int> yPixel)
 {
   int NumOfPhotons = numOfPhotons;
@@ -150,7 +130,6 @@ int RingFinder::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector
 	bool ringStatus = findRing(firstHit,secondHit,thirdHit, x_Cherenkov, y_Cherenkov, r_Cherenkov);
 	if(ringStatus) 
 	{
-	  h_mQA_HT->Fill(x_Cherenkov,y_Cherenkov,r_Cherenkov);
 	  h_mHoughTransform->Fill(x_Cherenkov,y_Cherenkov,r_Cherenkov);
 	  // cout << "firstHit.x = " << firstHit.X() << ", firstHit.y = " << firstHit.Y() << endl;
 	  // cout << "secondHit.x = " << secondHit.X() << ", secondHit.y = " << secondHit.Y() << endl;
@@ -174,7 +153,7 @@ int RingFinder::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector
     double x_HoughTransform = h_mHoughTransform->GetXaxis()->GetBinCenter(hBin_x);
     double y_HoughTransform = h_mHoughTransform->GetYaxis()->GetBinCenter(hBin_y);
     double r_HoughTransform = h_mHoughTransform->GetZaxis()->GetBinCenter(hBin_r);
-    h_mCherenkovRing->Fill(x_HoughTransform,y_HoughTransform,r_HoughTransform);
+    h_mCherenkovRing_HT->Fill(x_HoughTransform,y_HoughTransform,r_HoughTransform);
     // cout << "hBin_x = " << hBin_x << ", hBin_y = " << hBin_y << ", hBin_r = " << hBin_r << ", globalBin = " << globalBin << ", with maxVote = " << maxVote << endl;
     // cout << "x_HoughTransform = " << x_HoughTransform << ", y_HoughTransform = " << y_HoughTransform << ", r_HoughTransform = " << r_HoughTransform << endl;
 
@@ -191,23 +170,56 @@ int RingFinder::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector
     }
     // cout << "NumOfPhotons = " << NumOfPhotons << ", NumOfPhotonsOnRing = " << NumOfPhotonsOnRing << endl;
 
-    mRingCenter.Set(x_HoughTransform,y_HoughTransform);
-    mRadius = r_HoughTransform;
-    mNumOfPhotonsOnRing = NumOfPhotonsOnRing;
-    mNumOfPhotonsOffRing = NumOfPhotons-NumOfPhotonsOnRing;
+    mRingCenter_HT.Set(x_HoughTransform,y_HoughTransform);
+    mRadius_HT = r_HoughTransform;
+    mNumOfPhotonsOnRing_HT = NumOfPhotonsOnRing;
+    mNumOfPhotonsOffRing_HT = NumOfPhotons-NumOfPhotonsOnRing;
 
     if(NumOfPhotonsOnRing > 4 && TMath::Abs(x_HoughTransform) < 5.5 && TMath::Abs(y_HoughTransform) < 5.5)
-    // if(TMath::Abs(x_HoughTransform) < 5.5 && TMath::Abs(y_HoughTransform) < 5.5)
     {
-      h_mNumOfCherenkovPhotons->Fill(NumOfPhotons,NumOfPhotonsOnRing,r_HoughTransform);
-      h_mNumOfPhotons_OnOffRing->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing);
+      h_mCherenkovPhotons_HT->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing,r_HoughTransform);
+      h_mNumOfCherenkovPhotons_HT->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing,NumOfPhotons);
     }
   }
 
   return 0;
 }
 
+TVector2 RingFinder::getRingCenter_HT()
+{
+  return mRingCenter_HT;
+}
+
+float RingFinder::getRingRadius_HT()
+{
+  return mRadius_HT;
+}
+
+int RingFinder::getNumOfPhotonsOnRing_HT()
+{
+  return mNumOfPhotonsOnRing_HT;
+}
+
+int RingFinder::getNumOfPhotonsOffRing_HT()
+{
+  return mNumOfPhotonsOffRing_HT;
+}
 //------------------------------------------------------
+bool RingFinder::isOnRing(TVector2 photonHit, double x0, double y0, double r0)
+{
+  double x_diff = photonHit.X() - x0;
+  double y_diff = photonHit.Y() - y0;
+  double r_diff = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff) - r0;
+
+  // double sigma_x = 6.0;
+  // double sigma_y = 6.0;
+  // double sigma_r = TMath::Sqrt(sigma_x*sigma_x+sigma_y*sigma_y);
+  double sigma_r = 6.0;
+
+  if( TMath::Abs(r_diff) < sigma_r) return true;
+
+  return false;
+}
 
 float RingFinder::findPixelCoord(int pixel)
 {
@@ -222,25 +234,4 @@ float RingFinder::findPixelCoord(int pixel)
 
   return out_coord;
 }
-
-TVector2 RingFinder::getRingCenter()
-{
-  return mRingCenter;
-}
-
-float RingFinder::getRingRadius()
-{
-  return mRadius;
-}
-
-int RingFinder::getNumOfPhotonsOnRing()
-{
-  return mNumOfPhotonsOnRing;
-}
-
-int RingFinder::getNumOfPhotonsOffRing()
-{
-  return mNumOfPhotonsOffRing;
-}
-
 //------------------------------------------------------
