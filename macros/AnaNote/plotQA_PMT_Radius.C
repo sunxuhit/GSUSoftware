@@ -13,13 +13,13 @@ void plotQA_PMT_Radius()
   TFile *File_Data = TFile::Open("/Users/xusun/WorkSpace/EICPID/OutPut/BeamTest/PMT/BeamTest_Calibration.root");
   TH3D *h_mNumOfCherenkovPhotons_Data = (TH3D*)File_Data->Get("h_mNumOfCherenkovPhotons");
   TH1D *h_mRadius_Data = (TH1D*)h_mNumOfCherenkovPhotons_Data->Project3D("z");
-  TH1D *h_mNumOfPhotons_OnRing_Data = (TH1D*)File_Data->Get("h_mNumOfPhotons_OnRing");
+  TH1D *h_mNumOfPhotons_OnRing_Data = (TH1D*)File_Data->Get("h_mNumOfPhotons");
   float NumOfEvents_Data = h_mNumOfPhotons_OnRing_Data->GetEntries();
 
   TFile *File_Sim = TFile::Open("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration.root");
   TH3D *h_mNumOfCherenkovPhotons_Sim = (TH3D*)File_Sim->Get("h_mNumOfCherenkovPhotons");
   TH1D *h_mRadius_Sim = (TH1D*)h_mNumOfCherenkovPhotons_Sim->Project3D("z");
-  TH1D *h_mNumOfPhotons_OnRing_Sim = (TH1D*)File_Sim->Get("h_mNumOfPhotons_OnRing");
+  TH1D *h_mNumOfPhotons_OnRing_Sim = (TH1D*)File_Sim->Get("h_mNumOfPhotons");
   float NumOfEvents_Sim = h_mNumOfPhotons_OnRing_Sim->GetEntries();
 
   float flength = 6.0*25.4; // mm
