@@ -23,7 +23,7 @@ using namespace std;
 
 ClassImp(gemcCalibration)
 
-gemcCalibration::gemcCalibration() : mDet("PMT"), is_pmt(true)
+gemcCalibration::gemcCalibration() : mDet("PMT"), is_pmt(true), mAirGap("3mm")
 {
   cout<<endl;
   cout<<"gemcCalibration::gemcCalibration() ----- Constructor ! ------"<<endl;
@@ -44,7 +44,7 @@ int gemcCalibration::Init()
 {
   cout<<"gemcCalibration::Init() ----- Initialization ! ------"<<endl;
 
-  mOutPutFile = Form("%s/WorkSpace/EICPID/OutPut/Simulation/%s/GEMC_Calibration.root",mHome.c_str(),mDet.c_str());
+  mOutPutFile = Form("%s/WorkSpace/EICPID/OutPut/Simulation/%s/GEMC_Calibration_%s.root",mHome.c_str(),mDet.c_str(),mAirGap.c_str());
   cout<<"gemcCalibration::Init(), create output file: "<< mOutPutFile.c_str() <<endl;
   File_mOutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
 
@@ -66,7 +66,7 @@ int gemcCalibration::Init()
 
 int gemcCalibration::initChain()
 {
-  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/Calibration/New/",mHome.c_str());
+  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/Calibration/%s/",mHome.c_str(),mAirGap.c_str());
   string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/Simulation/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
   // string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/AngleRun/",mHome.c_str());
   // string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/Simulation/%s/AngleRun/proton_anglerun.list",mHome.c_str(),mDet.c_str());
@@ -190,7 +190,7 @@ int gemcCalibration::resetSimpleTree()
 int gemcCalibration::Make()
 {
   // long NumOfEvents = (long)mChainInPut_Events->GetEntries();
-  long NumOfEvents = 5000;
+  long NumOfEvents = 50000;
 
   mChainInPut_Events->GetEntry(0);
   mChainInPut_Tracks->GetEntry(0);

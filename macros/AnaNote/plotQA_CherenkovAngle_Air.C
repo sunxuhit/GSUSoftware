@@ -5,22 +5,22 @@
 #include "TMath.h"
 #include "TLegend.h"
 
-double CherenkovAngle(double *x_val, double *par)
+double CherenkovAngle_Air(double *x_val, double *par)
 {
   double p = x_val[0];
   double m0 = par[0];
   double n = par[1];
 
-  double numerator = TMath::Sqrt(p*p+m0*m0);
-  double denominator = n*p;
+  double numerator = (n*n-1.0)*p*p-m0*m0;
+  double denominator = (2.0-n*n)*p*p+m0*m0;
 
   double theta = 0.0;
-  if( numerator > 0) theta = TMath::ACos(numerator/denominator);
+  if( numerator > 0) theta = TMath::ATan(TMath::Sqrt(numerator/denominator));
 
   return theta;
 }
 
-void plotQA_CherenkovAngle()
+void plotQA_CherenkovAngle_Air()
 {
   // double f = 6.0*25.4; // mm
   // double f = 200; // mm
@@ -67,7 +67,7 @@ void plotQA_CherenkovAngle()
     TString FuncName = Form("f_%s",ParType[i_particle].Data());
     double p_min = TMath::Sqrt(mass[i_particle]*mass[i_particle]/(n*n-1.0));
     // cout << "mass = " << mass[i_particle] << ", p_min = " << p_min<< endl;
-    f_theta[i_particle] = new TF1(FuncName.Data(),CherenkovAngle,0,150.0,2);
+    f_theta[i_particle] = new TF1(FuncName.Data(),CherenkovAngle_Air,0,150.0,2);
     f_theta[i_particle]->SetNpx(10000);
     f_theta[i_particle]->FixParameter(0,mass[i_particle]);
     f_theta[i_particle]->FixParameter(1,n);
@@ -87,9 +87,9 @@ void plotQA_CherenkovAngle()
   }
   leg->Draw("same");
 
-  cout << "120 GeV proton Cherenkov Angle is: " << f_theta[2]->Eval(120.0) << endl;
-  cout << "9 GeV pion Cherenkov Angle is: " << f_theta[0]->Eval(9.0) << endl;
-  cout << "9 GeV Kaon Cherenkov Angle is: " << f_theta[1]->Eval(9.0) << endl;
+  cout << "120 GeV proton Angle is: " << f_theta[2]->Eval(120.0) << endl;
+  cout << "9 GeV pion Angle is: " << f_theta[0]->Eval(9.0) << endl;
+  cout << "9 GeV Kaon Angle is: " << f_theta[1]->Eval(9.0) << endl;
 
-  c_play->SaveAs("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/c_theta_cherenkov.eps");
+  c_play->SaveAs("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/c_theta.eps");
 }

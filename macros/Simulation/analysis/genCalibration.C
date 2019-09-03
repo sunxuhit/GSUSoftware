@@ -13,6 +13,7 @@ int genCalibration(std::string detector = "PMT")
   calib->set_det(detector);
   if(detector == "PMT") calib->is_PMT(true);
   if(detector == "MPPC") calib->is_PMT(false);
+  calib->set_airgap("8mm");
 
   calib->Init();
   calib->Make();

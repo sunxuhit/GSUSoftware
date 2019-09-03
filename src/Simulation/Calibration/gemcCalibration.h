@@ -37,6 +37,11 @@ class gemcCalibration : public TObject
       mDet = detector;
     }
 
+    void set_airgap(std::string airgap)
+    {
+      mAirGap = airgap;
+    }
+
     int Init();
     int initChain();
     int initSimpleTree();
@@ -62,7 +67,7 @@ class gemcCalibration : public TObject
     Material *mMat;
     RingFinder *mRingFinder; // ring finder
 
-    std::string mDet, mHome;
+    std::string mDet, mAirGap, mHome;
     bool is_pmt;
 
     std::string mOutPutFile;
