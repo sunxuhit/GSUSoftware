@@ -234,13 +234,16 @@ int gemcCalibration::Make()
     for (int i_track = 0; i_track < NumOfTracks; ++i_track) // track loop
     {
       int pid = trk_pid->at(i_track);
-      double pz_out = trk_out_pz->at(i_track);
+      // double pz_out = trk_out_pz->at(i_track);
+      double pz_out = trk_in_pz->at(i_track);
       int detector_id = trk_id->at(i_track);
 
       if(isPhoton(pid,i_track) && !isReflection(pz_out,i_track) && isOnPhotonSensor(detector_id,i_track))
       {
-	double out_x_generated = trk_out_x->at(i_track);
-	double out_y_generated = trk_out_y->at(i_track);
+	// double out_x_generated = trk_out_x->at(i_track);
+	// double out_y_generated = trk_out_y->at(i_track);
+	double out_x_generated = trk_in_x->at(i_track);
+	double out_y_generated = trk_in_y->at(i_track);
 	h_mPhotonGenerated->Fill(out_x_generated,out_y_generated);
 
 	double photonE = trk_trackE->at(i_track);   /// in MeV (GEANT4 default)
@@ -253,8 +256,10 @@ int gemcCalibration::Make()
 
 	if( quantumEff > gRandom->Uniform(0.0,1.0) )
 	{
-	  double out_x_input = trk_out_x->at(i_track);
-	  double out_y_input = trk_out_y->at(i_track);
+	  // double out_x_input = trk_out_x->at(i_track);
+	  // double out_y_input = trk_out_y->at(i_track);
+	  double out_x_input = trk_in_x->at(i_track);
+	  double out_y_input = trk_in_y->at(i_track);
 	  mX_Sensor[NumOfPhotons] = out_x_input;
 	  mY_Sensor[NumOfPhotons] = out_y_input;
 	  mWaveLength[NumOfPhotons] = wavelength;

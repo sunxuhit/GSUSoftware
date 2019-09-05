@@ -423,25 +423,23 @@ int Calibration::Make()
 	{
 	  mBeamFinder->fillBeamOff(NumOfPhotons,mXPixelMap,mYPixelMap);
 
-	  if(NumOfPhotons > 0) // Ring Finder
+	  // Ring Finder
+	  // Hough Transform
+	  mRingFinder->HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
+	  TVector2 RingCenter_HT = mRingFinder->getRingCenter_HT();
+	  double RingRadius_HT = mRingFinder->getRingRadius_HT();
+	  // cout << "Ring Info from HoughTransform: X = " << RingCenter_HT.X() << ", Y = " << RingCenter_HT.Y() << ", R = " << RingRadius_HT << endl;
+
+	  // Minuit Fit
+	  mRingFinder->MinuitFit(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
+	  TVector2 RingCenter_MF = mRingFinder->getRingCenter_MF();
+	  double RingRadius_MF = mRingFinder->getRingRadius_MF();
+	  // cout << "Ring Info from MinuitFit: X = " << RingCenter_MF.X() << ", Y = " << RingCenter_MF.Y() << ", R = " << RingRadius_MF << endl;
+
+	  if(mRingFinder->getNumOfPhotonsOnRing_MF() > 4 && TMath::Abs(RingCenter_MF.X()) < 5.5 && TMath::Abs(RingCenter_MF.Y()) < 5.5)
 	  {
-	    // Hough Transform
-	    mRingFinder->HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
-	    TVector2 RingCenter_HT = mRingFinder->getRingCenter_HT();
-	    double RingRadius_HT = mRingFinder->getRingRadius_HT();
-	    // cout << "Ring Info from HoughTransform: X = " << RingCenter_HT.X() << ", Y = " << RingCenter_HT.Y() << ", R = " << RingRadius_HT << endl;
-
-	    // Minuit Fit
-	    mRingFinder->MinuitFit(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
-	    TVector2 RingCenter_MF = mRingFinder->getRingCenter_MF();
-	    double RingRadius_MF = mRingFinder->getRingRadius_MF();
-	    // cout << "Ring Info from MinuitFit: X = " << RingCenter_MF.X() << ", Y = " << RingCenter_MF.Y() << ", R = " << RingRadius_MF << endl;
-
-	    if(mRingFinder->getNumOfPhotonsOnRing_HT() > 4 && TMath::Abs(RingCenter_HT.X()) < 5.5 && TMath::Abs(RingCenter_HT.Y()) < 5.5)
-	    {
-	      h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_HT());
-	      p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_HT());
-	    }
+	    h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_MF());
+	    p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_MF());
 	  }
 	}
       }
