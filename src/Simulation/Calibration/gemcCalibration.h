@@ -52,6 +52,34 @@ class gemcCalibration : public TObject
     int Finish();
     int writeSimpleTree();
 
+    // beam spot cut
+    bool isHodoXY(float vx, float vy);
+    void set_HodoXY(float vx, float vy)
+    {
+      mVx_Hodo = vx;
+      mVy_Hodo = vy;
+    }
+
+    bool isHodoR(float vx, float vy);
+    void set_HodoR(float vr)
+    {
+      mVr_Hodo = vr;
+    }
+
+    bool isVetoXY(float vx, float vy);
+    void set_VetoXY(float vx, float vy)
+    {
+      mVx_Veto = vx;
+      mVy_Veto = vy;
+    }
+
+    bool isVetoR(float vx, float vy);
+    void set_VetoR(float vr)
+    {
+      mVr_Veto = vr;
+    }
+
+    // pid cut
     bool isPhoton(int pid, int i_track);
     bool isReflection(double pz_out, int i_track);
     bool isOnAerogel(int detector_id, int i);
@@ -72,8 +100,11 @@ class gemcCalibration : public TObject
 
     std::string mOutPutFile;
     TFile *File_mOutPut;
+    float mVx_Hodo, mVy_Hodo, mVr_Hodo;
+    float mVx_Veto, mVy_Veto, mVr_Veto;
 
     TH1D *h_mNumOfEvents;
+    TH2D *h_mBeamSpot; // beam configuration
     TH2D *h_mRingImage; // ring image in pixel plane
     TH2D *h_mPhotonDist;
     TH2D *h_mPhotonDist_SingleEvent; // single event display
