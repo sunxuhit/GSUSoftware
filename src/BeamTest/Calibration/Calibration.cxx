@@ -64,7 +64,8 @@ int Calibration::Init()
   mBeamFinder->initBeamFinder();
 
   mRingFinder = new RingFinder();
-  mRingFinder->initRingFinder();
+  mRingFinder->initRingFinder_HT(); // initialize Hough Transform
+  mRingFinder->initRingFinder_MF(); // initialize Minuit Fit
 
   initRingImage();
 
@@ -426,18 +427,27 @@ int Calibration::Make()
 	  {
 	    // Hough Transform
 	    mRingFinder->HoughTransform(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
+	    TVector2 RingCenter_HT = mRingFinder->getRingCenter_HT();
+	    double RingRadius_HT = mRingFinder->getRingRadius_HT();
+	    // cout << "Ring Info from HoughTransform: X = " << RingCenter_HT.X() << ", Y = " << RingCenter_HT.Y() << ", R = " << RingRadius_HT << endl;
 
-	    TVector2 RingCenter = mRingFinder->getRingCenter();
-	    if(mRingFinder->getNumOfPhotonsOnRing() > 4 && TMath::Abs(RingCenter.X()) < 5.5 && TMath::Abs(RingCenter.Y()) < 5.5)
+	    // Minuit Fit
+	    mRingFinder->MinuitFit(NumOfPhotons, h_mRingFinder, mXPixelMap, mYPixelMap);
+	    TVector2 RingCenter_MF = mRingFinder->getRingCenter_MF();
+	    double RingRadius_MF = mRingFinder->getRingRadius_MF();
+	    // cout << "Ring Info from MinuitFit: X = " << RingCenter_MF.X() << ", Y = " << RingCenter_MF.Y() << ", R = " << RingRadius_MF << endl;
+
+	    if(mRingFinder->getNumOfPhotonsOnRing_HT() > 4 && TMath::Abs(RingCenter_HT.X()) < 5.5 && TMath::Abs(RingCenter_HT.Y()) < 5.5)
 	    {
-	      h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing());
-	      p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing());
+	      h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_HT());
+	      p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_HT());
 	    }
 	  }
 	}
       }
     }
-    mRingFinder->clearRingFinder();
+    mRingFinder->clearRingFinder_HT();
+    mRingFinder->clearRingFinder_MF();
     clearRingImage();
 
     for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x) // fill time duration
@@ -466,7 +476,8 @@ int Calibration::Finish()
     }
   }
   mBeamFinder->writeBeamFinder();
-  mRingFinder->writeRingFinder();
+  mRingFinder->writeRingFinder_HT();
+  mRingFinder->writeRingFinder_MF();
 
   writeRingImage();
 
