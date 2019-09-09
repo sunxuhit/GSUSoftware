@@ -104,7 +104,12 @@ class gemcCalibration : public TObject
     float mVx_Veto, mVy_Veto, mVr_Veto;
 
     TH1D *h_mNumOfEvents;
+
     TH2D *h_mBeamSpot; // beam configuration
+    TH2D *h_mBeamSpotX;
+    TH2D *h_mBeamSpotY;
+    TH1D *h_mPhotonSensorIn;
+
     TH2D *h_mRingImage; // ring image in pixel plane
     TH2D *h_mPhotonDist;
     TH2D *h_mPhotonDist_SingleEvent; // single event display

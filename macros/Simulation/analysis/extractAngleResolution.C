@@ -6,9 +6,9 @@
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TMath.h"
-#include "draw.h"
+#include "../../draw.h"
 
-void extractAngleResolution(const string airgap = "0mm")
+void extractAngleResolution(const string airgap = "8mm")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
@@ -34,6 +34,7 @@ void extractAngleResolution(const string airgap = "0mm")
   h_mRadius->SetLineWidth(1);
   h_mRadius->GetXaxis()->SetTitle("R (mm)");
   h_mRadius->GetXaxis()->CenterTitle();
+  h_mRadius->GetXaxis()->SetRangeUser(32.0,52.0);
   h_mRadius->Draw();
 
   TF1 *f_gaus = new TF1("f_gaus","gaus",0,100);
@@ -57,7 +58,7 @@ void extractAngleResolution(const string airgap = "0mm")
   float mean_r = f_gaus->GetParameter(1);
   float sigma_r = f_gaus->GetParameter(2);
   string leg_gaus = Form("R: %1.2f #pm %1.2f (mm)",mean_r,sigma_r);
-  plotTopLegend((char*)leg_gaus.c_str(),0.48,0.6,0.04,1,0.0,42,1,1);
+  plotTopLegend((char*)leg_gaus.c_str(),0.46,0.6,0.04,1,0.0,42,1,1);
 
   /*
   float tan_theta = mean_r/flength; // r/f
@@ -69,16 +70,18 @@ void extractAngleResolution(const string airgap = "0mm")
   float dist_r = TMath::Sqrt(mean_r*mean_r+flength*flength);
   float sin_theta = mean_r/dist_r; // sin(theta_c)*n_c = sin(theta_air)*n_air
   float theta = TMath::ASin(sin_theta);
+  float sigma_theta = sigma_r/(flength*(1.0+theta*theta));
 
   float sin_theta_c = mean_r/(dist_r*nref); // sin(theta_c)*n_c = sin(theta_air)*n_air
   float theta_c = TMath::ASin(sin_theta_c);
   float sigma_theta_c = TMath::Cos(theta)*TMath::Cos(theta)*TMath::Cos(theta)*sigma_r/(nref*flength*TMath::Cos(theta_c));
+  // float sigma_theta_c = TMath::Cos(theta)*sigma_theta/(nref*TMath::Cos(theta_c));
   // cout << "theta (asin) = " << theta << ", theta_c = " << theta_c << endl;
   string leg_theta_c = Form("#theta_{c}: %1.2f #pm %1.2f (mRad)",theta_c*1000.0,sigma_theta_c*1000.0);
-  plotTopLegend((char*)leg_theta_c.c_str(),0.48,0.5,0.04,1,0.0,42,1,1);
+  plotTopLegend((char*)leg_theta_c.c_str(),0.46,0.5,0.04,1,0.0,42,1,1);
 
   string leg_sigma = Form("#sigma_{#theta_{c}} = %1.2f (mRad)",1000.0*sigma_theta_c);
-  plotTopLegend((char*)leg_sigma.c_str(),0.48,0.4,0.04,1,0.0,42,1,1);
+  plotTopLegend((char*)leg_sigma.c_str(),0.46,0.4,0.04,1,0.0,42,1,1);
 
   string fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_radius_%s.eps",airgap.c_str());
   c_Radius->SaveAs(fig_name.c_str());

@@ -244,7 +244,9 @@ int gemcCalibration::Make()
 	// double out_y_generated = trk_out_y->at(i_track);
 	double out_x_generated = trk_in_x->at(i_track);
 	double out_y_generated = trk_in_y->at(i_track);
+	double out_z_generated = trk_in_z->at(i_track);
 	h_mPhotonGenerated->Fill(out_x_generated,out_y_generated);
+	h_mPhotonSensorIn->Fill(out_z_generated);
 
 	double photonE = trk_trackE->at(i_track);   /// in MeV (GEANT4 default)
 	double wavelength = 1240./(photonE*1.e6);  /// MeV->eV,wavelength in "nm"
@@ -308,11 +310,13 @@ int gemcCalibration::Make()
       double RingRadius_MF = mRingFinder->getRingRadius_MF();
       // cout << "Ring Info from MinuitFit: X = " << RingCenter_MF.X() << ", Y = " << RingCenter_MF.Y() << ", R = " << RingRadius_MF << endl;
 
-      if(mRingFinder->getNumOfPhotonsOnRing_HT() > 4 && TMath::Abs(RingCenter_HT.X()) < 5.5 && TMath::Abs(RingCenter_HT.Y()) < 5.5)
+      if(mRingFinder->getNumOfPhotonsOnRing_MF() > 4 && TMath::Abs(RingCenter_MF.X()) < 3.5 && TMath::Abs(RingCenter_MF.Y()) < 3.5)
       {
-	h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_HT());
-	p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_HT());
+	h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_MF());
+	p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_MF());
       }
+      h_mBeamSpotX->Fill(vx_mom,RingCenter_MF.X());
+      h_mBeamSpotY->Fill(vy_mom,RingCenter_MF.Y());
     }
     mRingFinder->clearRingFinder_HT();
     mRingFinder->clearRingFinder_MF();
@@ -421,6 +425,10 @@ int gemcCalibration::initRingImage()
   h_mRingFinder = new TH2D("h_mRingFinder","h_mRingFinder",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
   h_mBeamSpot = new TH2D("h_mBeamSpot","h_mBeamSpot",201,-10.05,10.05,201,-10.05,10.05);
+  h_mBeamSpotX = new TH2D("h_mBeamSpotX","h_mBeamSpotX",201,-10.05,10.05,201,-10.05,10.05);
+  h_mBeamSpotY = new TH2D("h_mBeamSpotY","h_mBeamSpotY",201,-10.05,10.05,201,-10.05,10.05);
+  h_mPhotonSensorIn = new TH1D("h_mPhotonSensorIn","h_mPhotonSensorIn",400,199.5,249.5);
+
   h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
   h_mPhotonGenerated = new TH2D("h_mPhotonGenerated","h_mPhotonGenerated",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
   h_mPhotonDist = new TH2D("h_mPhotonDist","h_mPhotonDist",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
@@ -448,6 +456,9 @@ int gemcCalibration::clearRingImage()
 int gemcCalibration::writeRingImage()
 {
   h_mBeamSpot->Write();
+  h_mBeamSpotX->Write();
+  h_mBeamSpotY->Write();
+  h_mPhotonSensorIn->Write();
   h_mRingImage->Write();
 
   h_mPhotonGenerated->Write();

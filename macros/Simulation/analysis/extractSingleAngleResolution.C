@@ -7,7 +7,7 @@
 #include "TF1.h"
 #include "TMath.h"
 #include "TGraphAsymmErrors.h"
-#include "draw.h"
+#include "../../draw.h"
 
 double singleAR(double *x_val, double *par)
 {
@@ -15,11 +15,12 @@ double singleAR(double *x_val, double *par)
   double p0 = par[0];
   double p1 = par[1];
   double sigma = p0/TMath::Sqrt(x) + p1;
+  // double sigma = TMath::Sqrt(p0*p0/x + p1*p1);
 
   return sigma;
 }
 
-void extractSingleAngleResolution(const string airgap = "0mm")
+void extractSingleAngleResolution(const string airgap = "8mm")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
@@ -32,6 +33,8 @@ void extractSingleAngleResolution(const string airgap = "0mm")
   // float flength = 6.0*25.4 +3.0; // mm
   float flength = 6.0*25.4; // mm
 
+  TCanvas *c_Radius = new TCanvas("c_Radius","c_Radius",2000,1500);
+  c_Radius->Divide(5,4);
   TH1D *h_mRadius[20];
   TF1 *f_gaus[20];
   float sigma_theta[20];
@@ -43,8 +46,13 @@ void extractSingleAngleResolution(const string airgap = "0mm")
     sigma_theta[i_photon] = 0.0;
     error_theta[i_photon] = 0.0;
 
+    c_Radius->cd(i_photon+1);
     string HistName = Form("h_mRadius_%d",i_photon);
     h_mRadius[i_photon] = (TH1D*)h_mNumRadius->ProjectionY(HistName.c_str(),i_photon+1,i_photon+1);
+    h_mRadius[i_photon]->GetXaxis()->SetRangeUser(35,45);
+    h_mRadius[i_photon]->GetXaxis()->SetTitle("R (mm)");
+    h_mRadius[i_photon]->GetXaxis()->CenterTitle();
+    h_mRadius[i_photon]->DrawCopy("hE");
 
     string FuncName = Form("f_gaus_%d",i_photon);
     f_gaus[i_photon] = new TF1(FuncName.c_str(),"gaus",0,100);
@@ -63,6 +71,10 @@ void extractSingleAngleResolution(const string airgap = "0mm")
       f_gaus[i_photon]->SetParameter(2,sig_1st);
       f_gaus[i_photon]->SetRange(mean_1st-3.0*sig_1st,mean_1st+3.0*sig_1st);
       h_mRadius[i_photon]->Fit(f_gaus[i_photon],"NQR");
+      f_gaus[i_photon]->SetLineColor(2);
+      f_gaus[i_photon]->SetLineStyle(2);
+      f_gaus[i_photon]->SetLineWidth(3);
+      f_gaus[i_photon]->Draw("l same");
 
       float mean_r = f_gaus[i_photon]->GetParameter(1);
       float sigma_r = f_gaus[i_photon]->GetParameter(2);
@@ -86,6 +98,12 @@ void extractSingleAngleResolution(const string airgap = "0mm")
       float sigma_theta_c = TMath::Cos(theta)*TMath::Cos(theta)*TMath::Cos(theta)*sigma_r/(nref*flength*TMath::Cos(theta_c));
       sigma_theta[i_photon] = sigma_theta_c;
       error_theta[i_photon] = error_r*TMath::Cos(theta)*TMath::Cos(theta)*TMath::Cos(theta)/(nref*flength*TMath::Cos(theta_c));
+
+      string leg_Npe = Form("N_{p.e.} = %d",i_photon);
+      plotTopLegend((char*)leg_Npe.c_str(),0.5,0.75,0.06,1,0.0,42,1,1);
+
+      string leg_sigma = Form("#sigma_{#theta_{c}} = %1.2f (mRad)",1000.0*sigma_theta_c);
+      plotTopLegend((char*)leg_sigma.c_str(),0.5,0.65,0.06,1,0.0,42,1,1);
 
       g_AngleResolution->SetPoint(nPoints,i_photon,sigma_theta[i_photon]);
       g_AngleResolution->SetPointError(nPoints,0.0,0.0,error_theta[i_photon],error_theta[i_photon]);
@@ -143,10 +161,13 @@ void extractSingleAngleResolution(const string airgap = "0mm")
 
   float sigma_pe = 1000.0*f_sigma->GetParameter(0);
 
-  string leg = Form("#sigma_{c,1pe} = %1.1f mRad",sigma_pe);
+  string leg = Form("#sigma_{#theta_{c},1pe} = %1.1f mRad",sigma_pe);
   plotTopLegend((char*)leg.c_str(),0.48,0.5,0.04,1,0.0,42,1,1);
 
   string fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_singleAR_%s.eps",airgap.c_str());
   c_AngleResolution->SaveAs(fig_name.c_str());
+
+  fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_radiusSlice_%s.eps",airgap.c_str());
+  c_Radius->SaveAs(fig_name.c_str());
 }
 

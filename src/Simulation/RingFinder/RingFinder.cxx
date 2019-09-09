@@ -28,7 +28,8 @@ int RingFinder::initRingFinder_HT()
   h_mHoughTransform = new TH3D("h_mHoughTransform","h_mHoughTransform",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
 
   h_mCherenkovRing_HT = new TH3D("h_mCherenkovRing_HT","h_mCherenkovRing_HT",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
-  h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
+  // h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
+  h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,100,29.5,49.5);
   h_mNumOfCherenkovPhotons_HT = new TH3D("h_mNumOfCherenkovPhotons_HT","h_mNumOfCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,50,-0.5,49.5);
 
   clearRingFinder_HT();
@@ -177,7 +178,7 @@ int RingFinder::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector
     mNumOfPhotonsOnRing_HT = NumOfPhotonsOnRing;
     mNumOfPhotonsOffRing_HT = NumOfPhotons-NumOfPhotonsOnRing;
 
-    if(NumOfPhotonsOnRing > 4 && TMath::Abs(x_HoughTransform) < 5.5 && TMath::Abs(y_HoughTransform) < 5.5)
+    if(NumOfPhotonsOnRing > 4 && TMath::Abs(x_HoughTransform) < 3.5 && TMath::Abs(y_HoughTransform) < 3.5)
     {
       h_mCherenkovPhotons_HT->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing,r_HoughTransform);
       h_mNumOfCherenkovPhotons_HT->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing,NumOfPhotons);
@@ -213,7 +214,7 @@ int RingFinder::initRingFinder_MF()
   cout << "initRingFinder: initialized histograms for Minuit Fit!" << endl;
 
   h_mCherenkovRing_MF = new TH3D("h_mCherenkovRing_MF","h_mCherenkovRing_MF",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
-  h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
+  h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,100,29.5,49.5);
   h_mNumOfCherenkovPhotons_MF = new TH3D("h_mNumOfCherenkovPhotons_MF","h_mNumOfCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,50,-0.5,49.5);
 
   h_mRingFinder_MF = new TH2D("h_mRingFinder_MF","h_mRingFinder_MF",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels); // reset for each minuitRingRadius fit
@@ -284,7 +285,7 @@ int RingFinder::MinuitFit(int numOfPhotons, TH2D *h_RingFinder, std::vector<int>
   // cout << "Npe_MF = " << mNumOfPhotonsOnRing_MF << ", Nbkg_MF = " << mNumOfPhotonsOffRing_MF << endl;
 
   h_mCherenkovRing_MF->Fill(mRingCenter_MF.X(),mRingCenter_MF.Y(),mRadius_MF);
-  if(mNumOfPhotonsOnRing_MF > 4 && TMath::Abs(mRingCenter_MF.X()) < 5.5 && TMath::Abs(mRingCenter_MF.Y()) < 5.5)
+  if(mNumOfPhotonsOnRing_MF > 4 && TMath::Abs(mRingCenter_MF.X()) < 3.5 && TMath::Abs(mRingCenter_MF.Y()) < 3.5)
   {
     h_mCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,mRadius_MF);
     h_mNumOfCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,numOfPhotons);
@@ -330,7 +331,7 @@ std::pair<int,int> RingFinder::minuitRingRadius(int numOfPhotons, TH2D *h_RingFi
   // do the fit 
   bool ok = fitter.FitFCN();
   if (!ok) {
-    Error("line3Dfit","Line3D Fit failed");
+    Error("minuitRingRadius","Minuit Fit failed");
     return NumInfo;
   }   
 
