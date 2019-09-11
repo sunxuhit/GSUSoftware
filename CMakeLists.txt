@@ -29,28 +29,28 @@ find_package(ROOT REQUIRED COMPONENTS RIO Net)
 include(${ROOT_USE_FILE})
 
 # include Pixel Map in BeamTest
-include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
-add_subdirectory(src/BeamTest/PixelMap)
+# include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/PixelMap")
+# add_subdirectory(src/BeamTest/PixelMap)
 
 # include Beam Finder in BeamTest
-include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/BeamFinder")
-add_subdirectory(src/BeamTest/BeamFinder)
+# include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/BeamFinder")
+# add_subdirectory(src/BeamTest/BeamFinder)
 
 # include Ring Finder in BeamTest
-include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/RingFinder")
-add_subdirectory(src/BeamTest/RingFinder)
+# include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/RingFinder")
+# add_subdirectory(src/BeamTest/RingFinder)
 
 # include Calibration in BeamTest
 include_directories("${PROJECT_SOURCE_DIR}/src/BeamTest/Calibration")
 add_subdirectory(src/BeamTest/Calibration)
 
 # include material in Simulation
-include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Material")
-add_subdirectory(src/Simulation/Material)
+# include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Material")
+# add_subdirectory(src/Simulation/Material)
 
 # include Ring Finder in Simulation
-include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/RingFinder")
-add_subdirectory(src/Simulation/RingFinder)
+# include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/RingFinder")
+# add_subdirectory(src/Simulation/RingFinder)
 
 # include gemc Calibration in Simulation
 include_directories("${PROJECT_SOURCE_DIR}/src/Simulation/Calibration")

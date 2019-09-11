@@ -29,7 +29,7 @@ int RingFinder::initRingFinder_HT()
 
   h_mCherenkovRing_HT = new TH3D("h_mCherenkovRing_HT","h_mCherenkovRing_HT",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
   // h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
-  h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,100,29.5,49.5);
+  h_mCherenkovPhotons_HT = new TH3D("h_mCherenkovPhotons_HT","h_mCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,150,29.5,59.5);
   h_mNumOfCherenkovPhotons_HT = new TH3D("h_mNumOfCherenkovPhotons_HT","h_mNumOfCherenkovPhotons_HT",50,-0.5,49.5,50,-0.5,49.5,50,-0.5,49.5);
 
   clearRingFinder_HT();
@@ -215,7 +215,7 @@ int RingFinder::initRingFinder_MF()
 
   h_mCherenkovRing_MF = new TH3D("h_mCherenkovRing_MF","h_mCherenkovRing_MF",108,-54.0,54.0,108,-54.0,54.0,108,0,54.0);
   // h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
-  h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,100,29.5,49.5);
+  h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,150,29.5,59.5);
   h_mNumOfCherenkovPhotons_MF = new TH3D("h_mNumOfCherenkovPhotons_MF","h_mNumOfCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,50,-0.5,49.5);
 
   h_mRingFinder_MF = new TH2D("h_mRingFinder_MF","h_mRingFinder_MF",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels); // reset for each minuitRingRadius fit

@@ -8,13 +8,13 @@
 #include "TMath.h"
 #include "../../draw.h"
 
-void plotQA_BeamSpot(const string airgap = "8mm")
+void plotQA_BeamSpotReco(const string airgap = "8mm")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
 
   TH2D *h_mBeamSpot= (TH2D*)File_InPut->Get("h_mBeamSpot");
-  TH2D *h_mPhotonDist = (TH2D*)File_InPut->Get("h_mPhotonDist");
+  TH2D *h_mBeamSpotReco = (TH2D*)File_InPut->Get("h_mBeamSpotReco");
 
   TCanvas *c_Beam = new TCanvas("c_Beam","c_Beam",10,10,1000,500);
   c_Beam->Divide(2,1);
@@ -28,7 +28,7 @@ void plotQA_BeamSpot(const string airgap = "8mm")
   }
 
   c_Beam->cd(1);
-  h_mBeamSpot->SetTitle("120 GeV/c proton");
+  h_mBeamSpot->SetTitle("input: 120 GeV/c proton");
   h_mBeamSpot->SetStats(0);
   h_mBeamSpot->SetLineColor(1);
   h_mBeamSpot->SetLineWidth(1);
@@ -41,27 +41,18 @@ void plotQA_BeamSpot(const string airgap = "8mm")
   h_mBeamSpot->Draw("colz");
 
   c_Beam->cd(2);
-  c_Beam->cd(2)->SetLogz();
-  h_mPhotonDist->SetTitle("120 GeV/c proton");
-  h_mPhotonDist->SetStats(0);
-  h_mPhotonDist->SetLineColor(1);
-  h_mPhotonDist->SetLineWidth(1);
-  h_mPhotonDist->GetXaxis()->SetTitle("x (mm)");
-  h_mPhotonDist->GetXaxis()->CenterTitle();
-  h_mPhotonDist->GetYaxis()->SetTitle("y (mm)");
-  h_mPhotonDist->GetYaxis()->CenterTitle();
-  h_mPhotonDist->Draw("colz");
+  h_mBeamSpotReco->SetTitle("reco: 120 GeV/c proton");
+  h_mBeamSpotReco->SetStats(0);
+  h_mBeamSpotReco->SetLineColor(1);
+  h_mBeamSpotReco->SetLineWidth(1);
+  h_mBeamSpotReco->GetXaxis()->SetRangeUser(-10.0,10.0);
+  h_mBeamSpotReco->GetXaxis()->SetTitle("x (mm)");
+  h_mBeamSpotReco->GetXaxis()->CenterTitle();
+  h_mBeamSpotReco->GetYaxis()->SetRangeUser(-10.0,10.0);
+  h_mBeamSpotReco->GetYaxis()->SetTitle("y (mm)");
+  h_mBeamSpotReco->GetYaxis()->CenterTitle();
+  h_mBeamSpotReco->Draw("colz");
 
-  h_mBeamSpot->SetTitle("120 GeV/c proton");
-  h_mBeamSpot->SetStats(0);
-  h_mBeamSpot->SetLineColor(1);
-  h_mBeamSpot->SetLineWidth(1);
-  h_mBeamSpot->GetXaxis()->SetTitle("x (mm)");
-  h_mBeamSpot->GetXaxis()->CenterTitle();
-  h_mBeamSpot->GetYaxis()->SetTitle("y (mm)");
-  h_mBeamSpot->GetYaxis()->CenterTitle();
-  h_mBeamSpot->Draw("col same");
-
-  string fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_BeamSpot_%s.eps",airgap.c_str());
+  string fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_BeamSpotReco_%s.eps",airgap.c_str());
   c_Beam->SaveAs(fig_name.c_str());
 }

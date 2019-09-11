@@ -68,11 +68,14 @@ class Calibration : public TObject
     float mTime_High;
     float mTimeDuration[mRICH::mNumOfPixels][mRICH::mNumOfPixels][2];
     TH1D *h_mTDC[mRICH::mNumOfPixels][mRICH::mNumOfPixels]; // 0 for x-pixel | 1 for y-pixel
+
     TH2D *h_mRingImage;
     TH2D *h_mRingFinder_Display; // QA for ring finder
     TH2D *h_mRingFinder_SingleEvent; // QA for ring finder
     TH1D *h_mNumOfPhotons;
     TProfile *p_mNumOfPhotons;
+    TH2D *h_mBeamSpotReco;
+    TH3D *h_mSinglePhoton; // theta_air & theta_c & r for single photon
 
     static const int MAXEDGE = 100000;
     const int MAROCPOLARITY = 1; // 1 falling, 0 rising

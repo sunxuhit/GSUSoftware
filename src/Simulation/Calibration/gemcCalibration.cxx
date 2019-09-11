@@ -221,8 +221,8 @@ int gemcCalibration::Make()
     const double momentum = TMath::Sqrt(px_mom*px_mom+py_mom*py_mom+pz_mom*pz_mom);
     // cout << "pid_mom = " << pid_mom << ", pz_mom = " << pz_mom << endl;
 
-    // if( !(isHodoXY(vx_mom,vy_mom) && !isVetoXY(vx_mom,vy_mom)) ) continue;
-    if( !(isHodoR(vx_mom,vy_mom) && !isVetoR(vx_mom,vy_mom)) ) continue;
+    if( !(isHodoXY(vx_mom,vy_mom) && !isVetoXY(vx_mom,vy_mom)) ) continue;
+    // if( !(isHodoR(vx_mom,vy_mom) && !isVetoR(vx_mom,vy_mom)) ) continue;
 
     h_mNumOfEvents->Fill(0);
     h_mBeamSpot->Fill(vx_mom,vy_mom);
@@ -314,9 +314,42 @@ int gemcCalibration::Make()
       {
 	h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_MF());
 	p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_MF());
+
+	for(int i_photon = 0; i_photon < NumOfPhotons; ++i_photon) // fit single photon radius distribution
+	{
+	  double x_photonHit = h_mRingFinder->GetXaxis()->GetBinCenter(mXPixelMap[i_photon]);
+	  double y_photonHit = h_mRingFinder->GetYaxis()->GetBinCenter(mYPixelMap[i_photon]);
+	  double x_MinuitFit = RingCenter_MF.X();
+	  double y_MinuitFit = RingCenter_MF.Y();
+	  double r_MinuitFit = RingRadius_MF;
+
+	  double x_diff = x_photonHit - x_MinuitFit;
+	  double y_diff = y_photonHit - y_MinuitFit;
+	  double r_diff = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff) - r_MinuitFit;
+
+	  double sigma_r = 3.0*2; // 2-pixel
+
+	  if( TMath::Abs(r_diff) < sigma_r)
+	  {
+	    double flength = 6.0*25.4; // mm
+	    double nref = 1.03;
+
+	    double r_singlephoton = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff);
+
+	    float dist_r = TMath::Sqrt(r_singlephoton*r_singlephoton+flength*flength);
+	    float sin_theta_air = r_singlephoton/dist_r; // sin(theta_c)*n_c = sin(theta_air)*n_air
+	    float theta_air = TMath::ASin(sin_theta_air);
+
+	    float sin_theta_c = r_singlephoton/(dist_r*nref); // sin(theta_c)*n_c = sin(theta_air)*n_air
+	    float theta_c = TMath::ASin(sin_theta_c);
+
+	    h_mSinglePhoton->Fill(theta_air, theta_c, r_singlephoton);
+	  }
+	}
       }
       h_mBeamSpotX->Fill(vx_mom,RingCenter_MF.X());
       h_mBeamSpotY->Fill(vy_mom,RingCenter_MF.Y());
+      h_mBeamSpotReco->Fill(RingCenter_MF.X(),RingCenter_MF.Y());
     }
     mRingFinder->clearRingFinder_HT();
     mRingFinder->clearRingFinder_MF();
@@ -356,7 +389,8 @@ int gemcCalibration::writeSimpleTree()
 // beam spot cut
 bool gemcCalibration::isHodoXY(float vx, float vy)
 {
-  if( TMath::Abs(vx) < mVx_Hodo && TMath::Abs(vy) < mVy_Hodo) return true;
+  // if( TMath::Abs(vx) < mVx_Hodo && TMath::Abs(vy) < mVy_Hodo) return true;
+  if( vx < mVx_Hodo && vy < mVy_Hodo) return true;
 
   return false;
 }
@@ -425,9 +459,11 @@ int gemcCalibration::initRingImage()
   h_mRingFinder = new TH2D("h_mRingFinder","h_mRingFinder",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
 
   h_mBeamSpot = new TH2D("h_mBeamSpot","h_mBeamSpot",201,-10.05,10.05,201,-10.05,10.05);
+  h_mBeamSpotReco = new TH2D("h_mBeamSpotReco","h_mBeamSpotReco",201,-10.05,10.05,201,-10.05,10.05);
   h_mBeamSpotX = new TH2D("h_mBeamSpotX","h_mBeamSpotX",201,-10.05,10.05,201,-10.05,10.05);
   h_mBeamSpotY = new TH2D("h_mBeamSpotY","h_mBeamSpotY",201,-10.05,10.05,201,-10.05,10.05);
   h_mPhotonSensorIn = new TH1D("h_mPhotonSensorIn","h_mPhotonSensorIn",400,199.5,249.5);
+  h_mSinglePhoton = new TH3D("h_mSinglePhoton","h_mSinglePhoton",150,0.10,0.40,150,0.10,0.40,150,29.5,59.5);
 
   h_mRingImage = new TH2D("h_mRingImage","h_mRingImage",mRICH::mNumOfPixels,-0.5,32.5,mRICH::mNumOfPixels,-0.5,32.5);
   h_mPhotonGenerated = new TH2D("h_mPhotonGenerated","h_mPhotonGenerated",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels);
@@ -456,9 +492,12 @@ int gemcCalibration::clearRingImage()
 int gemcCalibration::writeRingImage()
 {
   h_mBeamSpot->Write();
+  h_mBeamSpotReco->Write();
   h_mBeamSpotX->Write();
   h_mBeamSpotY->Write();
   h_mPhotonSensorIn->Write();
+  h_mSinglePhoton->Write();
+
   h_mRingImage->Write();
 
   h_mPhotonGenerated->Write();
