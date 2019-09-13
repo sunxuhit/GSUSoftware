@@ -68,9 +68,10 @@ my $hollow_halfz = (2.0*$box_halfz-$box_thicknessZ)/2.0;
 my $agel_halfx = 55.25;
 my $agel_halfy = $agel_halfx;
 my $agel_halfz = 15.0; # 3*10mm thick aerogel
+my $agel_gap   = 0.1; # 0.1mm air gap between aerogel and lens
 
 my $foamHolderThicknessX = $hollow_halfx-$agel_halfx; # distance between aerogel and holder box
-my $foamHolderThicknessZ = $box_chamber-$lens_halfz*2.0 - $agel_halfz*2.0; # box_chamber - lens thickness - aeorgel thickness
+my $foamHolderThicknessZ = $box_chamber-$lens_halfz*2.0 - $agel_halfz*2.0 - $agel_gap; # box_chamber - lens thickness - aeorgel thickness - air gap
 my $foamHolder_halfx     = $agel_halfx+$foamHolderThicknessX;
 my $foamHolder_halfy     = $foamHolder_halfx;
 my $foamHolder_halfz     = $foamHolderThicknessZ/2.0;
@@ -89,9 +90,9 @@ my $mirror_halfz      = ($focalLength-$mirror_gap_front-$mirror_gap_back)/2.0;
 
 #===================================================================================================#
 #---------- Readout electronics ---------#
-my $readout_gap        = 3.0;     # 3mm: gap between optical box and readout box
-my $readout_thicknessZ = 40.0; # 40.0mm                                          = > Xu's guess
-my $readout_halfx      = 5.5*$inch_to_mm/2.0; # 5.5"                             = > same as holder box
+my $readout_gap        = 3.7; # 3.7mm: gap between optical box and PMT surface in readout box
+my $readout_thicknessZ = 40.0; # 40.0mm = > Xu's guess
+my $readout_halfx      = 5.5*$inch_to_mm/2.0; # 5.5" = > same as holder box
 my $readout_halfy      = $readout_halfx;
 my $readout_halfz      = $readout_thicknessZ/2.0;
 
@@ -109,8 +110,8 @@ my $airgap_z         = $offset + $box_halfz + $airgap_halfz; # w.r.t. mother vol
 
 #------------ Photon Sensor -------------#
 # H13700 dimesion: 51.8*51.8*32.1 mm | eff. area: 48.5*48.2mm | glass window thickness 1.5mm
-my $sensorGap             = 4.0/2.0;             # 4.0mm gap between PMT sensors
-my $glassWindow_thickness = 1.5;  #glass window thickness                                       = 1.5mm
+my $sensorGap             = 2.7/2.0; # 2.7mm gap between PMT sensors
+my $glassWindow_thickness = 1.5; #glass window thickness                                       = 1.5mm
 my $glassWindow_halfx     = 51.8/2.0; # 51.8mm
 my $glassWindow_halfy     = $glassWindow_halfx;
 my $glassWindow_halfz     = $glassWindow_thickness/2.0;
@@ -133,7 +134,7 @@ my $phoAnode_halfz = (32.1-$glassWindow_thickness-$phodet_thickness)/2.0; # 32.1
 my $hollow_z        = -$box_halfz + $box_thicknessZ + $hollow_halfz; # w.r.t holder box
 my $foamHolder_posz = -$hollow_halfz + $foamHolder_halfz; # w.r.t hollow volume
 my $agel_posz       = $foamHolder_posz + $foamHolder_halfz + $agel_halfz; # w.r.t hollow volume
-my $lens_z          = $agel_posz + $agel_halfz + $lens_halfz; # w.r.t hollow volume
+my $lens_z          = $agel_posz + $agel_halfz + $agel_gap + $lens_halfz; # w.r.t hollow volume
 #---------- optical---------#
 
 #---------- readbout ---------#
