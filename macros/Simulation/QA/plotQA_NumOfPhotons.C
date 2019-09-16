@@ -5,9 +5,10 @@
 #include "TTree.h"
 #include "TCanvas.h"
 
-void plotQA_PMT_NumOfPhotons()
+void plotQA_NumOfPhotons(const string airgap = "3mm")
 {
-  TFile *File_InPut = TFile::Open("/Users/xusun/WorkSpace/EICPID/OutPut/BeamTest/PMT/BeamTest_Calibration.root");
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
+  TFile *File_InPut = TFile::Open(inputfile.c_str());
   TH3D *h_mCherenkovPhotons_MF = (TH3D*)File_InPut->Get("h_mCherenkovPhotons_MF");
   TH1D *h_mPhotons = (TH1D*)h_mCherenkovPhotons_MF->Project3D("x");
 
@@ -25,6 +26,7 @@ void plotQA_PMT_NumOfPhotons()
   h_mPhotons->GetXaxis()->SetRangeUser(0.0,40.0);
   h_mPhotons->Draw();
 
-  c_NumOfPhotons->SaveAs("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/BeamTest/c_NumOfPhotons_TB.eps");
+  string FigName = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_NumOfPhotons_%s.eps",airgap.c_str());
+  c_NumOfPhotons->SaveAs(FigName.c_str());
 }
 

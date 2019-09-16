@@ -13,10 +13,10 @@ int genCalibration(std::string detector = "PMT")
   calib->set_det(detector);
   if(detector == "PMT") calib->is_PMT(true);
   if(detector == "MPPC") calib->is_PMT(false);
-  // calib->set_airgap("8mm_center");
-  calib->set_airgap("8mm");
+  calib->set_airgap("3mm_center");
+  // calib->set_airgap("3mm");
   // calib->set_HodoXY(3.65,3.65);
-  calib->set_HodoXY(0,0);
+  calib->set_HodoXY(3.0,3.0);
   calib->set_VetoXY(-1.0,-1.0);
   // calib->set_HodoR(3.65);
   // calib->set_VetoR(-1.0);

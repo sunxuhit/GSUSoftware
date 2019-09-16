@@ -108,7 +108,8 @@ void plotQA_PMT_BeamSpot(const int runID = 124)
     // c_BeamSpot->cd(i_pad+1)->SetLogz();
   }
   c_BeamSpot->cd(1);
-  h_mRingImage->SetTitle("Ring Image");
+  string title = Form("Ring Image @ Run %d", runID);
+  h_mRingImage->SetTitle(title.c_str());
   h_mRingImage->SetStats(0);
   h_mRingImage->GetXaxis()->SetTitle("pixel ID");
   h_mRingImage->GetXaxis()->CenterTitle();
@@ -126,7 +127,8 @@ void plotQA_PMT_BeamSpot(const int runID = 124)
   }
 
   c_BeamSpot->cd(2);
-  h_mCluster->SetTitle("Cluster Finder");
+  title = Form("Cluster Finder @ Run %d", runID);
+  h_mCluster->SetTitle(title.c_str());
   h_mCluster->SetStats(0);
   h_mCluster->GetXaxis()->SetTitle("pixel ID");
   h_mCluster->GetXaxis()->CenterTitle();
@@ -154,4 +156,31 @@ void plotQA_PMT_BeamSpot(const int runID = 124)
 
   string FigName = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_BeamSpot_%d.eps",mode.c_str(),runID);
   c_BeamSpot->SaveAs(FigName.c_str());
+
+  TCanvas *c_EventDisplay = new TCanvas("c_EventDisplay","c_EventDisplay",10,10,800,800);
+  c_EventDisplay->cd()->SetLeftMargin(0.15);
+  c_EventDisplay->cd()->SetBottomMargin(0.15);
+  c_EventDisplay->cd()->SetRightMargin(0.15);
+  c_EventDisplay->cd()->SetTicks(1,1);
+  c_EventDisplay->cd()->SetGrid(0,0);
+  c_EventDisplay->cd();
+  // h_mRingImage->SetTitle(title.c_str());
+  h_mRingImage->SetStats(0);
+  h_mRingImage->GetXaxis()->SetTitle("pixel ID");
+  h_mRingImage->GetXaxis()->CenterTitle();
+  h_mRingImage->GetYaxis()->SetTitle("pixel ID");
+  h_mRingImage->GetYaxis()->CenterTitle();
+  h_mRingImage->Draw("colz");
+
+  if(mode != "MesonRun")
+  {
+    // plot beam spot
+    PlotLine(beam_x_start-0.5,beam_x_start-0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_stop+0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_stop+0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_start-0.5,beam_y_start-0.5,2,5,2);
+    PlotLine(beam_x_start-0.5,beam_x_stop+0.5,beam_y_stop+0.5,beam_y_stop+0.5,2,5,2);
+  }
+
+  FigName = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/PMT/%s/c_EventDisplay_%d.eps",mode.c_str(),runID);
+  c_EventDisplay->SaveAs(FigName.c_str());
 }

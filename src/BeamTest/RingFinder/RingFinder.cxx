@@ -178,7 +178,7 @@ int RingFinder::HoughTransform(int numOfPhotons, TH2D *h_RingFinder, std::vector
     mNumOfPhotonsOnRing_HT = NumOfPhotonsOnRing;
     mNumOfPhotonsOffRing_HT = NumOfPhotons-NumOfPhotonsOnRing;
 
-    if(NumOfPhotonsOnRing > 4 && TMath::Abs(x_HoughTransform) < 3.5 && TMath::Abs(y_HoughTransform) < 3.5)
+    if(NumOfPhotonsOnRing > 4 && TMath::Abs(x_HoughTransform) < 3.0 && TMath::Abs(y_HoughTransform) < 3.0)
     {
       h_mCherenkovPhotons_HT->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing,r_HoughTransform);
       h_mNumOfCherenkovPhotons_HT->Fill(NumOfPhotonsOnRing,NumOfPhotons-NumOfPhotonsOnRing,NumOfPhotons);
@@ -286,7 +286,7 @@ int RingFinder::MinuitFit(int numOfPhotons, TH2D *h_RingFinder, std::vector<int>
   // cout << "Npe_MF = " << mNumOfPhotonsOnRing_MF << ", Nbkg_MF = " << mNumOfPhotonsOffRing_MF << endl;
 
   h_mCherenkovRing_MF->Fill(mRingCenter_MF.X(),mRingCenter_MF.Y(),mRadius_MF);
-  if(mNumOfPhotonsOnRing_MF > 4 && TMath::Abs(mRingCenter_MF.X()) < 3.5 && TMath::Abs(mRingCenter_MF.Y()) < 3.5)
+  if(mNumOfPhotonsOnRing_MF > 4 && TMath::Abs(mRingCenter_MF.X()) < 3.0 && TMath::Abs(mRingCenter_MF.Y()) < 3.0)
   {
     h_mCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,mRadius_MF);
     h_mNumOfCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,numOfPhotons);

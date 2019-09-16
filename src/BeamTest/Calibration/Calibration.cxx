@@ -245,8 +245,8 @@ int Calibration::Make()
 {
   cout << " this is Calibration::Make" << endl;
 
-  // long NumOfEvents = (long)mChainInPut->GetEntries();
-  long NumOfEvents = 100000;
+  long NumOfEvents = (long)mChainInPut->GetEntries();
+  // long NumOfEvents = 100000;
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
@@ -436,7 +436,7 @@ int Calibration::Make()
 	  double RingRadius_MF = mRingFinder->getRingRadius_MF();
 	  // cout << "Ring Info from MinuitFit: X = " << RingCenter_MF.X() << ", Y = " << RingCenter_MF.Y() << ", R = " << RingRadius_MF << endl;
 
-	  if(mRingFinder->getNumOfPhotonsOnRing_MF() > 4 && TMath::Abs(RingCenter_MF.X()) < 3.5 && TMath::Abs(RingCenter_MF.Y()) < 3.5)
+	  if(mRingFinder->getNumOfPhotonsOnRing_MF() > 4 && TMath::Abs(RingCenter_MF.X()) < 3.0 && TMath::Abs(RingCenter_MF.Y()) < 3.0)
 	  {
 	    h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_MF());
 	    p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_MF());

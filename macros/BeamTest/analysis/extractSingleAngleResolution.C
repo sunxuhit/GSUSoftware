@@ -14,8 +14,8 @@ double singleAR(double *x_val, double *par)
   double x = x_val[0];
   double p0 = par[0];
   double p1 = par[1];
-  double sigma = p0/TMath::Sqrt(x) + p1;
-  // double sigma = TMath::Sqrt(p0*p0/x + p1*p1);
+  // double sigma = p0/TMath::Sqrt(x) + p1;
+  double sigma = TMath::Sqrt(p0*p0/x + p1*p1);
 
   return sigma;
 }
@@ -37,6 +37,7 @@ void extractSingleAngleResolution()
   // float flength = 6.0*25.4 +8.0; // mm
   // float flength = 6.0*25.4 +3.0; // mm
   float flength = 6.0*25.4; // mm
+  float nSigma = 1.0;
 
   TCanvas *c_Radius = new TCanvas("c_Radius","c_Radius",2000,1500);
   c_Radius->Divide(5,4);
@@ -74,7 +75,7 @@ void extractSingleAngleResolution()
       f_gaus[i_photon]->SetParameter(0,norm_1st);
       f_gaus[i_photon]->SetParameter(1,mean_1st);
       f_gaus[i_photon]->SetParameter(2,sig_1st);
-      f_gaus[i_photon]->SetRange(mean_1st-3.0*sig_1st,mean_1st+3.0*sig_1st);
+      f_gaus[i_photon]->SetRange(mean_1st-nSigma*sig_1st,mean_1st+nSigma*sig_1st);
       h_mRadius[i_photon]->Fit(f_gaus[i_photon],"NQR");
       f_gaus[i_photon]->SetLineColor(2);
       f_gaus[i_photon]->SetLineStyle(2);
@@ -120,25 +121,20 @@ void extractSingleAngleResolution()
   string fig_name = "/Users/xusun/WorkSpace/EICPID/figures/AnaNote/BeamTest/c_RadiusSlice.eps";
   c_Radius->SaveAs(fig_name.c_str());
 
-  TCanvas *c_AngleResolution = new TCanvas("c_AngleResolution","c_AngleResolution",10,10,800,800);
-  c_AngleResolution->Divide(2,2);
-  for(int i_pad = 0; i_pad < 4; ++i_pad)
-  {
-    c_AngleResolution->cd(i_pad+1)->SetLeftMargin(0.15);
-    c_AngleResolution->cd(i_pad+1)->SetBottomMargin(0.15);
-    c_AngleResolution->cd(i_pad+1)->SetRightMargin(0.15);
-    c_AngleResolution->cd(i_pad+1)->SetTicks(1,1);
-    c_AngleResolution->cd(i_pad+1)->SetGrid(0,0);
-  }
+  TCanvas *c_AR_Npe= new TCanvas("c_AR_Npe","c_AR_Npe",10,10,800,800);
+  c_AR_Npe->cd()->SetLeftMargin(0.15);
+  c_AR_Npe->cd()->SetBottomMargin(0.15);
+  c_AR_Npe->cd()->SetRightMargin(0.15);
+  c_AR_Npe->cd()->SetTicks(1,1);
+  c_AR_Npe->cd()->SetGrid(0,0);
 
-  c_AngleResolution->cd(1);
   TH1D *h_frame = new TH1D("h_frame","h_frame",50,-0.5,49.5);
   for(int i_bin = 0; i_bin < 50; ++i_bin)
   {
     h_frame->SetBinContent(i_bin+1,-10.0);
     h_frame->SetBinError(i_bin+1,0.1);
   }
-  h_frame->SetTitle("#sigma_{#theta_{c} vs. N_{pe}}");
+  h_frame->SetTitle("#sigma_{#theta_{c}} vs. N_{pe}");
   h_frame->SetStats(0);
   h_frame->GetXaxis()->SetTitle("N_{pe}");
   h_frame->GetXaxis()->CenterTitle();
@@ -173,11 +169,29 @@ void extractSingleAngleResolution()
   f_sigma->Draw("l same");
 
   float sigma_pe = 1000.0*f_sigma->GetParameter(0);
+  float sigma_glob = 1000.0*f_sigma->GetParameter(1);
 
   string leg = Form("#sigma_{#theta_{c},1pe} = %1.1f mRad",sigma_pe);
   plotTopLegend((char*)leg.c_str(),0.28,0.8,0.06,1,0.0,42,1,1);
 
-  c_AngleResolution->cd(2);
+  string leg_glob = Form("#sigma_{Glob} = %1.1f mRad",sigma_glob);
+  plotTopLegend((char*)leg_glob.c_str(),0.28,0.7,0.06,1,0.0,42,1,1);
+
+  fig_name = "/Users/xusun/WorkSpace/EICPID/figures/AnaNote/BeamTest/c_singleAR_Npe.eps";
+  c_AR_Npe->SaveAs(fig_name.c_str());
+
+  TCanvas *c_AR_SP= new TCanvas("c_AR_SP","c_AR_SP",10,10,800,400);
+  c_AR_SP->Divide(2,1);
+  for(int i_pad = 0; i_pad < 2; ++i_pad)
+  {
+    c_AR_SP->cd(i_pad+1)->SetLeftMargin(0.15);
+    c_AR_SP->cd(i_pad+1)->SetBottomMargin(0.15);
+    c_AR_SP->cd(i_pad+1)->SetRightMargin(0.15);
+    c_AR_SP->cd(i_pad+1)->SetTicks(1,1);
+    c_AR_SP->cd(i_pad+1)->SetGrid(0,0);
+  }
+
+  c_AR_SP->cd(1);
   h_mRadius_SinglePhoton->SetTitle("Single Photon Radius");
   h_mRadius_SinglePhoton->GetXaxis()->SetTitle("R (mm)");
   h_mRadius_SinglePhoton->GetXaxis()->CenterTitle();
@@ -202,7 +216,7 @@ void extractSingleAngleResolution()
   f_gaus_rs->SetParameter(0,norm_rs_1st);
   f_gaus_rs->SetParameter(1,mean_rs_1st);
   f_gaus_rs->SetParameter(2,sig_rs_1st);
-  f_gaus_rs->SetRange(mean_rs_1st-3.0*sig_rs_1st,mean_rs_1st+3.0*sig_rs_1st);
+  f_gaus_rs->SetRange(mean_rs_1st-nSigma*sig_rs_1st,mean_rs_1st+nSigma*sig_rs_1st);
   h_mRadius_SinglePhoton->Fit(f_gaus_rs,"NQR");
   f_gaus_rs->SetLineColor(2);
   f_gaus_rs->SetLineStyle(2);
@@ -221,10 +235,17 @@ void extractSingleAngleResolution()
   float theta_c_rs = TMath::ASin(sin_theta_c_rs);
   float sigma_theta_c_rs = TMath::Cos(theta_rs)*TMath::Cos(theta_rs)*TMath::Cos(theta_rs)*sigma_rs/(nref*flength*TMath::Cos(theta_c_rs));
 
+  string leg_gaus_rs = Form("R: %1.2f #pm %1.2f (mm)",mean_rs,sigma_rs);
+  plotTopLegend((char*)leg_gaus_rs.c_str(),0.2,0.85,0.04,1,0.0,42,1,1);
+
+  string leg_theta_rs = Form("#theta_{c}: %1.2f #pm %1.2f (mRad)",theta_c_rs*1000.0,sigma_theta_c_rs*1000.0);
+  plotTopLegend((char*)leg_theta_rs.c_str(),0.2,0.80,0.04,1,0.0,42,1,1);
+
   string leg_sigma_rs = Form("#sigma_{#theta_{c},1pe} = %1.2f mRad",1000.0*sigma_theta_c_rs);
-  plotTopLegend((char*)leg_sigma_rs.c_str(),0.2,0.8,0.06,1,0.0,42,1,1);
+  plotTopLegend((char*)leg_sigma_rs.c_str(),0.2,0.75,0.04,1,0.0,42,1,1);
 
 
+  /*
   c_AngleResolution->cd(3);
   h_mTheta_air->SetTitle("Single Photon Angle in Air");
   h_mTheta_air->GetXaxis()->SetTitle("#theta_{air}");
@@ -250,7 +271,7 @@ void extractSingleAngleResolution()
   f_gaus_ta->SetParameter(0,norm_ta_1st);
   f_gaus_ta->SetParameter(1,mean_ta_1st);
   f_gaus_ta->SetParameter(2,sig_ta_1st);
-  f_gaus_ta->SetRange(mean_ta_1st-3.0*sig_ta_1st,mean_ta_1st+3.0*sig_ta_1st);
+  f_gaus_ta->SetRange(mean_ta_1st-nSigma*sig_ta_1st,mean_ta_1st+nSigma*sig_ta_1st);
   h_mTheta_air->Fit(f_gaus_ta,"NQR");
   f_gaus_ta->SetLineColor(2);
   f_gaus_ta->SetLineStyle(2);
@@ -267,8 +288,9 @@ void extractSingleAngleResolution()
 
   string leg_sigma_ta = Form("#sigma_{#theta_{c},1pe} = %1.2f mRad",1000.0*sigma_theta_c_ta);
   plotTopLegend((char*)leg_sigma_ta.c_str(),0.2,0.8,0.06,1,0.0,42,1,1);
+  */
 
-  c_AngleResolution->cd(4);
+  c_AR_SP->cd(2);
   h_mTheta_c->SetTitle("Single Photon Cherenkov Angle");
   h_mTheta_c->GetXaxis()->SetTitle("#theta_{c}");
   h_mTheta_c->GetXaxis()->CenterTitle();
@@ -293,7 +315,7 @@ void extractSingleAngleResolution()
   f_gaus_tc->SetParameter(0,norm_tc_1st);
   f_gaus_tc->SetParameter(1,mean_tc_1st);
   f_gaus_tc->SetParameter(2,sig_tc_1st);
-  f_gaus_tc->SetRange(mean_tc_1st-3.0*sig_tc_1st,mean_tc_1st+3.0*sig_tc_1st);
+  f_gaus_tc->SetRange(mean_tc_1st-nSigma*sig_tc_1st,mean_tc_1st+nSigma*sig_tc_1st);
   h_mTheta_c->Fit(f_gaus_tc,"NQR");
   f_gaus_tc->SetLineColor(2);
   f_gaus_tc->SetLineStyle(2);
@@ -307,7 +329,7 @@ void extractSingleAngleResolution()
   string leg_sigma_tc = Form("#sigma_{#theta_{c},1pe} = %1.2f mRad",1000.0*sigma_tc);
   plotTopLegend((char*)leg_sigma_tc.c_str(),0.2,0.80,0.06,1,0.0,42,1,1);
 
-  fig_name = "/Users/xusun/WorkSpace/EICPID/figures/AnaNote/BeamTest/c_singleAR.eps";
-  c_AngleResolution->SaveAs(fig_name.c_str());
+  fig_name = "/Users/xusun/WorkSpace/EICPID/figures/AnaNote/BeamTest/c_singleAR_SP.eps";
+  c_AR_SP->SaveAs(fig_name.c_str());
 }
 

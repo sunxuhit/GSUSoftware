@@ -74,7 +74,7 @@ int gemcCalibration::Init()
 
 int gemcCalibration::initChain()
 {
-  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/Calibration/%s/",mHome.c_str(),mAirGap.c_str());
+  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/Calibration/TestBeamSetup/%s/",mHome.c_str(),mAirGap.c_str());
   string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/Simulation/%s/Calibration/proton_calibration.list",mHome.c_str(),mDet.c_str());
   // string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/gemc/AngleRun/",mHome.c_str());
   // string InPutList = Form("%s/WorkSpace/EICPID/BeamTest_mRICH/list/Simulation/%s/AngleRun/proton_anglerun.list",mHome.c_str(),mDet.c_str());
@@ -197,8 +197,8 @@ int gemcCalibration::resetSimpleTree()
 
 int gemcCalibration::Make()
 {
-  // long NumOfEvents = (long)mChainInPut_Events->GetEntries();
-  long NumOfEvents = 50000;
+  long NumOfEvents = (long)mChainInPut_Events->GetEntries();
+  // long NumOfEvents = 5000;
 
   mChainInPut_Events->GetEntry(0);
   mChainInPut_Tracks->GetEntry(0);
@@ -310,7 +310,7 @@ int gemcCalibration::Make()
       double RingRadius_MF = mRingFinder->getRingRadius_MF();
       // cout << "Ring Info from MinuitFit: X = " << RingCenter_MF.X() << ", Y = " << RingCenter_MF.Y() << ", R = " << RingRadius_MF << endl;
 
-      if(mRingFinder->getNumOfPhotonsOnRing_MF() > 4 && TMath::Abs(RingCenter_MF.X()) < 3.5 && TMath::Abs(RingCenter_MF.Y()) < 3.5)
+      if(mRingFinder->getNumOfPhotonsOnRing_MF() > 4 && TMath::Abs(RingCenter_MF.X()) < 3.0 && TMath::Abs(RingCenter_MF.Y()) < 3.0)
       {
 	h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_MF());
 	p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_MF());
@@ -389,8 +389,8 @@ int gemcCalibration::writeSimpleTree()
 // beam spot cut
 bool gemcCalibration::isHodoXY(float vx, float vy)
 {
-  // if( TMath::Abs(vx) < mVx_Hodo && TMath::Abs(vy) < mVy_Hodo) return true;
-  if( vx < mVx_Hodo && vy < mVy_Hodo) return true;
+  if( TMath::Abs(vx) < mVx_Hodo && TMath::Abs(vy) < mVy_Hodo) return true;
+  // if( vx < mVx_Hodo && vy < mVy_Hodo) return true;
 
   return false;
 }

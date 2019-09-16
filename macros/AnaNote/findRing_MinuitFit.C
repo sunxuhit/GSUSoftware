@@ -192,6 +192,9 @@ std::pair<int,int> minuitRingRadius(int numOfPhotons, TH2D *h_RingFinder, std::v
   fitter.Config().ParSettings(1).SetName("y0");
   fitter.Config().ParSettings(2).SetName("R");
 
+  // fitter.Config().ParSettings(0).Fix();
+  // fitter.Config().ParSettings(1).Fix();
+
   // do the fit 
   bool ok = fitter.FitFCN();
   if (!ok) {
