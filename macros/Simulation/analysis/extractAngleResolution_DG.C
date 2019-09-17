@@ -45,7 +45,7 @@ double Gauss(double *x_val, double *par)
   return gaus;
 }
 
-void extractAngleResolution(const string airgap = "0mm_fixed")
+void extractAngleResolution_DG(const string airgap = "0mm_fixed")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
@@ -58,7 +58,7 @@ void extractAngleResolution(const string airgap = "0mm_fixed")
   // float flength = 6.0*25.4 +8.0; // mm
   // float flength = 6.0*25.4 +3.7; // mm
   float flength = 6.0*25.4; // mm
-  float nSigma = 3.0;
+  float nSigma = 1.0;
 
   TCanvas *c_Radius = new TCanvas("c_Radius","c_Radius",10,10,500,500);
   c_Radius->cd()->SetLeftMargin(0.15);
@@ -77,14 +77,13 @@ void extractAngleResolution(const string airgap = "0mm_fixed")
   h_mRadius->GetYaxis()->SetRangeUser(0.1,h_mRadius->GetMaximum()*1.2);
   h_mRadius->Draw("hE");
 
-  /*
   TF1 *f_gaus = new TF1("f_gaus",doubleGauss,0,100,5);
   f_gaus->SetParameter(0,40.0);
   f_gaus->SetParameter(1,2.0);
-  f_gaus->SetParLimits(1,0.0,10.0);
+  // f_gaus->SetParLimits(1,0.0,10.0);
   f_gaus->SetParameter(2,100.0);
   f_gaus->SetParameter(3,10.0);
-  f_gaus->SetParLimits(3,0.0,10.0);
+  // f_gaus->SetParLimits(3,0.0,10.0);
   f_gaus->SetParameter(4,100.0);
   f_gaus->SetRange(34.0,50.0);
   h_mRadius->Fit(f_gaus,"NR");
@@ -124,44 +123,10 @@ void extractAngleResolution(const string airgap = "0mm_fixed")
   cout << "chi2/ndf = " << chi2/ndf << endl;
 
   float mean_r = f_gaus->GetParameter(0);
-  float sigma_r = f_gaus->GetParameter(1);
-  string leg_gaus = Form("R: %1.2f #pm %1.2f (mm)",mean_r,sigma_r);
+  float sigma_r = sigma_1st;
+  if(sigma_2nd < sigma_1st) sigma_r = sigma_2nd;
+  string leg_gaus = Form("R: %1.2f #pm %1.2f (mm) (narrow)",mean_r,sigma_r);
   plotTopLegend((char*)leg_gaus.c_str(),0.18,0.85,0.04,1,0.0,42,1,1);
-  */
-
-  TF1 *f_gaus = new TF1("f_gaus","gaus",0,100);
-  f_gaus->SetParameter(0,100);
-  f_gaus->SetParameter(1,40.0);
-  f_gaus->SetParameter(2,2.0);
-  f_gaus->SetRange(35.0,45.0);
-  h_mRadius->Fit(f_gaus,"NR");
-  float norm_1st = f_gaus->GetParameter(0);
-  float mean_1st = f_gaus->GetParameter(1);
-  float sig_1st  = f_gaus->GetParameter(2);
-  f_gaus->SetParameter(0,norm_1st);
-  f_gaus->SetParameter(1,mean_1st);
-  f_gaus->SetParameter(2,sig_1st);
-  f_gaus->SetRange(mean_1st-nSigma*sig_1st,mean_1st+nSigma*sig_1st);
-  h_mRadius->Fit(f_gaus,"NR");
-  f_gaus->SetLineColor(2);
-  f_gaus->SetLineStyle(2);
-  f_gaus->SetLineWidth(3);
-  f_gaus->Draw("l same");
-  float mean_r = f_gaus->GetParameter(1);
-  float sigma_r = f_gaus->GetParameter(2);
-  string leg_gaus = Form("R: %1.2f #pm %1.2f (mm)",mean_r,sigma_r);
-  plotTopLegend((char*)leg_gaus.c_str(),0.18,0.85,0.04,1,0.0,42,1,1);
-
-  double chi2 = f_gaus->GetChisquare();
-  double ndf = f_gaus->GetNDF();
-  cout << "chi2/ndf = " << chi2/ndf << endl;
-
-  /*
-  float tan_theta = mean_r/flength; // r/f
-  float theta_tan = TMath::ATan2(mean_r,flength); // theta = atan(r/f)
-  float sigma_theta = sigma_r/(flength*(1.0+tan_theta*tan_theta));
-  cout << "theta (atan) = " << theta_tan << endl;
-  */
 
   float dist_r = TMath::Sqrt(mean_r*mean_r+flength*flength);
   float sin_theta = mean_r/dist_r; // sin(theta_c)*n_c = sin(theta_air)*n_air
@@ -179,6 +144,6 @@ void extractAngleResolution(const string airgap = "0mm_fixed")
   string leg_sigma = Form("#sigma_{#theta_{c}} = %1.2f (mRad)",1000.0*sigma_theta_c);
   plotTopLegend((char*)leg_sigma.c_str(),0.18,0.75,0.04,1,0.0,42,1,1);
 
-  string fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_meanAR_%s.eps",airgap.c_str());
+  string fig_name = Form("/Users/xusun/WorkSpace/EICPID/figures/AnaNote/Simulation/c_meanAR_DG_%s.eps",airgap.c_str());
   c_Radius->SaveAs(fig_name.c_str());
 }

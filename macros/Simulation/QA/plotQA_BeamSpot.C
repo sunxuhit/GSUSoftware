@@ -8,7 +8,7 @@
 #include "TMath.h"
 #include "../../draw.h"
 
-void plotQA_BeamSpot(const string airgap = "8mm")
+void plotQA_BeamSpot(const string airgap = "3mm")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());

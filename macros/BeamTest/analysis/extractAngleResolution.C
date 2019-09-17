@@ -8,6 +8,43 @@
 #include "TMath.h"
 #include "../../draw.h"
 
+double doubleGauss(double *x_val, double *par)
+{
+  double x = x_val[0];
+
+  double mean = par[0];
+
+  double sigma_1st = par[1];
+  double norm_1st = par[2];
+  double sigSquare_1st = sigma_1st*sigma_1st;
+  double power_1st = -0.5*(x-mean)*(x-mean)/sigSquare_1st;
+  double gaus_1st = norm_1st*TMath::Exp(power_1st)/TMath::Sqrt(2.0*TMath::Pi()*sigSquare_1st);
+
+  double sigma_2nd = par[3];
+  double norm_2nd = par[4];
+  double sigSquare_2nd = sigma_2nd*sigma_2nd;
+  double power_2nd = -0.5*(x-mean)*(x-mean)/sigSquare_2nd;
+  double gaus_2nd = norm_2nd*TMath::Exp(power_2nd)/TMath::Sqrt(2.0*TMath::Pi()*sigSquare_2nd);
+
+  double y = gaus_1st + gaus_2nd;
+
+  return y;
+}
+
+double Gauss(double *x_val, double *par)
+{
+  double x = x_val[0];
+
+  double mean = par[0];
+  double sigma = par[1];
+  double norm = par[2];
+  double sigSquare = sigma*sigma;
+  double power = -0.5*(x-mean)*(x-mean)/sigSquare;
+  double gaus = norm*TMath::Exp(power)/TMath::Sqrt(2.0*TMath::Pi()*sigSquare);
+
+  return gaus;
+}
+
 void extractAngleResolution()
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/BeamTest/PMT/BeamTest_Calibration.root");
@@ -30,14 +67,65 @@ void extractAngleResolution()
   c_Radius->cd()->SetTicks(1,1);
   c_Radius->cd()->SetGrid(0,0);
 
-  h_mRadius->SetTitle("Minuit Fit"); // MF
+  h_mRadius->SetTitle("Test Beam"); // MF
   h_mRadius->SetLineColor(1);
   h_mRadius->SetLineWidth(1);
   h_mRadius->GetXaxis()->SetTitle("R (mm)");
   h_mRadius->GetXaxis()->CenterTitle();
-  h_mRadius->GetXaxis()->SetRangeUser(30.0,48.0);
+  h_mRadius->GetXaxis()->SetRangeUser(30.0,52.0);
   h_mRadius->GetYaxis()->SetRangeUser(0.0,h_mRadius->GetMaximum()*1.2);
   h_mRadius->Draw();
+
+  /*
+  TF1 *f_gaus = new TF1("f_gaus",doubleGauss,0,100,5);
+  f_gaus->SetParameter(0,40.0);
+  f_gaus->SetParameter(1,2.0);
+  f_gaus->SetParameter(2,100.0);
+  f_gaus->SetParameter(3,10.0);
+  f_gaus->SetParameter(4,100.0);
+  f_gaus->SetRange(34.0,50.0);
+  h_mRadius->Fit(f_gaus,"NR");
+  f_gaus->SetLineColor(2);
+  f_gaus->SetLineStyle(1);
+  f_gaus->SetLineWidth(3);
+  f_gaus->Draw("l same");
+
+  double mean = f_gaus->GetParameter(0);
+  double sigma_1st = f_gaus->GetParameter(1);
+  double norm_1st = f_gaus->GetParameter(2);
+  double sigma_2nd = f_gaus->GetParameter(3);
+  double norm_2nd = f_gaus->GetParameter(4);
+
+  TF1 *f_gaus_1st = new TF1("f_gaus_1st",Gauss,0,100,3);
+  f_gaus_1st->FixParameter(0,mean);
+  f_gaus_1st->FixParameter(1,sigma_1st);
+  f_gaus_1st->FixParameter(2,norm_1st);
+  f_gaus_1st->SetRange(34.0,50.0);
+  f_gaus_1st->SetLineColor(1);
+  f_gaus_1st->SetLineStyle(2);
+  f_gaus_1st->SetLineWidth(2);
+  f_gaus_1st->Draw("l same");
+
+  TF1 *f_gaus_2nd = new TF1("f_gaus_2nd",Gauss,0,100,3);
+  f_gaus_2nd->FixParameter(0,mean);
+  f_gaus_2nd->FixParameter(1,sigma_2nd);
+  f_gaus_2nd->FixParameter(2,norm_2nd);
+  f_gaus_2nd->SetRange(34.0,50.0);
+  f_gaus_2nd->SetLineColor(4);
+  f_gaus_2nd->SetLineStyle(2);
+  f_gaus_2nd->SetLineWidth(2);
+  f_gaus_2nd->Draw("l same");
+
+
+  double chi2 = f_gaus->GetChisquare();
+  double ndf = f_gaus->GetNDF();
+  cout << "chi2/ndf = " << chi2/ndf << endl;
+
+  float mean_r = f_gaus->GetParameter(0);
+  float sigma_r = f_gaus->GetParameter(3);
+  string leg_gaus = Form("R: %1.2f #pm %1.2f (mm)",mean_r,sigma_r);
+  plotTopLegend((char*)leg_gaus.c_str(),0.18,0.85,0.04,1,0.0,42,1,1);
+  */
 
   TF1 *f_gaus = new TF1("f_gaus","gaus",0,100);
   f_gaus->SetParameter(0,100);

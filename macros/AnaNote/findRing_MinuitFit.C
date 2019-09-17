@@ -192,8 +192,8 @@ std::pair<int,int> minuitRingRadius(int numOfPhotons, TH2D *h_RingFinder, std::v
   fitter.Config().ParSettings(1).SetName("y0");
   fitter.Config().ParSettings(2).SetName("R");
 
-  // fitter.Config().ParSettings(0).Fix();
-  // fitter.Config().ParSettings(1).Fix();
+  fitter.Config().ParSettings(0).Fix();
+  fitter.Config().ParSettings(1).Fix();
 
   // do the fit 
   bool ok = fitter.FitFCN();
@@ -210,25 +210,29 @@ std::pair<int,int> minuitRingRadius(int numOfPhotons, TH2D *h_RingFinder, std::v
   double r_MinuitFit = fitpar[2];
 
   int Npe = 0;
+  double r_temp = 0.0;
   for(int i_photon = 0; i_photon < NumOfPhotons; ++i_photon)
   {
     TVector2 photonHit;
     double x_photonHit = h_RingFinder->GetXaxis()->GetBinCenter(xPixel[i_photon]);
     double y_photonHit = h_RingFinder->GetYaxis()->GetBinCenter(yPixel[i_photon]);
     photonHit.Set(x_photonHit,y_photonHit);
-    if( isOnRing(photonHit,x_MinuitFit,y_MinuitFit,r_MinuitFit) )
+    // if( isOnRing(photonHit,x_MinuitFit,y_MinuitFit,r_MinuitFit) )
+    if( isOnRing(photonHit,0.0,0.0,38.8) )
     {
       Npe++;
       mXPixel_MF.push_back(xPixel[i_photon]);
       mYPixel_MF.push_back(yPixel[i_photon]);
       h_mRingFinder_MF->Fill(x_photonHit,y_photonHit);
+      r_temp += TMath::Sqrt(x_photonHit*x_photonHit+y_photonHit*y_photonHit);
     }
   }
   int Nbkg = NumOfPhotons-Npe;
   NumInfo = std::make_pair(Npe,Nbkg);
   // cout << "NumOfPhotons = " << NumOfPhotons << ", Npe = " << NumInfo.first << ", Nbkg = " << NumInfo.second << endl;
   mRingCenter_MF.Set(x_MinuitFit,y_MinuitFit);
-  mRadius_MF = r_MinuitFit;
+  // mRadius_MF = r_MinuitFit;
+  mRadius_MF = r_temp/Npe;
   cout << "x_MinuitFit = " << x_MinuitFit << ", y_MinuitFit = " << y_MinuitFit << ", r_MinuitFit = " << r_MinuitFit << endl;
   cout << "NumOfPhotons = " << NumOfPhotons << ", Npe = " << NumInfo.first << ", Nbkg = " << NumInfo.second << endl;
   cout << "--------------------------------" << endl;
