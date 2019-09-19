@@ -293,7 +293,6 @@ int RingFinder::MinuitFit(int numOfPhotons, TH2D *h_RingFinder, std::vector<int>
     h_mCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,mRadius_MF);
     h_mNumOfCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,numOfPhotons);
 
-    /*
     double flength = 6.0*25.4; // mm
     double nref = 1.03;
     for(int i_photon = 0; i_photon < mNumOfPhotonsOnRing_MF; ++i_photon) // fit single photon radiusa distribution
@@ -312,7 +311,6 @@ int RingFinder::MinuitFit(int numOfPhotons, TH2D *h_RingFinder, std::vector<int>
 
       h_mSinglePhoton->Fill(theta_air, theta_c, r_singlephoton);
     }
-    */
   }
 
   return 1;

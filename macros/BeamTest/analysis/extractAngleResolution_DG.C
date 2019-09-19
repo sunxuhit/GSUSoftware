@@ -79,8 +79,10 @@ void extractAngleResolution_DG()
   TF1 *f_gaus = new TF1("f_gaus",doubleGauss,0,100,5);
   f_gaus->SetParameter(0,40.0);
   f_gaus->SetParameter(1,2.0);
+  f_gaus->SetParLimits(1,0.0,10.0);
   f_gaus->SetParameter(2,100.0);
   f_gaus->SetParameter(3,10.0);
+  f_gaus->SetParLimits(3,0.0,10.0);
   f_gaus->SetParameter(4,100.0);
   f_gaus->SetRange(34.0,50.0);
   h_mRadius->Fit(f_gaus,"NR");
