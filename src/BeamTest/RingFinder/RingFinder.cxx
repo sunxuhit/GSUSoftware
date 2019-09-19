@@ -217,6 +217,7 @@ int RingFinder::initRingFinder_MF()
   // h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,210,0,2.0*mRICH::mHalfWidth);
   h_mCherenkovPhotons_MF = new TH3D("h_mCherenkovPhotons_MF","h_mCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,150,29.5,59.5);
   h_mNumOfCherenkovPhotons_MF = new TH3D("h_mNumOfCherenkovPhotons_MF","h_mNumOfCherenkovPhotons_MF",50,-0.5,49.5,50,-0.5,49.5,50,-0.5,49.5);
+  h_mSinglePhoton = new TH3D("h_mSinglePhoton","h_mSinglePhoton",150,0.10,0.40,150,0.10,0.40,150,29.5,59.5);
 
   h_mRingFinder_MF = new TH2D("h_mRingFinder_MF","h_mRingFinder_MF",mRICH::mNumOfPixels,mRICH::mPixels,mRICH::mNumOfPixels,mRICH::mPixels); // reset for each minuitRingRadius fit
 
@@ -251,6 +252,7 @@ int RingFinder::writeRingFinder_MF()
   h_mCherenkovRing_MF->Write();
   h_mCherenkovPhotons_MF->Write();
   h_mNumOfCherenkovPhotons_MF->Write();
+  h_mSinglePhoton->Write();
 
   return 1;
 }
@@ -290,6 +292,27 @@ int RingFinder::MinuitFit(int numOfPhotons, TH2D *h_RingFinder, std::vector<int>
   {
     h_mCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,mRadius_MF);
     h_mNumOfCherenkovPhotons_MF->Fill(mNumOfPhotonsOnRing_MF,mNumOfPhotonsOffRing_MF,numOfPhotons);
+
+    /*
+    double flength = 6.0*25.4; // mm
+    double nref = 1.03;
+    for(int i_photon = 0; i_photon < mNumOfPhotonsOnRing_MF; ++i_photon) // fit single photon radiusa distribution
+    {
+      double x_single = h_mRingFinder_MF->GetXaxis()->GetBinCenter(mXPixel_MF[i_photon]) - mRingCenter_MF.X();
+      double y_single = h_mRingFinder_MF->GetYaxis()->GetBinCenter(mYPixel_MF[i_photon]) - mRingCenter_MF.Y();
+
+      double r_singlephoton = TMath::Sqrt(x_single*x_single+y_single*y_single);
+
+      float dist_r = TMath::Sqrt(r_singlephoton*r_singlephoton+flength*flength);
+      float sin_theta_air = r_singlephoton/dist_r; // sin(theta_c)*n_c = sin(theta_air)*n_air
+      float theta_air = TMath::ASin(sin_theta_air);
+
+      float sin_theta_c = r_singlephoton/(dist_r*nref); // sin(theta_c)*n_c = sin(theta_air)*n_air
+      float theta_c = TMath::ASin(sin_theta_c);
+
+      h_mSinglePhoton->Fill(theta_air, theta_c, r_singlephoton);
+    }
+    */
   }
 
   return 1;

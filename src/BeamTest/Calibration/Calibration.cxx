@@ -24,13 +24,15 @@ Calibration::~Calibration()
   cout << "Calibration::~Calibration() ----- Release memory ! ------" << endl;
   delete pixel_map;
   delete mBeamFinder;
+  delete mRingFinder;
+  delete File_mOutPut;
 }
 
 int Calibration::Init()
 {
   mOutPutFile = Form("%s/WorkSpace/EICPID/OutPut/BeamTest/%s/BeamTest_Calibration.root",mHome.c_str(),mDet.c_str());
   cout << "Calibration::Init(), create output file: "<< mOutPutFile.c_str() <<endl;
-  mFile_OutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
+  File_mOutPut = new TFile(mOutPutFile.c_str(),"RECREATE");
 
   pixel_map = new PixelMap();
   if( is_pmt ) 
@@ -245,8 +247,8 @@ int Calibration::Make()
 {
   cout << " this is Calibration::Make" << endl;
 
-  long NumOfEvents = (long)mChainInPut->GetEntries();
-  // long NumOfEvents = 100000;
+  // long NumOfEvents = (long)mChainInPut->GetEntries();
+  long NumOfEvents = 50000;
   mChainInPut->GetEntry(0);
   for(int i_event = 0; i_event < NumOfEvents; ++i_event)
   {
@@ -440,38 +442,6 @@ int Calibration::Make()
 	  {
 	    h_mNumOfPhotons->Fill(mRingFinder->getNumOfPhotonsOnRing_MF());
 	    p_mNumOfPhotons->Fill(0.0,mRingFinder->getNumOfPhotonsOnRing_MF());
-
-	    for(int i_photon = 0; i_photon < NumOfPhotons; ++i_photon) // fit single photon radiusa distribution
-	    {
-	      double x_photonHit = h_mRingFinder->GetXaxis()->GetBinCenter(mXPixelMap[i_photon]);
-	      double y_photonHit = h_mRingFinder->GetYaxis()->GetBinCenter(mYPixelMap[i_photon]);
-	      double x_MinuitFit = RingCenter_MF.X();
-	      double y_MinuitFit = RingCenter_MF.Y();
-	      double r_MinuitFit = RingRadius_MF;
-
-	      double x_diff = x_photonHit - x_MinuitFit;
-	      double y_diff = y_photonHit - y_MinuitFit;
-	      double r_diff = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff) - r_MinuitFit;
-
-	      double sigma_r = 3.0*2; // 2-pixel
-
-	      if( TMath::Abs(r_diff) < sigma_r)
-	      {
-		double flength = 6.0*25.4; // mm
-		double nref = 1.03;
-
-		double r_singlephoton = TMath::Sqrt(x_diff*x_diff+y_diff*y_diff);
-
-		float dist_r = TMath::Sqrt(r_singlephoton*r_singlephoton+flength*flength);
-		float sin_theta_air = r_singlephoton/dist_r; // sin(theta_c)*n_c = sin(theta_air)*n_air
-		float theta_air = TMath::ASin(sin_theta_air);
-
-		float sin_theta_c = r_singlephoton/(dist_r*nref); // sin(theta_c)*n_c = sin(theta_air)*n_air
-		float theta_c = TMath::ASin(sin_theta_c);
-
-		h_mSinglePhoton->Fill(theta_air, theta_c, r_singlephoton);
-	      }
-	    }
 	  }
 	  h_mBeamSpotReco->Fill(RingCenter_MF.X(),RingCenter_MF.Y());
 	}
@@ -498,7 +468,7 @@ int Calibration::Make()
 int Calibration::Finish()
 {
   cout << " this is Calibration::Finish" << endl;
-  mFile_OutPut->cd();
+  File_mOutPut->cd();
   /*
   for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
   {
@@ -514,7 +484,7 @@ int Calibration::Finish()
 
   writeRingImage();
 
-  mFile_OutPut->Close();
+  File_mOutPut->Close();
 
   return 0;
 }
@@ -550,8 +520,6 @@ int Calibration::initRingImage()
   p_mNumOfPhotons = new TProfile("p_mNumOfPhotons","p_mNumOfPhotons",1,-0.5,0.5);
 
   h_mBeamSpotReco = new TH2D("h_mBeamSpotReco","h_mBeamSpotReco",201,-10.05,10.05,201,-10.05,10.05);
-  h_mSinglePhoton = new TH3D("h_mSinglePhoton","h_mSinglePhoton",150,0.10,0.40,150,0.10,0.40,150,29.5,59.5);
-
 
   clearRingImage();
 
@@ -576,7 +544,6 @@ int Calibration::writeRingImage()
   h_mNumOfPhotons->Write();
   p_mNumOfPhotons->Write();
   h_mBeamSpotReco->Write();
-  h_mSinglePhoton->Write();
 
   return 1;
 }

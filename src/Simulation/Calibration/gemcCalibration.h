@@ -110,7 +110,6 @@ class gemcCalibration : public TObject
     TH2D *h_mBeamSpotX;
     TH2D *h_mBeamSpotY;
     TH1D *h_mPhotonSensorIn;
-    TH3D *h_mSinglePhoton; // theta_air & theta_c & r for single photon
 
     TH2D *h_mRingImage; // ring image in pixel plane
     TH2D *h_mPhotonDist;

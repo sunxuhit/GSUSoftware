@@ -78,6 +78,7 @@ class RingFinder : public TObject
     TH3D *h_mCherenkovRing_MF; // x | y | R for all rings
     TH3D *h_mCherenkovPhotons_MF; // number of photons on ring | number of photons off ring | ring radius
     TH3D *h_mNumOfCherenkovPhotons_MF; // num of photons on ring | num of photons off ring | total num of photons
+    TH3D *h_mSinglePhoton; // theta_air & theta_c & r for single photon
 
     std::vector<int> mXPixel_MF;
     std::vector<int> mYPixel_MF;

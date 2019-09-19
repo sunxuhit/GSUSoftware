@@ -20,7 +20,7 @@ double singleAR(double *x_val, double *par)
   return sigma;
 }
 
-void extractSingleAngleResolution(const string airgap = "3mm_center")
+void extractSingleAngleResolution(const string airgap = "3mm")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
@@ -37,7 +37,7 @@ void extractSingleAngleResolution(const string airgap = "3mm_center")
   // float flength = 6.0*25.4 +8.0; // mm
   // float flength = 6.0*25.4 +3.0; // mm
   float flength = 6.0*25.4; // mm
-  float nSigma = 3.0;
+  float nSigma = 1.0;
 
   TCanvas *c_Radius = new TCanvas("c_Radius","c_Radius",2000,1500);
   c_Radius->Divide(5,4);
@@ -160,7 +160,9 @@ void extractSingleAngleResolution(const string airgap = "3mm_center")
 
   TF1 *f_sigma = new TF1("f_sigma",singleAR,0,50,2);
   f_sigma->SetParameter(0,0.002);
+  f_sigma->SetParLimits(0,0.0,10.0);
   f_sigma->SetParameter(1,0.01);
+  f_sigma->SetParLimits(1,0.0,10.0);
   f_sigma->SetRange(4,17);
   g_AngleResolution->Fit(f_sigma,"NR");
   f_sigma->SetLineColor(2);

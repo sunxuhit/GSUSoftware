@@ -59,7 +59,7 @@ class Calibration : public TObject
     bool is_pmt;
 
     std::string mOutPutFile;
-    TFile *mFile_OutPut;
+    TFile *File_mOutPut;
 
     // static int const mNumOfPixels = 33;
     float mTdc_Start;
@@ -75,7 +75,6 @@ class Calibration : public TObject
     TH1D *h_mNumOfPhotons;
     TProfile *p_mNumOfPhotons;
     TH2D *h_mBeamSpotReco;
-    TH3D *h_mSinglePhoton; // theta_air & theta_c & r for single photon
 
     static const int MAXEDGE = 100000;
     const int MAROCPOLARITY = 1; // 1 falling, 0 rising

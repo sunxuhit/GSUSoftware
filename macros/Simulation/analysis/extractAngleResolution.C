@@ -45,7 +45,7 @@ double Gauss(double *x_val, double *par)
   return gaus;
 }
 
-void extractAngleResolution(const string airgap = "0mm_fixed")
+void extractAngleResolution(const string airgap = "3mm")
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/Simulation/PMT/GEMC_Calibration_%s.root",airgap.c_str());
   TFile *File_InPut = TFile::Open(inputfile.c_str());
@@ -58,7 +58,7 @@ void extractAngleResolution(const string airgap = "0mm_fixed")
   // float flength = 6.0*25.4 +8.0; // mm
   // float flength = 6.0*25.4 +3.7; // mm
   float flength = 6.0*25.4; // mm
-  float nSigma = 3.0;
+  float nSigma = 1.0;
 
   TCanvas *c_Radius = new TCanvas("c_Radius","c_Radius",10,10,500,500);
   c_Radius->cd()->SetLeftMargin(0.15);
