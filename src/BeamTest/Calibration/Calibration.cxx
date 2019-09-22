@@ -13,10 +13,18 @@ using namespace std;
 ClassImp(Calibration)
 
 // Calibration::Calibration(string outputfile)
-Calibration::Calibration() : mDet("PMT"), is_pmt(true), mTdc_Start(2000.0), mTdc_Stop(2050.0)
+Calibration::Calibration() : mDet("PMT"), is_pmt(true)
 {
   cout << "Calibration::Calibration() ----- Constructor ! ------" << endl;
   mHome = getenv("HOME");
+  for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
+  {
+    for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
+    {
+      mTdc_Start[i_pixel_x][i_pixel_y] = 2000.0;
+      mTdc_Stop[i_pixel_x][i_pixel_y] = 2050.0;
+    }
+  }
 }
 
 Calibration::~Calibration()
@@ -54,9 +62,6 @@ int Calibration::Init()
   {
     for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
     {
-      string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
-      // cout << HistName.c_str() << endl;
-      h_mTDC[i_pixel_x][i_pixel_y] = new TH1D(HistName.c_str(),HistName.c_str(),5000,-0.5,4999.5);
       mTimeDuration[i_pixel_x][i_pixel_y][0] = -999.9;
       mTimeDuration[i_pixel_x][i_pixel_y][1] = -999.9;
     }
@@ -130,62 +135,34 @@ int Calibration::initTdcCut()
 {
   cout << endl;
   cout << "initialize TDC Cuts!!" << endl;
-  string inputdir = Form("%s/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/%s/Calibration/",mHome.c_str(),mDet.c_str());
+  // string inputdir = Form("%s/WorkSpace/EICPID/OutPut/BeamTest/%s/TDC/Calibration/",mHome.c_str(),mDet.c_str());
+  string inputdir = Form("%s/WorkSpace/EICPID/OutPut/BeamTest/%s/TDC/ThresholdScan/",mHome.c_str(),mDet.c_str());
   string inputfile;
   if( is_pmt )
   {
-    inputfile = inputdir + "richTimeCuts.root";
+    inputfile = inputdir + "richTimeCuts_3.root";
   }
   if( !is_pmt )
   {
     inputfile = inputdir + "sipmTimeCuts.root";
   }
 
-  float NumOfRuns   = 0.0;
-  float SumTdcMean  = 0.0;
-  float SumTdcSigma = 0.0;
-  // float SumTdcStart = 0.0;
-  // float SumTdcStop  = 0.0;
-
+  float nSigma = 3.0;
   TFile *File_mTDC = TFile::Open(inputfile.c_str());
-  TH2D *h_mTimeCuts = (TH2D*)File_mTDC->Get("h_mTimeCuts")->Clone();
-  TH1D *h_mTdcMean  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcMean",1,1)->Clone();
-  TH1D *h_mTdcSigma = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcSigma",2,2)->Clone();
-  TH1D *h_mRunId    = (TH1D*)h_mTimeCuts->ProjectionY("h_mRunId",3,3)->Clone();
-  // TH1D *h_mTdcStart = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStart",1,1)->Clone();
-  // TH1D *h_mTdcStop  = (TH1D*)h_mTimeCuts->ProjectionY("h_mTdcStop",2,2)->Clone();
-  for(int i_bin = 1; i_bin < h_mRunId->GetNbinsX(); ++i_bin)
+  TH2D *h_mTdcMean  = (TH2D*)File_mTDC->Get("h_mean_tdc")->Clone();
+  TH2D *h_mTdcSigma = (TH2D*)File_mTDC->Get("h_sigma_tdc")->Clone();
+  for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
   {
-    float runId     = h_mRunId->GetBinContent(i_bin);
-    float tdc_mean  = h_mTdcMean->GetBinContent(i_bin);
-    float tdc_sigma = h_mTdcSigma->GetBinContent(i_bin);
-    // float tdc_start = h_mTdcStart->GetBinContent(i_bin);
-    // float tdc_stop  = h_mTdcStop->GetBinContent(i_bin);
-    if(runId > 0)
+    for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
     {
-      NumOfRuns++;
-      SumTdcMean  += tdc_mean;
-      SumTdcSigma += tdc_sigma;
-      cout << "runId = " << runId << ", tdc_mean = " << tdc_mean << ", tdc_sigma = " << tdc_sigma << ", NumOfRuns = " << NumOfRuns << endl;
-      // SumTdcStart += tdc_start;
-      // SumTdcStop  += tdc_stop;
-      // cout << "runId = " << runId << ", tdc_start = " << tdc_start << ", tdc_stop = " << tdc_stop << ", NumOfRuns = " << NumOfRuns << endl;
+      float mean_tdc = h_mTdcMean->GetBinContent(i_pixel_x+1,i_pixel_y+1);
+      float sigma_tdc = h_mTdcSigma->GetBinContent(i_pixel_x+1,i_pixel_y+1);
+      mTdc_Start[i_pixel_x][i_pixel_y] = floor(mean_tdc - nSigma*sigma_tdc);
+      mTdc_Stop[i_pixel_x][i_pixel_y] = ceil(mean_tdc + nSigma*sigma_tdc);
+      // cout << "i_pixel_x = " << i_pixel_x << ", i_pixel_y = " << i_pixel_y << ", mTdc_Start = " << mTdc_Start[i_pixel_x][i_pixel_y] << ", mTdc_Stop = " << mTdc_Stop[i_pixel_x][i_pixel_y] << endl;
     }
   }
   File_mTDC->Close();
-
-  float nSigma = 3.0;
-  float mean_tdc_Start = SumTdcMean/NumOfRuns - nSigma*SumTdcSigma/NumOfRuns; 
-  float mean_tdc_Stop  = SumTdcMean/NumOfRuns + nSigma*SumTdcSigma/NumOfRuns;
-
-  mTdc_Start = floor(mean_tdc_Start);
-  mTdc_Stop  = ceil(mean_tdc_Stop);
-  // mTdc_Start = floor(SumTdcStart/NumOfRuns);
-  // mTdc_Stop  = ceil(SumTdcStop/NumOfRuns);
-
-  cout << "tdc_mean = " << SumTdcMean/NumOfRuns << ", tdc_sigma = " << SumTdcSigma/NumOfRuns << ", nSigma = " << nSigma << endl;
-  cout << "mean_tdc_Start = " << mean_tdc_Start  << ", mean_tdc_Stop = " << mean_tdc_Stop << endl;
-  cout << "mTdc_Start set to " << mTdc_Start << " and mTdc_Stop set to " << mTdc_Stop << endl;
 
   return 0;
 }
@@ -309,7 +286,7 @@ int Calibration::Make()
       if(pixel_x < 0 || pixel_y < 0) return -1;
 
       int polarity = tPolarity[i_photon];
-      mTimeDuration[pixel_x][pixel_y][polarity] = tTime[i_photon];
+      // mTimeDuration[pixel_x][pixel_y][polarity] = tTime[i_photon];
 
       if(mTimeDuration[pixel_x][pixel_y][polarity] < 0) // cut off second late pulse
       {
@@ -372,16 +349,11 @@ int Calibration::Make()
 
       if(pixel_x < 0 || pixel_y < 0) return -1;
 
-      if(tPolarity[i_photon] == MAROCPOLARITY) 
-      {
-	h_mTDC[pixel_x][pixel_y]->Fill(tTime[i_photon]);
-      }
-
       float time_duration = mTimeDuration[pixel_x][pixel_y][0] - mTimeDuration[pixel_x][pixel_y][1];
       // if(time_duration > mTime_Low && time_duration < mTime_High)
-      if(time_duration > 35)
+      if(time_duration > 35.0)
       {
-	if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start && tTime[i_photon] < mTdc_Stop)
+	if(tPolarity[i_photon] == MAROCPOLARITY && tTime[i_photon] > mTdc_Start[pixel_x][pixel_y] && tTime[i_photon] < mTdc_Stop[pixel_x][pixel_y])
 	{
 	  h_mRingImage->Fill(pixel_x,pixel_y);
 	  NumOfPhotons++;
@@ -469,15 +441,6 @@ int Calibration::Finish()
 {
   cout << " this is Calibration::Finish" << endl;
   File_mOutPut->cd();
-  /*
-  for(int i_pixel_x = 0; i_pixel_x < mRICH::mNumOfPixels; ++i_pixel_x)
-  {
-    for(int i_pixel_y = 0; i_pixel_y < mRICH::mNumOfPixels; ++i_pixel_y)
-    {
-      h_mTDC[i_pixel_x][i_pixel_y]->Write();
-    }
-  }
-  */
   mBeamFinder->writeBeamFinder();
   mRingFinder->writeRingFinder_HT();
   mRingFinder->writeRingFinder_MF();

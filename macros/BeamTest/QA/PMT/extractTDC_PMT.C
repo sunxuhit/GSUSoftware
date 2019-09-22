@@ -8,6 +8,7 @@
 #include <TF1.h>
 #include "../../../draw.h"
 
+// int extractTDC_PMT(const string mode = "Calibration", const int runConfig = 0)
 int extractTDC_PMT(const string mode = "ThresholdScan", const int runConfig = 3)
 {
   string inputfile = Form("/Users/xusun/WorkSpace/EICPID/OutPut/BeamTest/PMT/TDC/%s/richTDC_%d.root",mode.c_str(),runConfig);
@@ -24,8 +25,10 @@ int extractTDC_PMT(const string mode = "ThresholdScan", const int runConfig = 3)
     }
   }
 
-  float tdc_Start = 1949.5;
-  float tdc_Stop  = 2149.5;
+  // float tdc_Start = 1949.5;
+  // float tdc_Stop  = 2149.5;
+  float tdc_Start = 2000.5;
+  float tdc_Stop  = 2050.5;
 
   TH1D *h_mTdcProjX[NumOfPixel][NumOfPixel];
   float mean_tdc[NumOfPixel][NumOfPixel];

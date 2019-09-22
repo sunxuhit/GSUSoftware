@@ -62,12 +62,11 @@ class Calibration : public TObject
     TFile *File_mOutPut;
 
     // static int const mNumOfPixels = 33;
-    float mTdc_Start;
-    float mTdc_Stop;
+    float mTdc_Start[mRICH::mNumOfPixels][mRICH::mNumOfPixels];
+    float mTdc_Stop[mRICH::mNumOfPixels][mRICH::mNumOfPixels];
     float mTime_Low;
     float mTime_High;
     float mTimeDuration[mRICH::mNumOfPixels][mRICH::mNumOfPixels][2];
-    TH1D *h_mTDC[mRICH::mNumOfPixels][mRICH::mNumOfPixels]; // 0 for x-pixel | 1 for y-pixel
 
     TH2D *h_mRingImage;
     TH2D *h_mRingFinder_Display; // QA for ring finder
