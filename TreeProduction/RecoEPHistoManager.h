@@ -79,11 +79,13 @@ class RecoEPHistoManager : public TObject
     TH1F *h_mEP_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mEP_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH2F *h_mEP_BbcCorrelation[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mCentrality_Bbc[3];
 
     // FVTX EP QA
     TH1F *h_mEP_FvtxSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mEP_FvtxNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH2F *h_mEP_FvtxCorrelation[3][vecMesonFlow::mNumOfCentrality20];
+    TH1F *h_mCentrality_Fvtx[3];
 
     // DiMuon Spectra
     TH2F *h_mInvMass_DiMuon; // rapidity vs. inv mass

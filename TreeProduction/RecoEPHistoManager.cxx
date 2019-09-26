@@ -96,6 +96,12 @@ void RecoEPHistoManager::initHist_BbcEP()
       h_mEP_BbcCorrelation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
     }
   }
+
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    std::string HistName = Form("h_mCentrality_Bbc_%s",Order[i_order].c_str());
+    h_mCentrality_Bbc[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),24,-1.5,22.5);
+  }
 }
 
 void RecoEPHistoManager::fillHist_BbcEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent)
@@ -103,6 +109,7 @@ void RecoEPHistoManager::fillHist_BbcEP(float Psi_BbcSouth, float Psi_BbcNorth, 
   h_mEP_BbcSouth[order][cent]->Fill(Psi_BbcSouth);
   h_mEP_BbcNorth[order][cent]->Fill(Psi_BbcNorth);
   h_mEP_BbcCorrelation[order][cent]->Fill(Psi_BbcSouth,Psi_BbcNorth);
+  h_mCentrality_Bbc[order]->Fill(cent);
 }
 
 void RecoEPHistoManager::writeHist_BbcEP()
@@ -115,6 +122,7 @@ void RecoEPHistoManager::writeHist_BbcEP()
       h_mEP_BbcNorth[i_order][i_cent]->Write();
       h_mEP_BbcCorrelation[i_order][i_cent]->Write();
     }
+    h_mCentrality_Bbc[i_order]->Write();
   }
 }
 //===============BBC Event Plane=========================
@@ -140,6 +148,12 @@ void RecoEPHistoManager::initHist_FvtxEP()
       h_mEP_FvtxCorrelation[i_order][i_cent] = new TH2F(HistName.c_str(),HistName.c_str(),90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order],90,-TMath::Pi()/harmonic[i_order],TMath::Pi()/harmonic[i_order]);
     }
   }
+
+  for(int i_order = 0; i_order < 3; ++i_order)
+  {
+    std::string HistName = Form("h_mCentrality_Fvtx_%s",Order[i_order].c_str());
+    h_mCentrality_Fvtx[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),24,-1.5,22.5);
+  }
 }
 
 void RecoEPHistoManager::fillHist_FvtxEP(float Psi_FvtxSouth, float Psi_FvtxNorth, int order, int cent)
@@ -147,6 +161,7 @@ void RecoEPHistoManager::fillHist_FvtxEP(float Psi_FvtxSouth, float Psi_FvtxNort
   h_mEP_FvtxSouth[order][cent]->Fill(Psi_FvtxSouth);
   h_mEP_FvtxNorth[order][cent]->Fill(Psi_FvtxNorth);
   h_mEP_FvtxCorrelation[order][cent]->Fill(Psi_FvtxSouth,Psi_FvtxNorth);
+  h_mCentrality_Fvtx[order]->Fill(cent);
 }
 
 void RecoEPHistoManager::writeHist_FvtxEP()
@@ -159,6 +174,7 @@ void RecoEPHistoManager::writeHist_FvtxEP()
       h_mEP_FvtxNorth[i_order][i_cent]->Write();
       h_mEP_FvtxCorrelation[i_order][i_cent]->Write();
     }
+    h_mCentrality_Fvtx[i_order]->Write();
   }
 }
 //===============FVTX Event Plane=========================
