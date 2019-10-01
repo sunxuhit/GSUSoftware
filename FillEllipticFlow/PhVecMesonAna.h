@@ -14,7 +14,7 @@ class TProfile;
 class TH1F;
 class TH2F;
 
-// class PhDiMuonHistoManager;
+class PhDiMuonHistoManager;
 // class PhDiMuonProManager;
 class PhDiMuonUtility;
 // class PhDiMuonCut;
@@ -35,7 +35,7 @@ class PhVecMesonAna: public TObject
 
     int Init();
     int Make();
-    // int Finish();
+    int Finish();
 
   private:
     std::string mInPutList;
@@ -59,7 +59,7 @@ class PhVecMesonAna: public TObject
     TFile* File_mOutPut;
 
     // utilities
-    // PhDiMuonHistoManager *mPhDiMuonHistoManager;
+    PhDiMuonHistoManager *mPhDiMuonHistoManager;
     // PhDiMuonProManager *mPhDiMuonProManager;
     PhDiMuonUtility *mPhDiMuonUtility;
     // PhDiMuonCut *mPhDiMuonCut;

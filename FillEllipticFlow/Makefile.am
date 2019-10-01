@@ -15,7 +15,8 @@ lib_LTLIBRARIES = libPhVecMesonAna.la
 noinst_HEADERS = \
 PhVecMesonAnaLinkDef.h \
 PhDiMuonEventLinkDef.h \
-PhDiMuonUtilityLinkDef.h
+PhDiMuonUtilityLinkDef.h \
+PhDiMuonHistoManagerLinkDef.h
 
 ##############################################
 # please add new classes in alphabetical order
@@ -23,7 +24,8 @@ PhDiMuonUtilityLinkDef.h
 pkginclude_HEADERS = \
 	PhVecMesonAna.h \
 	PhDiMuonEvent.h \
-	PhDiMuonUtility.h
+	PhDiMuonUtility.h \
+	PhDiMuonHistoManager.h
 
 ##############################################
 # please add new classes in alphabetical order
@@ -34,7 +36,9 @@ libPhVecMesonAna_la_SOURCES = \
   PhDiMuonEvent_Dict.C \
   PhDiMuonEvent.cxx \
   PhDiMuonUtility_Dict.C \
-  PhDiMuonUtility.cxx
+  PhDiMuonUtility.cxx \
+  PhDiMuonHistoManager_Dict.C \
+  PhDiMuonHistoManager.cxx
 
 ##############################################
 # libraries used in the package
@@ -78,5 +82,11 @@ PhDiMuonUtility_Dict.C: \
 	PhVecMesonCons.h \
 	PhDiMuonUtility.h \
 	PhDiMuonUtilityLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+PhDiMuonHistoManager_Dict.C: \
+	PhVecMesonCons.h \
+	PhDiMuonHistoManager.h \
+	PhDiMuonHistoManagerLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 

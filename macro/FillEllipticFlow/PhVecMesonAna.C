@@ -12,14 +12,14 @@ void PhVecMesonAna(const int pid = 0, const int list = 1, const long start_event
   TStopwatch *stopWatch = new TStopwatch();
   stopWatch->Start();
 
-  gSystem->Load("../../install/lib/libPhVecMesonAna.so");
+  gSystem->Load("$HOME/WorkSpace/PHENIX/install/lib/libPhVecMesonAna.so");
   cout << "Load in libPhVecMesonAna.so!" << endl;
   cout << "Start to Analyze PicoDst TTree!" << endl;
 
   PhVecMesonAna *mVecMesonAna = new PhVecMesonAna(pid,list,start_event,stop_event,mode);
   mVecMesonAna->Init();
   mVecMesonAna->Make();
-  // mVecMesonAna->Finish();
+  mVecMesonAna->Finish();
 
   cout << "Completed Analyzing Di-Muon Yields in PhVecMesonAna.C." << endl;
 }

@@ -19,7 +19,7 @@
 #include <TVector3.h>
 
 //Utility Class
-// #include "PhDiMuonHistoManager.h"
+#include "PhDiMuonHistoManager.h"
 // #include "PhDiMuonProManager.h"
 #include "PhDiMuonUtility.h"
 // #include "PhDiMuonCut.h"
@@ -62,8 +62,8 @@ int PhVecMesonAna::Init()
 {
   mPhDiMuonUtility = new PhDiMuonUtility(); // initialize utilities
   mPhDiMuonUtility->initRunIndex();
-  // mPhDiMuonHistoManager = new PhDiMuonHistoManager(); // initialize histograms
-  // mPhDiMuonHistoManager->initQA_Global();
+  mPhDiMuonHistoManager = new PhDiMuonHistoManager(); // initialize histograms
+  mPhDiMuonHistoManager->initHist_InvMass(mPid,mMode);
   // mPhDiMuonProManager   = new PhDiMuonProManager(); // initialize histograms
 
   // initialize input/output
@@ -154,6 +154,7 @@ int PhVecMesonAna::Make()
     if (!mChain_DiMuon->GetEntry( i_event )) // take the event -> information is stored in event
       break;  // end of data chunk
 
+    /*
     // get Vertex
     TVector3 vtx_BBC = mDiMuonEvent->getVtxBbc();
     TVector3 vtx_FVTX = mDiMuonEvent->getVtxFvtx();
@@ -212,147 +213,82 @@ int PhVecMesonAna::Make()
       float rapidity_fvtxmutr = mDiMuonTrack->getRapidity_fvtxmutr();
       float vtxchi2_fvtxmutr  = mDiMuonTrack->getVtxChi2_fvtxmutr();
 
-      /*
-      NumOfDiMuons++;
-      if(rapidity < 0) NumOfDiMuonsSouth++;
-      if(rapidity > 0) NumOfDiMuonsNorth++;
-
       // single muon spectra
       // Tr0
-      float px_tr0 = dimuon->get_Tr0_px(); // get Tr0 info from DiMuonContainer
-      float py_tr0 = dimuon->get_Tr0_py();
-      float pz_tr0 = dimuon->get_Tr0_pz();
-      float rapidity_tr0 = dimuon->get_Tr0_rapidity(); // > 0 => north
-      float DG0_tr0 = dimuon->get_Tr0_DG0();
-      float DDG0_tr0 = dimuon->get_Tr0_DDG0();
-      float dca_r_tr0 = dimuon->get_Tr0_dca_r();
-      float dca_z_tr0 = dimuon->get_Tr0_dca_z();
-      short trhits_tr0 = dimuon->get_Tr0_trhits();
-      float trchi2_tr0 = dimuon->get_Tr0_trchi2();
-      short ntrhits_tr0 = dimuon->get_Tr0_ntrhits();
-      short idhits_tr0 = dimuon->get_Tr0_idhits();
-      float idchi2_tr0 = dimuon->get_Tr0_idchi2();
-      short nidhits_tr0 = dimuon->get_Tr0_nidhits();
-      float idx_tr0 = dimuon->get_Tr0_idx();
-      float idy_tr0 = dimuon->get_Tr0_idy();
-      short lastgap_tr0 = dimuon->get_Tr0_lastgap();
-      float px_fvtx_tr0 = dimuon->get_Tr0_px_fvtx(); // fvtx
-      float py_fvtx_tr0 = dimuon->get_Tr0_py_fvtx();
-      float pz_fvtx_tr0 = dimuon->get_Tr0_pz_fvtx();
-      float dphi_fvtx_tr0 = dimuon->get_Tr0_dphi_fvtx();
-      float dtheta_fvtx_tr0 = dimuon->get_Tr0_dtheta_fvtx();
-      float dr_fvtx_tr0 = dimuon->get_Tr0_dr_fvtx();
-      float chi2_fvtx_tr0 = dimuon->get_Tr0_chi2_fvtx();
-      float px_fvtxmutr_tr0 = dimuon->get_Tr0_px_fvtxmutr(); // fvtx & mutr
-      float py_fvtxmutr_tr0 = dimuon->get_Tr0_py_fvtxmutr();
-      float pz_fvtxmutr_tr0 = dimuon->get_Tr0_pz_fvtxmutr();
-      float chi2_fvtxmutr_tr0 = dimuon->get_Tr0_chi2_fvtxmutr();
-
-      mDiMuonTrack->setPx_tr0(px_tr0); // set Tr0 info to mTree_DiMuon 
-      mDiMuonTrack->setPy_tr0(py_tr0); 
-      mDiMuonTrack->setPz_tr0(pz_tr0); 
-      mDiMuonTrack->setRapidity_tr0(rapidity_tr0); 
-      mDiMuonTrack->setDG0_tr0(DG0_tr0); 
-      mDiMuonTrack->setDDG0_tr0(DDG0_tr0); 
-      mDiMuonTrack->setDcaR_tr0(dca_r_tr0); 
-      mDiMuonTrack->setDcaZ_tr0(dca_z_tr0); 
-      mDiMuonTrack->setTrhits_tr0(trhits_tr0); 
-      mDiMuonTrack->setTrchi2_tr0(trchi2_tr0); 
-      mDiMuonTrack->setNTrhits_tr0(ntrhits_tr0); 
-      mDiMuonTrack->setIdhits_tr0(idhits_tr0); 
-      mDiMuonTrack->setIdchi2_tr0(idchi2_tr0); 
-      mDiMuonTrack->setNIdhits_tr0(nidhits_tr0); 
-      mDiMuonTrack->setIdx_tr0(idx_tr0); 
-      mDiMuonTrack->setIdy_tr0(idy_tr0); 
-      mDiMuonTrack->setLastgap_tr0(lastgap_tr0); 
-      mDiMuonTrack->setPxfvtx_tr0(px_fvtx_tr0); // fvtx
-      mDiMuonTrack->setPyfvtx_tr0(py_fvtx_tr0);
-      mDiMuonTrack->setPzfvtx_tr0(pz_fvtx_tr0);
-      mDiMuonTrack->setDphifvtx_tr0(dphi_fvtx_tr0);
-      mDiMuonTrack->setDthetafvtx_tr0(dtheta_fvtx_tr0);
-      mDiMuonTrack->setDrfvtx_tr0(dr_fvtx_tr0);
-      mDiMuonTrack->setChi2fvtx_tr0(chi2_fvtx_tr0);
-      mDiMuonTrack->setPxfvtxmutr_tr0(px_fvtxmutr_tr0); // fvtxmutr
-      mDiMuonTrack->setPyfvtxmutr_tr0(py_fvtxmutr_tr0);
-      mDiMuonTrack->setPzfvtxmutr_tr0(pz_fvtxmutr_tr0);
-      mDiMuonTrack->setChi2fvtxmutr_tr0(chi2_fvtxmutr_tr0);
+      float px_tr0            = mDiMuonTrack->setPx_tr0(px_tr0); // set Tr0 info to mTree_DiMuon 
+      float py_tr0            = mDiMuonTrack->setPy_tr0(py_tr0); 
+      float pz_tr0            = mDiMuonTrack->setPz_tr0(pz_tr0); 
+      float rapidity_tr0      = mDiMuonTrack->setRapidity_tr0(rapidity_tr0); 
+      float DG0_tr0           = mDiMuonTrack->setDG0_tr0(DG0_tr0); 
+      float DDG0_tr0          = mDiMuonTrack->setDDG0_tr0(DDG0_tr0); 
+      float dca_r_tr0         = mDiMuonTrack->setDcaR_tr0(dca_r_tr0); 
+      float dca_z_tr0         = mDiMuonTrack->setDcaZ_tr0(dca_z_tr0); 
+      short trhits_tr0        = mDiMuonTrack->setTrhits_tr0(trhits_tr0); 
+      float trchi2_tr0        = mDiMuonTrack->setTrchi2_tr0(trchi2_tr0); 
+      short ntrhits_tr0       = mDiMuonTrack->setNTrhits_tr0(ntrhits_tr0); 
+      short idhits_tr0        = mDiMuonTrack->setIdhits_tr0(idhits_tr0); 
+      float idchi2_tr0        = mDiMuonTrack->setIdchi2_tr0(idchi2_tr0); 
+      short nidhits_tr0       = mDiMuonTrack->setNIdhits_tr0(nidhits_tr0); 
+      float idx_tr0           = mDiMuonTrack->setIdx_tr0(idx_tr0); 
+      float idy_tr0           = mDiMuonTrack->setIdy_tr0(idy_tr0); 
+      short lastgap_tr0       = mDiMuonTrack->setLastgap_tr0(lastgap_tr0); 
+      float px_fvtx_tr0       = mDiMuonTrack->setPxfvtx_tr0(px_fvtx_tr0); // fvtx
+      float py_fvtx_tr0       = mDiMuonTrack->setPyfvtx_tr0(py_fvtx_tr0);
+      float pz_fvtx_tr0       = mDiMuonTrack->setPzfvtx_tr0(pz_fvtx_tr0);
+      float dphi_fvtx_tr0     = mDiMuonTrack->setDphifvtx_tr0(dphi_fvtx_tr0);
+      float dtheta_fvtx_tr0   = mDiMuonTrack->setDthetafvtx_tr0(dtheta_fvtx_tr0);
+      float dr_fvtx_tr0       = mDiMuonTrack->setDrfvtx_tr0(dr_fvtx_tr0);
+      float chi2_fvtx_tr0     = mDiMuonTrack->setChi2fvtx_tr0(chi2_fvtx_tr0);
+      float px_fvtxmutr_tr0   = mDiMuonTrack->setPxfvtxmutr_tr0(px_fvtxmutr_tr0); // fvtxmutr
+      float py_fvtxmutr_tr0   = mDiMuonTrack->setPyfvtxmutr_tr0(py_fvtxmutr_tr0);
+      float pz_fvtxmutr_tr0   = mDiMuonTrack->setPzfvtxmutr_tr0(pz_fvtxmutr_tr0);
+      float chi2_fvtxmutr_tr0 = mDiMuonTrack->setChi2fvtxmutr_tr0(chi2_fvtxmutr_tr0);
 
       // Tr1
-      float px_tr1 = dimuon->get_Tr1_px(); // get Tr1 info from DiMuonContainer
-      float py_tr1 = dimuon->get_Tr1_py();
-      float pz_tr1 = dimuon->get_Tr1_pz();
-      float rapidity_tr1 = dimuon->get_Tr1_rapidity(); // > 0 => north
-      float DG0_tr1 = dimuon->get_Tr1_DG0();
-      float DDG0_tr1 = dimuon->get_Tr1_DDG0();
-      float dca_r_tr1 = dimuon->get_Tr1_dca_r();
-      float dca_z_tr1 = dimuon->get_Tr1_dca_z();
-      short trhits_tr1 = dimuon->get_Tr1_trhits();
-      float trchi2_tr1 = dimuon->get_Tr1_trchi2();
-      short ntrhits_tr1 = dimuon->get_Tr1_ntrhits();
-      short idhits_tr1 = dimuon->get_Tr1_idhits();
-      float idchi2_tr1 = dimuon->get_Tr1_idchi2();
-      short nidhits_tr1 = dimuon->get_Tr1_nidhits();
-      float idx_tr1 = dimuon->get_Tr1_idx();
-      float idy_tr1 = dimuon->get_Tr1_idy();
-      short lastgap_tr1 = dimuon->get_Tr1_lastgap();
-      float px_fvtx_tr1 = dimuon->get_Tr1_px_fvtx(); // fvtx
-      float py_fvtx_tr1 = dimuon->get_Tr1_py_fvtx();
-      float pz_fvtx_tr1 = dimuon->get_Tr1_pz_fvtx();
-      float dphi_fvtx_tr1 = dimuon->get_Tr1_dphi_fvtx();
-      float dtheta_fvtx_tr1 = dimuon->get_Tr1_dtheta_fvtx();
-      float dr_fvtx_tr1 = dimuon->get_Tr1_dr_fvtx();
-      float chi2_fvtx_tr1 = dimuon->get_Tr1_chi2_fvtx();
-      float px_fvtxmutr_tr1 = dimuon->get_Tr1_px_fvtxmutr(); // fvtx & mutr
-      float py_fvtxmutr_tr1 = dimuon->get_Tr1_py_fvtxmutr();
-      float pz_fvtxmutr_tr1 = dimuon->get_Tr1_pz_fvtxmutr();
-      float chi2_fvtxmutr_tr1 = dimuon->get_Tr1_chi2_fvtxmutr();
-
-      mDiMuonTrack->setPx_tr1(px_tr1); // set Tr1 info to mTree_DiMuon 
-      mDiMuonTrack->setPy_tr1(py_tr1); 
-      mDiMuonTrack->setPz_tr1(pz_tr1); 
-      mDiMuonTrack->setRapidity_tr1(rapidity_tr1); 
-      mDiMuonTrack->setDG0_tr1(DG0_tr1); 
-      mDiMuonTrack->setDDG0_tr1(DDG0_tr1); 
-      mDiMuonTrack->setDcaR_tr1(dca_r_tr1); 
-      mDiMuonTrack->setDcaZ_tr1(dca_z_tr1); 
-      mDiMuonTrack->setTrhits_tr1(trhits_tr1); 
-      mDiMuonTrack->setTrchi2_tr1(trchi2_tr1); 
-      mDiMuonTrack->setNTrhits_tr1(ntrhits_tr1); 
-      mDiMuonTrack->setIdhits_tr1(idhits_tr1); 
-      mDiMuonTrack->setIdchi2_tr1(idchi2_tr1); 
-      mDiMuonTrack->setNIdhits_tr1(nidhits_tr1); 
-      mDiMuonTrack->setIdx_tr1(idx_tr1); 
-      mDiMuonTrack->setIdy_tr1(idy_tr1); 
-      mDiMuonTrack->setLastgap_tr1(lastgap_tr1); 
-      mDiMuonTrack->setPxfvtx_tr1(px_fvtx_tr1); // fvtx
-      mDiMuonTrack->setPyfvtx_tr1(py_fvtx_tr1);
-      mDiMuonTrack->setPzfvtx_tr1(pz_fvtx_tr1);
-      mDiMuonTrack->setDphifvtx_tr1(dphi_fvtx_tr1);
-      mDiMuonTrack->setDthetafvtx_tr1(dtheta_fvtx_tr1);
-      mDiMuonTrack->setDrfvtx_tr1(dr_fvtx_tr1);
-      mDiMuonTrack->setChi2fvtx_tr1(chi2_fvtx_tr1);
-      mDiMuonTrack->setPxfvtxmutr_tr1(px_fvtxmutr_tr1); // fvtxmutr
-      mDiMuonTrack->setPyfvtxmutr_tr1(py_fvtxmutr_tr1);
-      mDiMuonTrack->setPzfvtxmutr_tr1(pz_fvtxmutr_tr1);
-      mDiMuonTrack->setChi2fvtxmutr_tr1(chi2_fvtxmutr_tr1);
-      */
+      float px_tr1            = mDiMuonTrack->setPx_tr1(px_tr1); // set Tr1 info to mTree_DiMuon 
+      float py_tr1            = mDiMuonTrack->setPy_tr1(py_tr1); 
+      float pz_tr1            = mDiMuonTrack->setPz_tr1(pz_tr1); 
+      float rapidity_tr1      = mDiMuonTrack->setRapidity_tr1(rapidity_tr1); 
+      float DG0_tr1           = mDiMuonTrack->setDG0_tr1(DG0_tr1); 
+      float DDG0_tr1          = mDiMuonTrack->setDDG0_tr1(DDG0_tr1); 
+      float dca_r_tr1         = mDiMuonTrack->setDcaR_tr1(dca_r_tr1); 
+      float dca_z_tr1         = mDiMuonTrack->setDcaZ_tr1(dca_z_tr1); 
+      short trhits_tr1        = mDiMuonTrack->setTrhits_tr1(trhits_tr1); 
+      float trchi2_tr1        = mDiMuonTrack->setTrchi2_tr1(trchi2_tr1); 
+      short ntrhits_tr1       = mDiMuonTrack->setNTrhits_tr1(ntrhits_tr1); 
+      short idhits_tr1        = mDiMuonTrack->setIdhits_tr1(idhits_tr1); 
+      float idchi2_tr1        = mDiMuonTrack->setIdchi2_tr1(idchi2_tr1); 
+      short nidhits_tr1       = mDiMuonTrack->setNIdhits_tr1(nidhits_tr1); 
+      float idx_tr1           = mDiMuonTrack->setIdx_tr1(idx_tr1); 
+      float idy_tr1           = mDiMuonTrack->setIdy_tr1(idy_tr1); 
+      short lastgap_tr1       = mDiMuonTrack->setLastgap_tr1(lastgap_tr1); 
+      float px_fvtx_tr1       = mDiMuonTrack->setPxfvtx_tr1(px_fvtx_tr1); // fvtx
+      float py_fvtx_tr1       = mDiMuonTrack->setPyfvtx_tr1(py_fvtx_tr1);
+      float pz_fvtx_tr1       = mDiMuonTrack->setPzfvtx_tr1(pz_fvtx_tr1);
+      float dphi_fvtx_tr1     = mDiMuonTrack->setDphifvtx_tr1(dphi_fvtx_tr1);
+      float dtheta_fvtx_tr1   = mDiMuonTrack->setDthetafvtx_tr1(dtheta_fvtx_tr1);
+      float dr_fvtx_tr1       = mDiMuonTrack->setDrfvtx_tr1(dr_fvtx_tr1);
+      float chi2_fvtx_tr1     = mDiMuonTrack->setChi2fvtx_tr1(chi2_fvtx_tr1);
+      float px_fvtxmutr_tr1   = mDiMuonTrack->setPxfvtxmutr_tr1(px_fvtxmutr_tr1); // fvtxmutr
+      float py_fvtxmutr_tr1   = mDiMuonTrack->setPyfvtxmutr_tr1(py_fvtxmutr_tr1);
+      float pz_fvtxmutr_tr1   = mDiMuonTrack->setPzfvtxmutr_tr1(pz_fvtxmutr_tr1);
+      float chi2_fvtxmutr_tr1 = mDiMuonTrack->setChi2fvtxmutr_tr1(chi2_fvtxmutr_tr1);
     }
+  */
   }
 
   return 1;
 }
 
-/*
 int PhVecMesonAna::Finish() 
 {
   File_mOutPut->cd();
-  mPhDiMuonHistoManager->writeQA_Global();
+  mPhDiMuonHistoManager->writeHist_InvMass(mPid,mMode);
 
   File_mOutPut->Close();
 
-  return EVENT_OK;
+  return 1;
 }
-*/
 
 //----------------------------------------------------
 // set Input/Output
