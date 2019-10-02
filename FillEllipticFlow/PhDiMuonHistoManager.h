@@ -21,7 +21,7 @@ class PhDiMuonHistoManager : public TObject
 
     //===============di-muon InvMass==============
     void initHist_InvMass(int pid, int mode);
-    // void fillHist_InvMass();
+    // void fillHist_InvMass(int pid, int mode, int cent20, int cent4, float pt, float phi);
     void writeHist_InvMass(int pid, int mode);
     //===============di-muon InvMass==============
 
@@ -37,12 +37,19 @@ class PhDiMuonHistoManager : public TObject
     // void writeHist_Spec(int pid, int mode);
     //===============di-muon Spectra==============
 
+    //=============utility functions==============
+    int getPtBin(float pt);
+    int getPhiBin(float phi);
+    //=============utility functions==============
+
+
   private:
     // elliptic flow analysis
     // 0 = pt bin
     // 1 = centrality: 0-80%, 0-10%, 10%-40%, 40-80%
     // 2 = phi-Psi
     TH1FMap h_mInvMass;
+    TH1FMap h_mInvMass_Raw; // raw flow
 
     // event plane resolution correction
     // 0 = centrality: 0-5%, 5-10%, 10-15% ....75-80%, 80-85%, 85-90%, 90-95%, 95-100%
