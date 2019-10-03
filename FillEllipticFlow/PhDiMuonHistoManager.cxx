@@ -68,7 +68,7 @@ void PhDiMuonHistoManager::writeHist_InvMass(int pid, int mode)
 //=============utility functions==============
 int PhDiMuonHistoManager::getPtBin(float pt)
 {
-  // 0: (0.0,2.0], 1: (2.0-4.0], 2: (4.0,6.0], 3: (6.0,10.0]
+  // 0: (0.0,2.0], 1: (2.0,4.0], 2: (4.0,6.0], 3: (6.0,10.0]
   // if(TMath::Abs(pt-vecMesonFlow::mPtStart[0]) < 1e-10) return vecMesonFlow::mPtBin[0]; // pt=0.0 == ptbin=0 
   for(int i_pt = 0; i_pt < vecMesonFlow::mNumOfPt; ++i_pt)
   {
@@ -77,6 +77,40 @@ int PhDiMuonHistoManager::getPtBin(float pt)
       return vecMesonFlow::mPtBin[i_pt];
     }
     if(TMath::Abs(pt-vecMesonFlow::mPtStop[i_pt]) < 1e-10) return vecMesonFlow::mPtBin[i_pt]; // ptbin == mPtStop
+  }
+
+  return -1;
+}
+
+int PhDiMuonHistoManager::getPhiBin(float phi)
+{
+  // 0: [0.0,1.0], 1: (1.0,2.0], 2: (2.0,3.0], 3: (3.0,4.0], 4: (4.0,5.0], 5: (5.0,6.0], 6: (6.0,7.0]
+  // * 0.5*TMath::Pi()
+
+  float phi_shift = -999.9;
+  for(int i_Psi = 0; i_Psi < vecMesonFlow::mNumOfPsi; ++i_Psi) // shift phi-Psi2 to [-pi/2,pi/2]
+  {
+    if( (i_Psi != 1) && (TMath::Abs(phi-vecMesonFlow::mPsiStart[i_Psi]*TMath::PiOver2()) < 1e-10) ) 
+    {
+      phi_shift = phi - (i_Psi-1)*TMath::Pi(); // shift lower edage to -pi/2
+    }
+    if(phi > vecMesonFlow::mPsiStart[i_Psi]*TMath::PiOver2() && phi < vecMesonFlow::mPsiStop[i_Psi]*TMath::PiOver2())
+    {
+      phi_shift = phi - (i_Psi-1)*TMath::Pi();
+    }
+    if( (i_Psi != 1) && (TMath::Abs(phi-vecMesonFlow::mPsiStop[i_Psi]*TMath::PiOver2()) < 1e-10) ) 
+    {
+      phi_shift = phi - (i_Psi-1)*TMath::Pi(); // shift upper lower edage to pi/2
+    }
+  }
+
+  for(int i_phi = 0; i_phi < vecMesonFlow::mNumOfPhi; ++i_phi) // phi-Psi2 bin
+  {
+    if(TMath::Abs(phi_shift) > vecMesonFlow::mPhiStart[i_phi]*TMath::PiOver2() && TMath::Abs(phi_shift) < vecMesonFlow::mPhiStop[i_phi])
+    {
+      return vecMesonFlow::mPhiBin[i_phi];
+    }
+    if(TMath::Abs(phi_shift-vecMesonFlow::mPhiStop[i_phi]) < 1e-10) return vecMesonFlow::mPhiBin[i_phi]; // phibin == mPhiStop
   }
 
   return -1;

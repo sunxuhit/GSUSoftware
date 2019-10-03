@@ -39,11 +39,20 @@ namespace vecMesonFlow // binning used in flow analysis
   const std::string mEventType[3] = {"US","LS","ME"};
 
   const int mNumOfPt = 4; // pt bining
-  const float mPtStart[mNumOfPt]  = {0.0,2.0,4.0,6.0};
-  const float mPtStop[mNumOfPt]   = {2.0,4.0,6.0,10.0};
-  const int mPtBin[mNumOfPt]   = {0, 1, 2, 3};
+  const float mPtStart[mNumOfPt] = {0.0,2.0,4.0,6.0};
+  const float mPtStop[mNumOfPt] = {2.0,4.0,6.0,10.0};
+  const int mPtBin[mNumOfPt] = {0, 1, 2, 3};
 
   const int mNumOfPhi = 7; // phi bining
+  const float mPhiStart[mNumOfPhi] = {0.0,1.0,2.0,3.0,4.0,5.0,6.0}; // * 0.5*TMath::Pi()
+  const float mPhiStop[mNumOfPhi] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+  const int mPhiBin[mNumOfPhi] = {0, 1, 2, 3, 4, 5, 6};
+
+  const int mNumOfPsi = 3; // phi bining
+  const float mPsiStart[mNumOfPsi] = {-3.0,-1.0,1.0}; // *0.5*TMath::Pi()
+  const float mPsiStop[mNumOfPsi] = {-1.0, 1.0,3.0};
+  const int mPsiBin[mNumOfPsi] = {0, 1, 2};
+
   //====================================================================
 }
 #endif
