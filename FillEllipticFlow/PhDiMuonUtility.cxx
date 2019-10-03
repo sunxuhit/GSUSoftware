@@ -131,7 +131,7 @@ int PhDiMuonUtility::getCentralityBin20(float centrality)
     {
       return vecMesonFlow::mCentrality20[i_cent];
     }
-    if(TMath::Abs(centrality-vecMesonFlow::mCentStop20[i_cent]) < 1e-10) return vecMesonFlow::mCentrality20[i_cent]; // centrality == mCentStop20
+    if(TMath::Abs(centrality-vecMesonFlow::mCentStop20[i_cent]) < FLT_EPSILON) return vecMesonFlow::mCentrality20[i_cent]; // centrality == mCentStop20
   }
 
   return -1;
@@ -146,7 +146,7 @@ int PhDiMuonUtility::getCentralityBin10(float centrality)
     {
       return vecMesonFlow::mCentrality10[i_cent];
     }
-    if(TMath::Abs(centrality-vecMesonFlow::mCentStop10[i_cent]) < 1e-10) return vecMesonFlow::mCentrality10[i_cent]; // centrality == mCentStop10
+    if(TMath::Abs(centrality-vecMesonFlow::mCentStop10[i_cent]) < FLT_EPSILON) return vecMesonFlow::mCentrality10[i_cent]; // centrality == mCentStop10
   }
 
   return -1;
@@ -161,7 +161,7 @@ int PhDiMuonUtility::getCentralityBin4(float centrality)
     {
       return vecMesonFlow::mCentrality4[i_cent];
     }
-    if(TMath::Abs(centrality-vecMesonFlow::mCentStop4[i_cent]) < 1e-10) return vecMesonFlow::mCentrality4[i_cent]; // centrality == mCentStop4
+    if(TMath::Abs(centrality-vecMesonFlow::mCentStop4[i_cent]) < FLT_EPSILON) return vecMesonFlow::mCentrality4[i_cent]; // centrality == mCentStop4
   }
 
   return -1;
@@ -176,9 +176,9 @@ int PhDiMuonUtility::getVertexBin(float vtx_z)
     {
       return vecMesonFlow::mVertex[i_vtx];
     }
-    if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStop[i_vtx]) < 1e-10) return vecMesonFlow::mVtxStop[i_vtx]; // vtx_z == mVtxStop
+    if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStop[i_vtx]) < FLT_EPSILON) return vecMesonFlow::mVtxStop[i_vtx]; // vtx_z == mVtxStop
   }
-  if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStart[0]) < 1e-10) return vecMesonFlow::mVertex[0]; // vtx_z == mVtxStart lower edge
+  if(TMath::Abs(vtx_z-vecMesonFlow::mVtxStart[0]) < FLT_EPSILON) return vecMesonFlow::mVertex[0]; // vtx_z == mVtxStart lower edge
 
   return -1;
 }
