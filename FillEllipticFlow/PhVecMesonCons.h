@@ -37,6 +37,7 @@ namespace vecMesonFlow // binning used in flow analysis
   const int mList_Delta = 40;
   const std::string mPID[2] = {"JPsi","Phi"};
   const std::string mEventType[3] = {"US","LS","ME"};
+  const std::string mCentType[4] = {"0010","1040","4080","0080"};
 
   const int mNumOfPt = 4; // pt bining
   const float mPtStart[mNumOfPt] = {0.0,2.0,4.0,6.0};
@@ -50,9 +51,37 @@ namespace vecMesonFlow // binning used in flow analysis
 
   const int mNumOfPsi = 3; // phi bining
   const float mPsiStart[mNumOfPsi] = {-3.0,-1.0,1.0}; // *TMath::Pi()/2.0
-  const float mPsiStop[mNumOfPsi] = {-1.0, 1.0,3.0};
+  const float mPsiStop[mNumOfPsi] = {-1.0,1.0,3.0};
   const int mPsiBin[mNumOfPsi] = {0, 1, 2};
+  //====================================================================
 
   //====================================================================
+  //==========constant used in cuts==========
+  const int mNumOfRapidity = 2; // rapidity bining
+  const float mRapidityStart[mNumOfRapidity] = {-2.2,1.2}; // -y for South | +y for North
+  const float mRapidityStop[mNumOfRapidity]  = {-1.2,2.2};
+  const int mRapidityBin[2] = {0, 1}; // 0 for South | 1 for North
+
+  const int mNumOfCharge = 2; // charge bining
+  const short mCharge[mNumOfCharge] = {0,2};
+  
+  // event cuts
+  const float mVtx_Bbc = 10.0;
+
+  // Di-Muon
+  const float mVtxChi2[mNumOfRapidity] = {5.5,7.0}; // 0 for South | 1 for North
+  const float mVtxChi2_Fvtx[mNumOfRapidity] = {25.0,19.0};
+
+  // Si-Muon
+  const float mDG0[mNumOfRapidity] = {15.0,11.0}; // 0 for South | 1 for North
+  const float mDDG0[mNumOfRapidity] = {7.0,8.0};
+  const float mPzSiMuon[mNumOfRapidity] = {3.0,3.1};
+  const float mMutrChi2[mNumOfRapidity] = {9.0,9.0};
+  const short mMutrHits[mNumOfRapidity] = {12,12};
+  const float mMuIdChi2[mNumOfRapidity] = {8.0,8.0};
+  const short mMuIdHits[mNumOfRapidity] = {7,7};
+  const short mLastGap[mNumOfRapidity] = {3,3};
+  const float mDcaR[mNumOfRapidity] = {0.08,0.08};
+  const float mDcaZ[mNumOfRapidity] = {0.08,0.08};
 }
 #endif

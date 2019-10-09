@@ -17,7 +17,7 @@ class TH2F;
 class PhDiMuonHistoManager;
 // class PhDiMuonProManager;
 class PhDiMuonUtility;
-// class PhDiMuonCut;
+class PhDiMuonCut;
 class PhDiMuonEvent;
 class PhDiMuonTrack;
 
@@ -62,7 +62,7 @@ class PhVecMesonAna: public TObject
     PhDiMuonHistoManager *mPhDiMuonHistoManager;
     // PhDiMuonProManager *mPhDiMuonProManager;
     PhDiMuonUtility *mPhDiMuonUtility;
-    // PhDiMuonCut *mPhDiMuonCut;
+    PhDiMuonCut *mPhDiMuonCut;
 
     // di-muon TChain
     TChain *mChain_DiMuon;

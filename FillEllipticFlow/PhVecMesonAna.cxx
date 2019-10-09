@@ -22,7 +22,7 @@
 #include "PhDiMuonHistoManager.h"
 // #include "PhDiMuonProManager.h"
 #include "PhDiMuonUtility.h"
-// #include "PhDiMuonCut.h"
+#include "PhDiMuonCut.h"
 #include "PhDiMuonEvent.h"
 #include "PhVecMesonCons.h"
 
@@ -44,18 +44,18 @@ PhVecMesonAna::PhVecMesonAna(int pid, int list, long start_event, long stop_even
   mChain_DiMuon = NULL;
   mDiMuonEvent = NULL;
 
-  // mPhDiMuonHistoManager = NULL;
+  mPhDiMuonHistoManager = NULL;
   // mPhDiMuonProManager   = NULL;
   mPhDiMuonUtility      = NULL;
-  // mPhDiMuonCut = NULL;
+  mPhDiMuonCut = NULL;
 }
 
 PhVecMesonAna::~PhVecMesonAna()
 {
   delete mPhDiMuonUtility; // delete utilities
-  // delete mPhDiMuonHistoManager; // delete histograms manager
+  delete mPhDiMuonHistoManager; // delete histograms manager
   // delete mPhDiMuonProManager; // delete  profiles manager
-  // delete mPhDiMuonCut; // delete cut manager
+  delete mPhDiMuonCut; // delete cut manager
 }
 
 int PhVecMesonAna::Init() 
@@ -64,7 +64,10 @@ int PhVecMesonAna::Init()
   mPhDiMuonUtility->initRunIndex();
   mPhDiMuonHistoManager = new PhDiMuonHistoManager(); // initialize histograms
   mPhDiMuonHistoManager->initHist_InvMass(mPid,mMode);
+  mPhDiMuonHistoManager->initHist_Yields(mPid,mMode);
+  mPhDiMuonHistoManager->initHist_Spec(mPid,mMode);
   // mPhDiMuonProManager   = new PhDiMuonProManager(); // initialize histograms
+  mPhDiMuonCut = new PhDiMuonCut(); // initialize cut manager
 
   // initialize input/output
   string inputdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/xusun/condor/Run14AuAu200MuonsMBPro109/DiMuonTree/";
@@ -154,28 +157,29 @@ int PhVecMesonAna::Make()
     if (!mChain_DiMuon->GetEntry( i_event )) // take the event -> information is stored in event
       break;  // end of data chunk
 
-    /*
     // get Vertex
     TVector3 vtx_BBC = mDiMuonEvent->getVtxBbc();
-    TVector3 vtx_FVTX = mDiMuonEvent->getVtxFvtx();
+    // TVector3 vtx_FVTX = mDiMuonEvent->getVtxFvtx();
+
+    if(!mPhDiMuonCut->passVtxCut(vtx_BBC)) continue; // apply event cuts
 
     // get Global Info
     float centrality = mDiMuonEvent->getCentrality();
-    int runId = mDiMuonEvent->getRunId();
-    int runIndex = mDiMuonEvent->getRunIndex();
-    int eventId = mDiMuonEvent->getEventId();
+    // int runId = mDiMuonEvent->getRunId();
+    // int runIndex = mDiMuonEvent->getRunIndex();
+    // int eventId = mDiMuonEvent->getEventId();
 
     const int cent20 = mPhDiMuonUtility->getCentralityBin20(centrality);
     // const int cent10 = mPhDiMuonUtility->getCentralityBin10(centrality);
-    // const int cent4  = mPhDiMuonUtility->getCentralityBin4(centrality);
+    const int cent4  = mPhDiMuonUtility->getCentralityBin4(centrality);
     // const int vtx4   = mPhDiMuonUtility->getVertexBin(vtx_bbcz);
     // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", vtx4 = " << vtx4 << endl;
 
     // get Event Plane
     // float Psi_BbcSouth_1st = mDiMuonEvent->getPsi_BbcSouth_1st();
     // float Psi_BbcNorth_1st = mDiMuonEvent->getPsi_BbcNorth_1st();
-    float Psi_BbcSouth_2nd = mDiMuonEvent->getPsi_BbcSouth_2nd();
-    float Psi_BbcNorth_2nd = mDiMuonEvent->getPsi_BbcNorth_2nd();
+    // float Psi_BbcSouth_2nd = mDiMuonEvent->getPsi_BbcSouth_2nd();
+    // float Psi_BbcNorth_2nd = mDiMuonEvent->getPsi_BbcNorth_2nd();
     // float Psi_BbcSouth_3rd = mDiMuonEvent->getPsi_BbcSouth_3rd();
     // float Psi_BbcNorth_3rd = mDiMuonEvent->getPsi_BbcNorth_3rd();
 
@@ -196,16 +200,16 @@ int PhVecMesonAna::Make()
       mDiMuonTrack = mDiMuonEvent->getTrack(i_dimuon);
 
       // get di-muon info
-      float invmass           = mDiMuonTrack->getInvMass(); // set di-muon info to mTree_DiMuon
-      float px                = mDiMuonTrack->getPx();
-      float py                = mDiMuonTrack->getPy();
-      float pz                = mDiMuonTrack->getPz();
-      float rapidity          = mDiMuonTrack->getRapidity();
+      // float invmass           = mDiMuonTrack->getInvMass();
+      // float px                = mDiMuonTrack->getPx();
+      // float py                = mDiMuonTrack->getPy();
+      // float pz                = mDiMuonTrack->getPz();
+      // float rapidity          = mDiMuonTrack->getRapidity();
       short charge            = mDiMuonTrack->getCharge();
-      float dca_r             = mDiMuonTrack->getDcaR();
-      float dca_z             = mDiMuonTrack->getDcaZ();
+      // float dca_r             = mDiMuonTrack->getDcaR();
+      // float dca_z             = mDiMuonTrack->getDcaZ();
       float vtxchi2           = mDiMuonTrack->getVtxChi2();
-      float invmass_fvtx      = mDiMuonTrack->getInvMass_fvtx(); // fvtx
+      // float invmass_fvtx      = mDiMuonTrack->getInvMass_fvtx(); // fvtx
       float invmass_fvtxmutr  = mDiMuonTrack->getInvMass_fvtxmutr(); // fvtxmutr
       float px_fvtxmutr       = mDiMuonTrack->getPx_fvtxmutr();
       float py_fvtxmutr       = mDiMuonTrack->getPy_fvtxmutr();
@@ -213,68 +217,106 @@ int PhVecMesonAna::Make()
       float rapidity_fvtxmutr = mDiMuonTrack->getRapidity_fvtxmutr();
       float vtxchi2_fvtxmutr  = mDiMuonTrack->getVtxChi2_fvtxmutr();
 
-      // single muon spectra
+      TVector3 mom_dimuon;
+      mom_dimuon.SetXYZ(px_fvtxmutr,py_fvtxmutr,pz_fvtxmutr);
+
+      float pt_dimuon = mom_dimuon.Pt();
+      float phi_dimuon = mom_dimuon.Phi();
+      float resolution = 1.0; // related with cent20
+      float reweight = 1.0; // related with cent20
+
+      // fill yields and spectra without cuts
+      mPhDiMuonHistoManager->fillHist_YieldsRaw(mPid,mMode,cent20,invmass_fvtxmutr,reweight);
+      mPhDiMuonHistoManager->fillHist_SpecRaw(mPid,mMode,cent4,pt_dimuon,invmass_fvtxmutr,reweight);
+
+      // apply di-muon cuts
+      if(!mPhDiMuonCut->passDiMuonVtxCuts(rapidity_fvtxmutr,vtxchi2,vtxchi2_fvtxmutr)) continue;
+      if(!mPhDiMuonCut->passDiMuonChargeCuts(charge,mMode)) continue;
+
+      // get single muon info 
       // Tr0
-      float px_tr0            = mDiMuonTrack->setPx_tr0(px_tr0); // set Tr0 info to mTree_DiMuon 
-      float py_tr0            = mDiMuonTrack->setPy_tr0(py_tr0); 
-      float pz_tr0            = mDiMuonTrack->setPz_tr0(pz_tr0); 
-      float rapidity_tr0      = mDiMuonTrack->setRapidity_tr0(rapidity_tr0); 
-      float DG0_tr0           = mDiMuonTrack->setDG0_tr0(DG0_tr0); 
-      float DDG0_tr0          = mDiMuonTrack->setDDG0_tr0(DDG0_tr0); 
-      float dca_r_tr0         = mDiMuonTrack->setDcaR_tr0(dca_r_tr0); 
-      float dca_z_tr0         = mDiMuonTrack->setDcaZ_tr0(dca_z_tr0); 
-      short trhits_tr0        = mDiMuonTrack->setTrhits_tr0(trhits_tr0); 
-      float trchi2_tr0        = mDiMuonTrack->setTrchi2_tr0(trchi2_tr0); 
-      short ntrhits_tr0       = mDiMuonTrack->setNTrhits_tr0(ntrhits_tr0); 
-      short idhits_tr0        = mDiMuonTrack->setIdhits_tr0(idhits_tr0); 
-      float idchi2_tr0        = mDiMuonTrack->setIdchi2_tr0(idchi2_tr0); 
-      short nidhits_tr0       = mDiMuonTrack->setNIdhits_tr0(nidhits_tr0); 
-      float idx_tr0           = mDiMuonTrack->setIdx_tr0(idx_tr0); 
-      float idy_tr0           = mDiMuonTrack->setIdy_tr0(idy_tr0); 
-      short lastgap_tr0       = mDiMuonTrack->setLastgap_tr0(lastgap_tr0); 
-      float px_fvtx_tr0       = mDiMuonTrack->setPxfvtx_tr0(px_fvtx_tr0); // fvtx
-      float py_fvtx_tr0       = mDiMuonTrack->setPyfvtx_tr0(py_fvtx_tr0);
-      float pz_fvtx_tr0       = mDiMuonTrack->setPzfvtx_tr0(pz_fvtx_tr0);
-      float dphi_fvtx_tr0     = mDiMuonTrack->setDphifvtx_tr0(dphi_fvtx_tr0);
-      float dtheta_fvtx_tr0   = mDiMuonTrack->setDthetafvtx_tr0(dtheta_fvtx_tr0);
-      float dr_fvtx_tr0       = mDiMuonTrack->setDrfvtx_tr0(dr_fvtx_tr0);
-      float chi2_fvtx_tr0     = mDiMuonTrack->setChi2fvtx_tr0(chi2_fvtx_tr0);
-      float px_fvtxmutr_tr0   = mDiMuonTrack->setPxfvtxmutr_tr0(px_fvtxmutr_tr0); // fvtxmutr
-      float py_fvtxmutr_tr0   = mDiMuonTrack->setPyfvtxmutr_tr0(py_fvtxmutr_tr0);
-      float pz_fvtxmutr_tr0   = mDiMuonTrack->setPzfvtxmutr_tr0(pz_fvtxmutr_tr0);
-      float chi2_fvtxmutr_tr0 = mDiMuonTrack->setChi2fvtxmutr_tr0(chi2_fvtxmutr_tr0);
+      // float px_tr0            = mDiMuonTrack->getPx_tr0(); // set Tr0 info to mTree_DiMuon
+      // float py_tr0            = mDiMuonTrack->getPy_tr0();
+      // float pz_tr0            = mDiMuonTrack->getPz_tr0();
+      // float rapidity_tr0      = mDiMuonTrack->getRapidity_tr0();
+      float DG0_tr0           = mDiMuonTrack->getDG0_tr0();
+      float DDG0_tr0          = mDiMuonTrack->getDDG0_tr0();
+      float dca_r_tr0         = mDiMuonTrack->getDcaR_tr0();
+      float dca_z_tr0         = mDiMuonTrack->getDcaZ_tr0();
+      // short trhits_tr0        = mDiMuonTrack->getTrhits_tr0();
+      float trchi2_tr0        = mDiMuonTrack->getTrchi2_tr0();
+      short ntrhits_tr0       = mDiMuonTrack->getNTrhits_tr0();
+      // short idhits_tr0        = mDiMuonTrack->getIdhits_tr0();
+      float idchi2_tr0        = mDiMuonTrack->getIdchi2_tr0();
+      short nidhits_tr0       = mDiMuonTrack->getNIdhits_tr0();
+      // float idx_tr0           = mDiMuonTrack->getIdx_tr0();
+      // float idy_tr0           = mDiMuonTrack->getIdy_tr0();
+      short lastgap_tr0       = mDiMuonTrack->getLastgap_tr0();
+      // float px_fvtx_tr0       = mDiMuonTrack->getPxfvtx_tr0(); // fvtx
+      // float py_fvtx_tr0       = mDiMuonTrack->getPyfvtx_tr0();
+      // float pz_fvtx_tr0       = mDiMuonTrack->getPzfvtx_tr0();
+      // float dphi_fvtx_tr0     = mDiMuonTrack->getDphifvtx_tr0();
+      // float dtheta_fvtx_tr0   = mDiMuonTrack->getDthetafvtx_tr0();
+      // float dr_fvtx_tr0       = mDiMuonTrack->getDrfvtx_tr0();
+      // float chi2_fvtx_tr0     = mDiMuonTrack->getChi2fvtx_tr0();
+      // float px_fvtxmutr_tr0   = mDiMuonTrack->getPxfvtxmutr_tr0(); // fvtxmutr
+      // float py_fvtxmutr_tr0   = mDiMuonTrack->getPyfvtxmutr_tr0();
+      float pz_fvtxmutr_tr0   = mDiMuonTrack->getPzfvtxmutr_tr0();
+      // float chi2_fvtxmutr_tr0 = mDiMuonTrack->getChi2fvtxmutr_tr0();
+
+      // apply single muon cuts to tr0
+      if(!mPhDiMuonCut->passSiMuonDGCuts(rapidity_fvtxmutr,DG0_tr0,DDG0_tr0,pz_fvtxmutr_tr0)) continue;
+      if(!mPhDiMuonCut->passSiMuonMutrCuts(rapidity_fvtxmutr,trchi2_tr0,ntrhits_tr0,idchi2_tr0,nidhits_tr0,lastgap_tr0)) continue;
+      if(!mPhDiMuonCut->passSiMuonDcaCuts(rapidity_fvtxmutr,dca_r_tr0,dca_z_tr0)) continue;
 
       // Tr1
-      float px_tr1            = mDiMuonTrack->setPx_tr1(px_tr1); // set Tr1 info to mTree_DiMuon 
-      float py_tr1            = mDiMuonTrack->setPy_tr1(py_tr1); 
-      float pz_tr1            = mDiMuonTrack->setPz_tr1(pz_tr1); 
-      float rapidity_tr1      = mDiMuonTrack->setRapidity_tr1(rapidity_tr1); 
-      float DG0_tr1           = mDiMuonTrack->setDG0_tr1(DG0_tr1); 
-      float DDG0_tr1          = mDiMuonTrack->setDDG0_tr1(DDG0_tr1); 
-      float dca_r_tr1         = mDiMuonTrack->setDcaR_tr1(dca_r_tr1); 
-      float dca_z_tr1         = mDiMuonTrack->setDcaZ_tr1(dca_z_tr1); 
-      short trhits_tr1        = mDiMuonTrack->setTrhits_tr1(trhits_tr1); 
-      float trchi2_tr1        = mDiMuonTrack->setTrchi2_tr1(trchi2_tr1); 
-      short ntrhits_tr1       = mDiMuonTrack->setNTrhits_tr1(ntrhits_tr1); 
-      short idhits_tr1        = mDiMuonTrack->setIdhits_tr1(idhits_tr1); 
-      float idchi2_tr1        = mDiMuonTrack->setIdchi2_tr1(idchi2_tr1); 
-      short nidhits_tr1       = mDiMuonTrack->setNIdhits_tr1(nidhits_tr1); 
-      float idx_tr1           = mDiMuonTrack->setIdx_tr1(idx_tr1); 
-      float idy_tr1           = mDiMuonTrack->setIdy_tr1(idy_tr1); 
-      short lastgap_tr1       = mDiMuonTrack->setLastgap_tr1(lastgap_tr1); 
-      float px_fvtx_tr1       = mDiMuonTrack->setPxfvtx_tr1(px_fvtx_tr1); // fvtx
-      float py_fvtx_tr1       = mDiMuonTrack->setPyfvtx_tr1(py_fvtx_tr1);
-      float pz_fvtx_tr1       = mDiMuonTrack->setPzfvtx_tr1(pz_fvtx_tr1);
-      float dphi_fvtx_tr1     = mDiMuonTrack->setDphifvtx_tr1(dphi_fvtx_tr1);
-      float dtheta_fvtx_tr1   = mDiMuonTrack->setDthetafvtx_tr1(dtheta_fvtx_tr1);
-      float dr_fvtx_tr1       = mDiMuonTrack->setDrfvtx_tr1(dr_fvtx_tr1);
-      float chi2_fvtx_tr1     = mDiMuonTrack->setChi2fvtx_tr1(chi2_fvtx_tr1);
-      float px_fvtxmutr_tr1   = mDiMuonTrack->setPxfvtxmutr_tr1(px_fvtxmutr_tr1); // fvtxmutr
-      float py_fvtxmutr_tr1   = mDiMuonTrack->setPyfvtxmutr_tr1(py_fvtxmutr_tr1);
-      float pz_fvtxmutr_tr1   = mDiMuonTrack->setPzfvtxmutr_tr1(pz_fvtxmutr_tr1);
-      float chi2_fvtxmutr_tr1 = mDiMuonTrack->setChi2fvtxmutr_tr1(chi2_fvtxmutr_tr1);
+      // float px_tr1            = mDiMuonTrack->getPx_tr1(); // set Tr1 info to mTree_DiMuon 
+      // float py_tr1            = mDiMuonTrack->getPy_tr1(); 
+      // float pz_tr1            = mDiMuonTrack->getPz_tr1(); 
+      // float rapidity_tr1      = mDiMuonTrack->getRapidity_tr1(); 
+      float DG0_tr1           = mDiMuonTrack->getDG0_tr1(); 
+      float DDG0_tr1          = mDiMuonTrack->getDDG0_tr1(); 
+      float dca_r_tr1         = mDiMuonTrack->getDcaR_tr1(); 
+      float dca_z_tr1         = mDiMuonTrack->getDcaZ_tr1(); 
+      // short trhits_tr1        = mDiMuonTrack->getTrhits_tr1(); 
+      float trchi2_tr1        = mDiMuonTrack->getTrchi2_tr1(); 
+      short ntrhits_tr1       = mDiMuonTrack->getNTrhits_tr1(); 
+      // short idhits_tr1        = mDiMuonTrack->getIdhits_tr1(); 
+      float idchi2_tr1        = mDiMuonTrack->getIdchi2_tr1(); 
+      short nidhits_tr1       = mDiMuonTrack->getNIdhits_tr1(); 
+      // float idx_tr1           = mDiMuonTrack->getIdx_tr1(); 
+      // float idy_tr1           = mDiMuonTrack->getIdy_tr1(); 
+      short lastgap_tr1       = mDiMuonTrack->getLastgap_tr1(); 
+      // float px_fvtx_tr1       = mDiMuonTrack->getPxfvtx_tr1(); // fvtx
+      // float py_fvtx_tr1       = mDiMuonTrack->getPyfvtx_tr1();
+      // float pz_fvtx_tr1       = mDiMuonTrack->getPzfvtx_tr1();
+      // float dphi_fvtx_tr1     = mDiMuonTrack->getDphifvtx_tr1();
+      // float dtheta_fvtx_tr1   = mDiMuonTrack->getDthetafvtx_tr1();
+      // float dr_fvtx_tr1       = mDiMuonTrack->getDrfvtx_tr1();
+      // float chi2_fvtx_tr1     = mDiMuonTrack->getChi2fvtx_tr1();
+      // float px_fvtxmutr_tr1   = mDiMuonTrack->getPxfvtxmutr_tr1(); // fvtxmutr
+      // float py_fvtxmutr_tr1   = mDiMuonTrack->getPyfvtxmutr_tr1();
+      float pz_fvtxmutr_tr1   = mDiMuonTrack->getPzfvtxmutr_tr1();
+      // float chi2_fvtxmutr_tr1 = mDiMuonTrack->getChi2fvtxmutr_tr1();
+
+      // apply single muon cuts to tr1
+      if(!mPhDiMuonCut->passSiMuonDGCuts(rapidity_fvtxmutr,DG0_tr1,DDG0_tr1,pz_fvtxmutr_tr1)) continue;
+      if(!mPhDiMuonCut->passSiMuonMutrCuts(rapidity_fvtxmutr,trchi2_tr1,ntrhits_tr1,idchi2_tr1,nidhits_tr1,lastgap_tr1)) continue;
+      if(!mPhDiMuonCut->passSiMuonDcaCuts(rapidity_fvtxmutr,dca_r_tr1,dca_z_tr1)) continue;
+
+      if(mPhDiMuonCut->isSouthDiMuon(rapidity_fvtxmutr))
+      { // di-muon pair from south and event plane from north 
+	float phi_Psi = phi_dimuon -  Psi_FvtxNorth_2nd;
+	mPhDiMuonHistoManager->fillHist_InvMass(mPid,mMode,cent20,cent4,pt_dimuon,phi_Psi,invmass_fvtxmutr,resolution,reweight);
+      }
+      if(mPhDiMuonCut->isNorthDiMuon(rapidity_fvtxmutr))
+      { // di-muon pair from north and event plane from south
+	float phi_Psi = phi_dimuon -  Psi_FvtxSouth_2nd;
+	mPhDiMuonHistoManager->fillHist_InvMass(mPid,mMode,cent20,cent4,pt_dimuon,phi_Psi,invmass_fvtxmutr,resolution,reweight);
+      }
+      mPhDiMuonHistoManager->fillHist_Yields(mPid,mMode,cent20,invmass_fvtxmutr,reweight);
+      mPhDiMuonHistoManager->fillHist_Spec(mPid,mMode,cent4,pt_dimuon,invmass_fvtxmutr,reweight);
     }
-  */
   }
 
   return 1;
@@ -284,6 +326,8 @@ int PhVecMesonAna::Finish()
 {
   File_mOutPut->cd();
   mPhDiMuonHistoManager->writeHist_InvMass(mPid,mMode);
+  mPhDiMuonHistoManager->writeHist_Yields(mPid,mMode);
+  mPhDiMuonHistoManager->writeHist_Spec(mPid,mMode);
 
   File_mOutPut->Close();
 

@@ -13,32 +13,34 @@ runIndex.txt
 lib_LTLIBRARIES = libPhVecMesonAna.la
 
 noinst_HEADERS = \
-PhVecMesonAnaLinkDef.h \
+PhDiMuonCutLinkDef.h \
 PhDiMuonEventLinkDef.h \
+PhDiMuonHistoManagerLinkDef.h \
 PhDiMuonUtilityLinkDef.h \
-PhDiMuonHistoManagerLinkDef.h
+PhVecMesonAnaLinkDef.h
 
 ##############################################
 # please add new classes in alphabetical order
-
 pkginclude_HEADERS = \
-	PhVecMesonAna.h \
+	PhDiMuonCut.h \
 	PhDiMuonEvent.h \
+	PhDiMuonHistoManager.h \
 	PhDiMuonUtility.h \
-	PhDiMuonHistoManager.h
+	PhVecMesonAna.h
 
 ##############################################
 # please add new classes in alphabetical order
-
 libPhVecMesonAna_la_SOURCES = \
-  PhVecMesonAna_Dict.C \
-  PhVecMesonAna.cxx \
+  PhDiMuonCut_Dict.C \
+  PhDiMuonCut.cxx \
   PhDiMuonEvent_Dict.C \
   PhDiMuonEvent.cxx \
+  PhDiMuonHistoManager_Dict.C \
+  PhDiMuonHistoManager.cxx \
   PhDiMuonUtility_Dict.C \
   PhDiMuonUtility.cxx \
-  PhDiMuonHistoManager_Dict.C \
-  PhDiMuonHistoManager.cxx
+  PhVecMesonAna_Dict.C \
+  PhVecMesonAna.cxx
 
 ##############################################
 # libraries used in the package
@@ -67,14 +69,21 @@ testexternals.C:
 clean-local:
 	rm -f *Dict* $(BUILT_SOURCES)
 
-PhVecMesonAna_Dict.C: \
-	PhVecMesonAna.h \
-	PhVecMesonAnaLinkDef.h
+PhDiMuonCut_Dict.C: \
+	PhVecMesonCons.h \
+	PhDiMuonCut.h \
+	PhDiMuonCutLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 PhDiMuonEvent_Dict.C: \
 	PhDiMuonEvent.h \
 	PhDiMuonEventLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
+
+PhDiMuonHistoManager_Dict.C: \
+	PhVecMesonCons.h \
+	PhDiMuonHistoManager.h \
+	PhDiMuonHistoManagerLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 PhDiMuonUtility_Dict.C: \
@@ -84,9 +93,8 @@ PhDiMuonUtility_Dict.C: \
 	PhDiMuonUtilityLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
-PhDiMuonHistoManager_Dict.C: \
-	PhVecMesonCons.h \
-	PhDiMuonHistoManager.h \
-	PhDiMuonHistoManagerLinkDef.h
+PhVecMesonAna_Dict.C: \
+	PhVecMesonAna.h \
+	PhVecMesonAnaLinkDef.h
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
