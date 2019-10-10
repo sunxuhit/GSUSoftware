@@ -28,7 +28,7 @@ echo "Queue"        >>${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 echo "     "        >>${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 
 echo "submitting: ${script}_AnaMode${mode}_$jobId"
-condor_submit ${out}/tmp/${script}_AnaMode${mode}_$jobId.job
+# condor_submit ${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 
 @ jobId++
 

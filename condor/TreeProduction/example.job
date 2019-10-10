@@ -1,0 +1,5 @@
+Universe       = vanilla
+Initialdir     = /direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/macro/TreeProduction
++Experiment    = "phenix"
+Notification   = Always
+Notify_user    = xsun16@gsu.edu

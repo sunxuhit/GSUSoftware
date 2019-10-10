@@ -5,7 +5,7 @@
 // void Fun4All_PhVecMesonMaker(const int nEvents = 10024, const int mode = 1, const int jobId = 10)
 void Fun4All_PhVecMesonMaker(const int nEvents = -1, const int mode = 1, const int jobId = 24)
 {
-  gSystem->Load("../../install/lib/libPhVecMesonMaker.so");
+  gSystem->Load("$HOME/WorkSpace/PHENIX/install/lib/libPhVecMesonMaker.so");
 
   Fun4AllServer *se = Fun4AllServer::instance();
   se->Verbosity(0);

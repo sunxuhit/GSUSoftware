@@ -14,6 +14,7 @@ class PhDiMuonCut : public TObject
     //----------------------------------------------------
     //===================event cut========================
     bool passVtxCut(TVector3 vtx_BBC); // BBC vtx cut
+    bool passEventPlaneCut(float Psi_FvtxSouth, float Psi_FvtxNorth); // event plane cut
     //----------------------------------------------------
 
     //----------------------------------------------------

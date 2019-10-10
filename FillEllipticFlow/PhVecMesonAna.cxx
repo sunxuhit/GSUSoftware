@@ -139,7 +139,7 @@ int PhVecMesonAna::Init()
     int num_events = mChain_DiMuon->GetEntriesFast();
     cout << "Number of events in file(s) = " << num_events << endl;
     if(mStartEvent > num_events) mStartEvent = num_events;
-    if(mStopEvent > num_events) mStopEvent   = num_events;
+    if(mStopEvent > num_events || mStopEvent < 0) mStopEvent = num_events;
 
     cout << "New nStartEvent = " << mStartEvent << ", new nStopEvent = " << mStopEvent << endl;
   }
@@ -157,11 +157,20 @@ int PhVecMesonAna::Make()
     if (!mChain_DiMuon->GetEntry( i_event )) // take the event -> information is stored in event
       break;  // end of data chunk
 
+    if (i_event != 0  &&  i_event % 1000 == 0)
+      cout << "." << flush;
+    if (i_event != 0  &&  i_event % 10000 == 0)
+    {
+      if((mStopEvent-mStartEvent) > 0)
+      {
+	double event_percent = 100.0*((double)(i_event-mStartEvent))/((double)(mStopEvent-mStartEvent));
+	cout << " " << i_event-mStartEvent << " (" << event_percent << "%) " << "\n" << "==> Processing data (VecMesonAnalysis) " << flush;
+      }
+    }
+
     // get Vertex
     TVector3 vtx_BBC = mDiMuonEvent->getVtxBbc();
     // TVector3 vtx_FVTX = mDiMuonEvent->getVtxFvtx();
-
-    if(!mPhDiMuonCut->passVtxCut(vtx_BBC)) continue; // apply event cuts
 
     // get Global Info
     float centrality = mDiMuonEvent->getCentrality();
@@ -192,6 +201,10 @@ int PhVecMesonAna::Make()
 
     // int NumOfTracks = mDiMuonEvent->getNumTracks();
     int NumOfDiMuons = mDiMuonEvent->getNumOfDiMuons();
+
+    // apply event cuts
+    if(!mPhDiMuonCut->passVtxCut(vtx_BBC)) continue;
+    if(!mPhDiMuonCut->passEventPlaneCut(Psi_FvtxSouth_2nd,Psi_FvtxNorth_2nd)) continue;
 
     // Track Level => di-muon pairs
     for(int i_dimuon = 0; i_dimuon < NumOfDiMuons; ++i_dimuon) 
@@ -318,6 +331,10 @@ int PhVecMesonAna::Make()
       mPhDiMuonHistoManager->fillHist_Spec(mPid,mMode,cent4,pt_dimuon,invmass_fvtxmutr,reweight);
     }
   }
+
+  cout << "." << flush;
+  cout << " " << mStopEvent-mStartEvent << "(" << 100 << "%)";
+  cout << endl;
 
   return 1;
 }

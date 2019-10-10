@@ -31,6 +31,16 @@ bool PhDiMuonCut::passVtxCut(TVector3 vtx_BBC)
 
   return true;
 }
+
+bool PhDiMuonCut::passEventPlaneCut(float Psi_FvtxSouth, float Psi_FvtxNorth)
+{
+  if( !(Psi_FvtxSouth > -900.0 && Psi_FvtxNorth > -900.0) )
+  {
+    return false;
+  }
+
+  return true;
+}
 //------------------------------------------------------------
 //=============Di-Muon Cuts==============
 bool PhDiMuonCut::passDiMuonVtxCuts(float rapidity, float vtxchi2, float vtxchi2_fvtxmutr)

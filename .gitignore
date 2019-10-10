@@ -84,4 +84,4 @@ tmtags
 *.rbc
 
 # for submit
-condor/tmp/*.job
+condor/*/tmp/*.job

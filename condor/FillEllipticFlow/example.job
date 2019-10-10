@@ -1,5 +1,5 @@
 Universe       = vanilla
-Initialdir     = /direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/macro
+Initialdir     = /direct/phenix+u/xusun/WorkSpace/PHENIX/VecMesonAnalysis/macro/FillEllipticFlow
 +Experiment    = "phenix"
 Notification   = Always
 Notify_user    = xsun16@gsu.edu
