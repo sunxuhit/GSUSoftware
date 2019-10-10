@@ -11,7 +11,7 @@ echo "script = $script"
 
 set pid = 0 # 0 for J/Psi | 1 for phi
 set jobId = 0
-set mode = 1 # 0 for US | 1 for LS | 2 for ME
+set mode = 0 # 0 for US | 1 for LS | 2 for ME
 set start_event = 0
 # set stop_event = 10000000
 set stop_event = -1 # < 0 for all events

@@ -238,13 +238,13 @@ int PhVecMesonAna::Make()
       float resolution = 1.0; // related with cent20
       float reweight = 1.0; // related with cent20
 
-      // fill yields and spectra without cuts
-      mPhDiMuonHistoManager->fillHist_YieldsRaw(mPid,mMode,cent20,invmass_fvtxmutr,reweight);
-      mPhDiMuonHistoManager->fillHist_SpecRaw(mPid,mMode,cent4,pt_dimuon,invmass_fvtxmutr,reweight);
-
       // apply di-muon cuts
       if(!mPhDiMuonCut->passDiMuonVtxCuts(rapidity_fvtxmutr,vtxchi2,vtxchi2_fvtxmutr)) continue;
       if(!mPhDiMuonCut->passDiMuonChargeCuts(charge,mMode)) continue;
+
+      // fill yields and spectra without cuts
+      mPhDiMuonHistoManager->fillHist_YieldsRaw(mPid,mMode,cent20,invmass_fvtxmutr,reweight);
+      mPhDiMuonHistoManager->fillHist_SpecRaw(mPid,mMode,cent4,pt_dimuon,invmass_fvtxmutr,reweight);
 
       // get single muon info 
       // Tr0

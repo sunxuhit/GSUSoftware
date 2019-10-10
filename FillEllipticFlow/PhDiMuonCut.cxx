@@ -111,7 +111,7 @@ bool PhDiMuonCut::passSiMuonDGCuts(float rapidity, float DG0, float DDG0, float 
   { // DDG0 cuts
     return false;
   }
-  if(pz > vecMesonFlow::mPzSiMuon[rapidity_bin])
+  if(TMath::Abs(pz) < vecMesonFlow::mPzSiMuon[rapidity_bin])
   { // pz cuts
     return false;
   }
