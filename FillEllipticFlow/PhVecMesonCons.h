@@ -44,10 +44,22 @@ namespace vecMesonFlow // binning used in flow analysis
   const float mPtStop[mNumOfPt] = {2.0,4.0,6.0,10.0};
   const int mPtBin[mNumOfPt] = {0, 1, 2, 3};
 
-  const int mNumOfPhi = 7; // phi bining
-  const float mPhiStart[mNumOfPhi] = {0.0,1.0,2.0,3.0,4.0,5.0,6.0}; // * TMath::Pi()/14.0
-  const float mPhiStop[mNumOfPhi] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0};
-  const int mPhiBin[mNumOfPhi] = {0, 1, 2, 3, 4, 5, 6};
+  // const int mNumOfPt = 3; // pt bining
+  // const float mPtStart[mNumOfPt] = {0.0,2.0,5.0};
+  // const float mPtStop[mNumOfPt] = {2.0,5.0,10.0};
+  // const int mPtBin[mNumOfPt] = {0, 1, 2};
+
+  // const int mNumOfPhi = 7; // phi bining
+  // const float mPhiStart[mNumOfPhi] = {0.0,1.0,2.0,3.0,4.0,5.0,6.0}; // * 0.5*TMath::Pi()/mNumOfPhiBin
+  // const float mPhiStop[mNumOfPhi] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+  // const int mPhiBin[mNumOfPhi] = {0, 1, 2, 3, 4, 5, 6};
+  // const float mNumOfPhiBin = 7.0; // phi bining
+
+  const int mNumOfPhi = 5; // phi bining
+  const float mPhiStart[mNumOfPhi] = {0.0,1.0,2.0,3.0,4.0}; // * 0.5*TMath::Pi()/mNumOfPhiBin
+  const float mPhiStop[mNumOfPhi] = {1.0,2.0,3.0,4.0,5.0};
+  const int mPhiBin[mNumOfPhi] = {0, 1, 2, 3, 4};
+  const float mNumOfPhiBin = 5.0; // phi bining
 
   const int mNumOfPsi = 3; // phi bining
   const float mPsiStart[mNumOfPsi] = {-3.0,-1.0,1.0}; // *TMath::Pi()/2.0

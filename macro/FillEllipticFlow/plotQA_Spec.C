@@ -15,7 +15,7 @@ using namespace std;
 
 void plotQA_Spec(int cent4 =3)
 {
-  string input_US = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/xusun/condor/Run14AuAu200MuonsMBPro109/DiMuonYields//withEPCut/Yields_200GeV_JPsi_US.root";
+  string input_US = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/xusun/condor/Run14AuAu200MuonsMBPro109/DiMuonYields/Yields_200GeV_JPsi_US.root";
   TFile *File_US = TFile::Open(input_US.c_str());
   TH1F *h_mSpecUS[4];
   for(int i_pt = 0; i_pt < vecMesonFlow::mNumOfPt; i_pt++) // pt bin
@@ -24,7 +24,7 @@ void plotQA_Spec(int cent4 =3)
     h_mSpecUS[i_pt] = (TH1F*)File_US->Get(KEY_Spec.c_str())->Clone();
   }
 
-  string input_LS = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/xusun/condor/Run14AuAu200MuonsMBPro109/DiMuonYields/withEPCut/Yields_200GeV_JPsi_LS.root";
+  string input_LS = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/xusun/condor/Run14AuAu200MuonsMBPro109/DiMuonYields/Yields_200GeV_JPsi_LS.root";
   TFile *File_LS = TFile::Open(input_LS.c_str());
   TH1F *h_mSpecLS[4];
   for(int i_pt = 0; i_pt < vecMesonFlow::mNumOfPt; i_pt++) // pt bin
@@ -42,7 +42,7 @@ void plotQA_Spec(int cent4 =3)
 
   TCanvas *c_spec = new TCanvas("c_spec","c_spec",10,10,800,800);
   c_spec->Divide(2,2);
-  for(int i_pad = 0; i_pad < 4; ++i_pad)
+  for(int i_pad = 0; i_pad < vecMesonFlow::mNumOfPt; ++i_pad)
   {
     c_spec->cd(i_pad+1)->SetLeftMargin(0.15);
     c_spec->cd(i_pad+1)->SetBottomMargin(0.15);
@@ -57,7 +57,7 @@ void plotQA_Spec(int cent4 =3)
 
   TCanvas *c_yields = new TCanvas("c_yields","c_yields",10,10,800,800);
   c_yields->Divide(2,2);
-  for(int i_pad = 0; i_pad < 4; ++i_pad)
+  for(int i_pad = 0; i_pad < vecMesonFlow::mNumOfPt; ++i_pad)
   {
     c_yields->cd(i_pad+1)->SetLeftMargin(0.15);
     c_yields->cd(i_pad+1)->SetBottomMargin(0.15);

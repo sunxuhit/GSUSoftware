@@ -22,13 +22,13 @@ class RecoEPHistoManager : public TObject
 
     //===============BBC Event Plane==============
     void initHist_BbcEP();
-    void fillHist_BbcEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
+    void fillHist_BbcEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent20, int cent10);
     void writeHist_BbcEP();
     //===============BBC Event Plane==============
 
     //===============FVTX Event Plane==============
     void initHist_FvtxEP();
-    void fillHist_FvtxEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent);
+    void fillHist_FvtxEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent20, int cent10);
     void writeHist_FvtxEP();
     //===============FVTX Event Plane==============
 
@@ -79,13 +79,15 @@ class RecoEPHistoManager : public TObject
     TH1F *h_mEP_BbcSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mEP_BbcNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH2F *h_mEP_BbcCorrelation[3][vecMesonFlow::mNumOfCentrality20];
-    TH1F *h_mCentrality_Bbc[3];
+    TH1F *h_mCentrality20_Bbc[3];
+    TH1F *h_mCentrality10_Bbc[3];
 
     // FVTX EP QA
     TH1F *h_mEP_FvtxSouth[3][vecMesonFlow::mNumOfCentrality20];
     TH1F *h_mEP_FvtxNorth[3][vecMesonFlow::mNumOfCentrality20];
     TH2F *h_mEP_FvtxCorrelation[3][vecMesonFlow::mNumOfCentrality20];
-    TH1F *h_mCentrality_Fvtx[3];
+    TH1F *h_mCentrality20_Fvtx[3];
+    TH1F *h_mCentrality10_Fvtx[3];
 
     // DiMuon Spectra
     TH2F *h_mInvMass_DiMuon; // rapidity vs. inv mass

@@ -236,7 +236,7 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
   mRecoEPHistoManager->fillQA_Global_NarrowVtxBbc(mRunIndex,zdcz,vtx_bbcz,centrality);
 
   const int cent20 = mRecoEPUtility->getCentralityBin20(centrality);
-  // const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
+  const int cent10 = mRecoEPUtility->getCentralityBin10(centrality);
   // const int cent4  = mRecoEPUtility->getCentralityBin4(centrality);
   // const int vtx4   = mRecoEPUtility->getVertexBin(vtx_bbcz);
   // cout << "centrality = " << centrality << ", cent20 = " << cent20 << ", cent10 = " << cent10 << ", vtx4 = " << vtx4 << endl;
@@ -254,8 +254,8 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float Psi_BbcNorth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
       if(Psi_BbcSouth > -900.0 && Psi_BbcNorth > -900.0)
       {
-	mRecoEPHistoManager->fillHist_BbcEP(Psi_BbcSouth,Psi_BbcNorth,i_order,cent20);
-	mRecoEPProManager->fillPro_BbcResolution(Psi_BbcSouth,Psi_BbcNorth,i_order,mRunIndex,cent20);
+	mRecoEPHistoManager->fillHist_BbcEP(Psi_BbcSouth,Psi_BbcNorth,i_order,cent20,cent10);
+	mRecoEPProManager->fillPro_BbcResolution(Psi_BbcSouth,Psi_BbcNorth,i_order,mRunIndex,cent20,cent10);
       }
 
       // FVTX Event Plane => all sectors w/ eta > 1.0
@@ -265,8 +265,8 @@ int PhVecMesonMaker::process_event(PHCompositeNode *topNode)
       float Psi_FvtxNorth = (mReactionPlaneSngl) ? mReactionPlaneSngl->GetPsi() : -999.9;
       if(Psi_FvtxSouth > -900.0 && Psi_FvtxNorth > -900.0)
       {
-	mRecoEPHistoManager->fillHist_FvtxEP(Psi_FvtxSouth,Psi_FvtxNorth,i_order,cent20);
-	mRecoEPProManager->fillPro_FvtxResolution(Psi_FvtxSouth,Psi_FvtxNorth,i_order,mRunIndex,cent20);
+	mRecoEPHistoManager->fillHist_FvtxEP(Psi_FvtxSouth,Psi_FvtxNorth,i_order,cent20,cent10);
+	mRecoEPProManager->fillPro_FvtxResolution(Psi_FvtxSouth,Psi_FvtxNorth,i_order,mRunIndex,cent20,cent10);
       }
     }
 

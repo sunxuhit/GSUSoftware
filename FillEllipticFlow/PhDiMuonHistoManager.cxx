@@ -195,6 +195,24 @@ void PhDiMuonHistoManager::writeHist_Spec(int pid, int mode)
 }
 
 //------------------------------------------------------------
+//===============di-muon phi-Psi QA==============
+void PhDiMuonHistoManager::initHist_QA(int pid, int mode)
+{
+  string HistName = Form("h_mQA_Azimuthal_%s_%s",vecMesonFlow::mPID[pid].c_str(),vecMesonFlow::mEventType[mode].c_str());
+  h_mQA_Psi = new TH1F(HistName.c_str(),HistName.c_str(),360,-TMath::TwoPi(),TMath::TwoPi());
+}
+
+void PhDiMuonHistoManager::fillHist_QA(int pid, int mode, float phi)
+{
+  h_mQA_Psi->Fill(phi);
+}
+
+void PhDiMuonHistoManager::writeHist_QA(int pid, int mode)
+{
+  h_mQA_Psi->Write();
+}
+
+//------------------------------------------------------------
 //=============utility functions==============
 int PhDiMuonHistoManager::getPtBin(float pt)
 {
@@ -216,8 +234,8 @@ int PhDiMuonHistoManager::getPtBin(float pt)
 
 int PhDiMuonHistoManager::getPhiBin(float phi)
 {
-  // 0: [0.0,1.0], 1: (1.0,2.0], 2: (2.0,3.0], 3: (3.0,4.0], 4: (4.0,5.0], 5: (5.0,6.0], 6: (6.0,7.0]
-  // * 0.5*TMath::Pi()
+  // 0: [0.0,1.0], 1: (1.0,2.0], 2: (2.0,3.0], 3: (3.0,4.0], 4: (4.0,5.0]
+  // * 0.5*TMath::Pi()/mNumOfPhiBin
 
   float phi_shift = -999.9;
   for(int i_Psi = 0; i_Psi < vecMesonFlow::mNumOfPsi; ++i_Psi)
@@ -237,17 +255,18 @@ int PhDiMuonHistoManager::getPhiBin(float phi)
   }
   // cout << "phi = " << phi << ", phi_shift = " << phi_shift << endl;
 
+  const float delta_phi = TMath::PiOver2()/vecMesonFlow::mNumOfPhiBin;
   for(int i_phi = 0; i_phi < vecMesonFlow::mNumOfPhi; ++i_phi) // phi-Psi2 bin
   {
-    if(TMath::Abs(phi_shift) > vecMesonFlow::mPhiStart[i_phi]*TMath::PiOver2()/7.0 && TMath::Abs(phi_shift) < vecMesonFlow::mPhiStop[i_phi]*TMath::PiOver2()/7.0)
+    if(TMath::Abs(phi_shift) > vecMesonFlow::mPhiStart[i_phi]*delta_phi && TMath::Abs(phi_shift) < vecMesonFlow::mPhiStop[i_phi]*delta_phi)
     {
       return vecMesonFlow::mPhiBin[i_phi];
     }
-    if( (i_phi == 0) && (TMath::Abs(TMath::Abs(phi_shift)-vecMesonFlow::mPhiStart[i_phi]*TMath::PiOver2()/7.0) < FLT_EPSILON) )
+    if( (i_phi == 0) && (TMath::Abs(TMath::Abs(phi_shift)-vecMesonFlow::mPhiStart[i_phi]*delta_phi) < FLT_EPSILON) )
     { // special case for the lower edge in first bin
       return vecMesonFlow::mPhiBin[i_phi]; // phibin == mPhiStart
     }
-    if(TMath::Abs(TMath::Abs(phi_shift)-vecMesonFlow::mPhiStop[i_phi]*TMath::PiOver2()/7.0) < FLT_EPSILON) 
+    if(TMath::Abs(TMath::Abs(phi_shift)-vecMesonFlow::mPhiStop[i_phi]*delta_phi) < FLT_EPSILON) 
     {
       return vecMesonFlow::mPhiBin[i_phi]; // phibin == mPhiStop
     }

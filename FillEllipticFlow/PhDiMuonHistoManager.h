@@ -50,6 +50,11 @@ class PhDiMuonHistoManager : public TObject
     std::string genKey_SpecRaw(int pid, int mode, int pt_bin, int cent4);
     //=============utility functions==============
 
+    //===============di-muon InvMass==============
+    void initHist_QA(int pid, int mode);
+    void fillHist_QA(int pid, int mode, float phi);
+    void writeHist_QA(int pid, int mode);
+    //===============di-muon InvMass==============
 
   private:
     // elliptic flow analysis
@@ -70,6 +75,8 @@ class PhDiMuonHistoManager : public TObject
     TH1FMap h_mSpec;
     TH1FMap h_mSpec_Raw; // without cuts
 
+    // QA for phi-Psi distribution
+    TH1F *h_mQA_Psi;
 
     ClassDef(PhDiMuonHistoManager,1)
 };

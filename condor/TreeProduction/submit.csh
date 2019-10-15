@@ -14,6 +14,7 @@ set mode = 0 # 0 for event plane resolution | 1 for di-muon TTree
 set jobId = 0
 
 set numOfJobs = 1023 # total number of runs => 1023
+# set numOfJobs = 23 # total number of runs => 1023
 
 while ( $jobId < $numOfJobs )
 
@@ -28,7 +29,7 @@ echo "Queue"        >>${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 echo "     "        >>${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 
 echo "submitting: ${script}_AnaMode${mode}_$jobId"
-# condor_submit ${out}/tmp/${script}_AnaMode${mode}_$jobId.job
+condor_submit ${out}/tmp/${script}_AnaMode${mode}_$jobId.job
 
 @ jobId++
 

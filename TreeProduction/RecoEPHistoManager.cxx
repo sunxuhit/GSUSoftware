@@ -99,17 +99,20 @@ void RecoEPHistoManager::initHist_BbcEP()
 
   for(int i_order = 0; i_order < 3; ++i_order)
   {
-    std::string HistName = Form("h_mCentrality_Bbc_%s",Order[i_order].c_str());
-    h_mCentrality_Bbc[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),24,-1.5,22.5);
+    std::string HistName = Form("h_mCentrality20_Bbc_%s",Order[i_order].c_str());
+    h_mCentrality20_Bbc[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),24,-1.5,22.5);
+    HistName = Form("h_mCentrality10_Bbc_%s",Order[i_order].c_str());
+    h_mCentrality10_Bbc[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),14,-1.5,12.5);
   }
 }
 
-void RecoEPHistoManager::fillHist_BbcEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent)
+void RecoEPHistoManager::fillHist_BbcEP(float Psi_BbcSouth, float Psi_BbcNorth, int order, int cent20, int cent10)
 {
-  h_mEP_BbcSouth[order][cent]->Fill(Psi_BbcSouth);
-  h_mEP_BbcNorth[order][cent]->Fill(Psi_BbcNorth);
-  h_mEP_BbcCorrelation[order][cent]->Fill(Psi_BbcSouth,Psi_BbcNorth);
-  h_mCentrality_Bbc[order]->Fill(cent);
+  h_mEP_BbcSouth[order][cent20]->Fill(Psi_BbcSouth);
+  h_mEP_BbcNorth[order][cent20]->Fill(Psi_BbcNorth);
+  h_mEP_BbcCorrelation[order][cent20]->Fill(Psi_BbcSouth,Psi_BbcNorth);
+  h_mCentrality20_Bbc[order]->Fill(cent20);
+  h_mCentrality10_Bbc[order]->Fill(cent10);
 }
 
 void RecoEPHistoManager::writeHist_BbcEP()
@@ -122,7 +125,8 @@ void RecoEPHistoManager::writeHist_BbcEP()
       h_mEP_BbcNorth[i_order][i_cent]->Write();
       h_mEP_BbcCorrelation[i_order][i_cent]->Write();
     }
-    h_mCentrality_Bbc[i_order]->Write();
+    h_mCentrality20_Bbc[i_order]->Write();
+    h_mCentrality10_Bbc[i_order]->Write();
   }
 }
 //===============BBC Event Plane=========================
@@ -151,17 +155,20 @@ void RecoEPHistoManager::initHist_FvtxEP()
 
   for(int i_order = 0; i_order < 3; ++i_order)
   {
-    std::string HistName = Form("h_mCentrality_Fvtx_%s",Order[i_order].c_str());
-    h_mCentrality_Fvtx[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),24,-1.5,22.5);
+    std::string HistName = Form("h_mCentrality20_Fvtx_%s",Order[i_order].c_str());
+    h_mCentrality20_Fvtx[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),24,-1.5,22.5);
+    HistName = Form("h_mCentrality10_Fvtx_%s",Order[i_order].c_str());
+    h_mCentrality10_Fvtx[i_order] = new TH1F(HistName.c_str(),HistName.c_str(),14,-1.5,12.5);
   }
 }
 
-void RecoEPHistoManager::fillHist_FvtxEP(float Psi_FvtxSouth, float Psi_FvtxNorth, int order, int cent)
+void RecoEPHistoManager::fillHist_FvtxEP(float Psi_FvtxSouth, float Psi_FvtxNorth, int order, int cent20, int cent10)
 {
-  h_mEP_FvtxSouth[order][cent]->Fill(Psi_FvtxSouth);
-  h_mEP_FvtxNorth[order][cent]->Fill(Psi_FvtxNorth);
-  h_mEP_FvtxCorrelation[order][cent]->Fill(Psi_FvtxSouth,Psi_FvtxNorth);
-  h_mCentrality_Fvtx[order]->Fill(cent);
+  h_mEP_FvtxSouth[order][cent20]->Fill(Psi_FvtxSouth);
+  h_mEP_FvtxNorth[order][cent20]->Fill(Psi_FvtxNorth);
+  h_mEP_FvtxCorrelation[order][cent20]->Fill(Psi_FvtxSouth,Psi_FvtxNorth);
+  h_mCentrality20_Fvtx[order]->Fill(cent20);
+  h_mCentrality10_Fvtx[order]->Fill(cent10);
 }
 
 void RecoEPHistoManager::writeHist_FvtxEP()
@@ -174,7 +181,8 @@ void RecoEPHistoManager::writeHist_FvtxEP()
       h_mEP_FvtxNorth[i_order][i_cent]->Write();
       h_mEP_FvtxCorrelation[i_order][i_cent]->Write();
     }
-    h_mCentrality_Fvtx[i_order]->Write();
+    h_mCentrality20_Fvtx[i_order]->Write();
+    h_mCentrality10_Fvtx[i_order]->Write();
   }
 }
 //===============FVTX Event Plane=========================

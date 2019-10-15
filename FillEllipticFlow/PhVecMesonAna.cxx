@@ -66,6 +66,7 @@ int PhVecMesonAna::Init()
   mPhDiMuonHistoManager->initHist_InvMass(mPid,mMode);
   mPhDiMuonHistoManager->initHist_Yields(mPid,mMode);
   mPhDiMuonHistoManager->initHist_Spec(mPid,mMode);
+  mPhDiMuonHistoManager->initHist_QA(mPid,mMode);
   // mPhDiMuonProManager   = new PhDiMuonProManager(); // initialize histograms
   mPhDiMuonCut = new PhDiMuonCut(); // initialize cut manager
 
@@ -321,11 +322,13 @@ int PhVecMesonAna::Make()
       { // di-muon pair from south and event plane from north 
 	float phi_Psi = phi_dimuon -  Psi_FvtxNorth_2nd;
 	mPhDiMuonHistoManager->fillHist_InvMass(mPid,mMode,cent20,cent4,pt_dimuon,phi_Psi,invmass_fvtxmutr,resolution,reweight);
+	mPhDiMuonHistoManager->fillHist_QA(mPid,mMode,phi_Psi);
       }
       if(mPhDiMuonCut->isNorthDiMuon(rapidity_fvtxmutr))
       { // di-muon pair from north and event plane from south
 	float phi_Psi = phi_dimuon -  Psi_FvtxSouth_2nd;
 	mPhDiMuonHistoManager->fillHist_InvMass(mPid,mMode,cent20,cent4,pt_dimuon,phi_Psi,invmass_fvtxmutr,resolution,reweight);
+	mPhDiMuonHistoManager->fillHist_QA(mPid,mMode,phi_Psi);
       }
       mPhDiMuonHistoManager->fillHist_Yields(mPid,mMode,cent20,invmass_fvtxmutr,reweight);
       mPhDiMuonHistoManager->fillHist_Spec(mPid,mMode,cent4,pt_dimuon,invmass_fvtxmutr,reweight);
@@ -342,9 +345,11 @@ int PhVecMesonAna::Make()
 int PhVecMesonAna::Finish() 
 {
   File_mOutPut->cd();
+
   mPhDiMuonHistoManager->writeHist_InvMass(mPid,mMode);
   mPhDiMuonHistoManager->writeHist_Yields(mPid,mMode);
   mPhDiMuonHistoManager->writeHist_Spec(mPid,mMode);
+  mPhDiMuonHistoManager->writeHist_QA(mPid,mMode);
 
   File_mOutPut->Close();
 
