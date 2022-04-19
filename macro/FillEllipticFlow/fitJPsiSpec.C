@@ -106,9 +106,9 @@ void fitJPsiSpec(const int pt_QA = 1, const int cent_QA = 3)
   // double N_start = coeff*h_mSpec_US[KEY_Spec_US]->Integral(binl,binh) / renorm;  // 1 // 1.5
 
   double p0_US_init = 1.2;  // 1.20, 1.50
-  double p1_US_init = 90.0; // 70, 90
+  double p1_US_init = 80.0; // 70, 90
   double p2_US_init = 3.1;
-  double p3_US_init = 0.15;
+  double p3_US_init = 0.1;
   // double p4_US_init = N_start;
   // double p5_US_init = N_start/5.0;  //originally set to 10.0
   double p4_US_init = 10.0;
@@ -116,10 +116,11 @@ void fitJPsiSpec(const int pt_QA = 1, const int cent_QA = 3)
   double p6_US_init = -2.05;
 
   TF1 *f_spec_US = new TF1("f_spec_US",func_spec_US,1.5,5,12); // sig + bkg_LS + bkg_Corr
-  f_spec_US->SetParameter(0, p0_US_init); f_spec_US->SetParLimits(0, 1.1, 1.3);
-  f_spec_US->SetParameter(1, p1_US_init); f_spec_US->SetParLimits(1, 70, 95);
+  f_spec_US->SetParameter(0, p0_US_init); f_spec_US->SetParLimits(0, 0.0, 1.3);
+  f_spec_US->SetParameter(1, p1_US_init); f_spec_US->SetParLimits(1, 60, 95);
   f_spec_US->SetParameter(2, p2_US_init); 
-  f_spec_US->SetParameter(3, p3_US_init); f_spec_US->SetParLimits(3, 0.0, 0.16499);// sigma    //0.1
+  // f_spec_US->SetParameter(3, p3_US_init); f_spec_US->SetParLimits(3, 0.0, 0.16499);// sigma    //0.1
+  f_spec_US->SetParameter(3, p3_US_init); f_spec_US->SetParLimits(3, 0.0, 0.4);// sigma    //0.1
   f_spec_US->SetParameter(4, p4_US_init);
   f_spec_US->SetParameter(5, p5_US_init);
   f_spec_US->SetParameter(6, p6_US_init);

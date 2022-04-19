@@ -45,15 +45,18 @@ double func_sig_US(double *x_val, double *par)
   // we need:
   double A = pow( (p1_US/TMath::Abs(p0_US)),p1_US) * exp(-pow(p0_US,2)/2.0);
   double B = p1_US/TMath::Abs(p0_US) - TMath::Abs(p0_US);
+  double C = (p1_US/TMath::Abs(p0_US))*(1.0/(p1_US-1.0))*exp(-p0_US*p0_US/2.0);
+  double D = TMath::Sqrt(TMath::PiOver2())*(1.0+erf(TMath::Abs(p0_US)/TMath::Sqrt(2.0)));
+  double N = 1.0/(p3_US*(C+D));
 
   // The Crystal Ball function is:
   if( (x-p2_US)/p3_US > -p0_US)
   {
-    sig_US = p4_US * exp( -pow(x-p2_US,2) / (2.0*pow(p3_US,2)));
+    sig_US = p4_US * N * exp( -pow(x-p2_US,2) / (2.0*pow(p3_US,2)));
   }
   else
   {
-    sig_US = p4_US * A * pow(B - (x-p2_US)/p3_US, -p1_US);
+    sig_US = p4_US * N * A * pow(B - (x-p2_US)/p3_US, -p1_US);
   }
 
   return sig_US;
@@ -78,15 +81,18 @@ double func_spec_US(double *x_val, double *par)
   // we need:
   double A = pow( (p1_US/TMath::Abs(p0_US)),p1_US) * exp(-pow(p0_US,2)/2.0);
   double B = p1_US/TMath::Abs(p0_US) - TMath::Abs(p0_US);
+  double C = (p1_US/TMath::Abs(p0_US))*(1.0/(p1_US-1.0))*exp(-p0_US*p0_US/2.0);
+  double D = TMath::Sqrt(TMath::PiOver2())*(1.0+erf(TMath::Abs(p0_US)/TMath::Sqrt(2.0)));
+  double N = 1.0/(p3_US*(C+D));
 
   // The Crystal Ball function is:
   if( (x-p2_US)/p3_US > -p0_US)
   {
-    sig_US = p4_US * exp( -pow(x-p2_US,2) / (2.0*pow(p3_US,2)));
+    sig_US = p4_US * N * exp( -pow(x-p2_US,2) / (2.0*pow(p3_US,2)));
   }
   else
   {
-    sig_US = p4_US * A * pow(B - (x-p2_US)/p3_US, -p1_US);
+    sig_US = p4_US * N * A * pow(B - (x-p2_US)/p3_US, -p1_US);
   }
 
   // Correlated exponential background
@@ -129,15 +135,18 @@ double func_spec_Exp(double *x_val, double *par)
   // we need:
   double A = pow( (p1_US/TMath::Abs(p0_US)),p1_US) * exp(-pow(p0_US,2)/2.0);
   double B = p1_US/TMath::Abs(p0_US) - TMath::Abs(p0_US);
+  double C = (p1_US/TMath::Abs(p0_US))*(1.0/(p1_US-1.0))*exp(-p0_US*p0_US/2.0);
+  double D = TMath::Sqrt(TMath::PiOver2())*(1.0+erf(TMath::Abs(p0_US)/TMath::Sqrt(2.0)));
+  double N = 1.0/(p3_US*(C+D));
 
   // The Crystal Ball function is:
   if( (x-p2_US)/p3_US > -p0_US)
   {
-    sig_US = p4_US * exp( -pow(x-p2_US,2) / (2.0*pow(p3_US,2)));
+    sig_US = p4_US * N * exp( -pow(x-p2_US,2) / (2.0*pow(p3_US,2)));
   }
   else
   {
-    sig_US = p4_US * A * pow(B - (x-p2_US)/p3_US, -p1_US);
+    sig_US = p4_US * N * A * pow(B - (x-p2_US)/p3_US, -p1_US);
   }
 
   // Correlated exponential background
