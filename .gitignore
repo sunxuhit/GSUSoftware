@@ -1,0 +1,35 @@
+# a comment - this is ignored
+# ignore share lib
+./lib/*.so
+# ignore *.swp and *.o
+include/*.swp
+
+src/*.swp
+
+obj/*.o
+
+bin/analysis
+bin/genMassHypo
+bin/calLikelihood
+bin/pid
+bin/nsigma
+
+macros/AutoDict_*
+macros/BeamTest/*/*/*_C.d
+macros/BeamTest/*/*/*_C.so
+macros/BeamTest/*/*/*_C_ACLiC_dict_rdict.pcm
+
+figures/*.png
+figures/*/*.png
+figures/*/*/*.png
+figures/*/*/*/*.png
+
+figures/*.eps
+figures/*/*.eps
+figures/*/*/*.eps
+figures/*/*/*/*.eps
+
+figures/*.pdf
+figures/*/*.pdf
+figures/*/*/*.pdf
+figures/*/*/*/*.pdf

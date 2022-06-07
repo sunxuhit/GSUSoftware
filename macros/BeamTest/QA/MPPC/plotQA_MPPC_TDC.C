@@ -1,0 +1,85 @@
+#include "string"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TCanvas.h"
+
+void plotQA_MPPC_TDC(const int runID = 649)
+{
+  const string mode = "Calibration";
+  float tdc_Start = 490.0;
+  float tdc_Stop  = 590.0;
+
+  float ratio_cut = 1.8; // run dependent
+  if(runID == 666) ratio_cut = 2.5; // run dependent
+  if(runID == 672) ratio_cut = 2.5; // run dependent
+  if(runID == 674) ratio_cut = 1.4;
+  if(runID == 686) ratio_cut = 0.7;
+  if(runID == 697) ratio_cut = 0.3;
+
+  int const NumOfPixel = 33;
+  string inputfile = Form("/Users/xusun/WorkSpace/EICPID/Data/BeamTest_mRICH/QA/MPPC/%s/sipmTDC_run%d.root",mode.c_str(),runID);
+  TFile *File_InPut = TFile::Open(inputfile.c_str());
+
+  TH2D *h_mRingImage = (TH2D*)File_InPut->Get("h_mRingImage")->Clone();
+  TH1D *h_mTDC[33][33]; // 0 for x-pixel | 1 for y-pixel
+  for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
+  {
+    for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
+    {
+      string HistName = Form("h_mTDC_pixelX_%d_pixelY_%d",i_pixel_x,i_pixel_y);
+      h_mTDC[i_pixel_x][i_pixel_y] = (TH1D*)File_InPut->Get(HistName.c_str())->Clone();
+    }
+  }
+
+  TCanvas *c_RingImage = new TCanvas("c_RingImage","c_RingImage",10,10,NumOfPixel*30,NumOfPixel*30);
+  c_RingImage->SetLeftMargin(0.15);
+  c_RingImage->SetBottomMargin(0.15);
+  c_RingImage->SetRightMargin(0.15);
+  c_RingImage->SetTicks(1,1);
+  c_RingImage->SetGrid(0,0);
+  string title = Form("120 GeV proton & run%d",runID);
+  h_mRingImage->SetTitle(title.c_str());
+  h_mRingImage->SetStats(0);
+  h_mRingImage->GetXaxis()->SetTitle("pixel ID");
+  h_mRingImage->GetXaxis()->CenterTitle();
+  h_mRingImage->GetYaxis()->SetTitle("pixel ID");
+  h_mRingImage->GetYaxis()->CenterTitle();
+  h_mRingImage->Draw("colz");
+  string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_RingImage_MPPC_%d.eps",mode.c_str(),runID);
+  c_RingImage->SaveAs(c_ringimage.c_str());
+  /* string c_ringimage = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_RingImage_MPPC_%d.png",mode.c_str(),runID); */
+  /* c_RingImage->SaveAs(c_ringimage.c_str()); */
+
+  // TCanvas *c_TDC = new TCanvas("c_TDC","c_TDC",10,10,NumOfPixel*100,NumOfPixel*100);
+  TCanvas *c_TDC = new TCanvas("c_TDC","c_TDC",10,10,NumOfPixel*30,NumOfPixel*30);
+  c_TDC->Divide(NumOfPixel,NumOfPixel,0,0);
+  for(int i_pixel_x = 0; i_pixel_x < NumOfPixel; ++i_pixel_x)
+  {
+    for(int i_pixel_y = 0; i_pixel_y < NumOfPixel; ++i_pixel_y)
+    {
+      double max_counts = h_mTDC[i_pixel_x][i_pixel_y]->GetMaximum();
+      int i_pad = NumOfPixel*(NumOfPixel-(i_pixel_y+1)) + i_pixel_x+1;
+      // cout << "i_pixel_x = " << i_pixel_x << ", i_pixel_y = " << i_pixel_y << ", i_pad = " << i_pad << endl;
+      c_TDC->cd(i_pad);
+      h_mTDC[i_pixel_x][i_pixel_y]->SetTitle("");
+      h_mTDC[i_pixel_x][i_pixel_y]->SetStats(0);
+      float tot = h_mTDC[i_pixel_x][i_pixel_y]->Integral();
+      float sig = h_mTDC[i_pixel_x][i_pixel_y]->Integral(tdc_Start,tdc_Stop);
+      float bkg = tot - sig;
+      float ratio = sig/bkg;
+      h_mTDC[i_pixel_x][i_pixel_y]->GetXaxis()->SetRangeUser(tdc_Start-100,tdc_Stop+100);
+      h_mTDC[i_pixel_x][i_pixel_y]->GetYaxis()->SetRangeUser(0.1,1e2);
+
+      if(ratio > ratio_cut) h_mTDC[i_pixel_x][i_pixel_y]->SetLineColor(2);
+      else h_mTDC[i_pixel_x][i_pixel_y]->SetLineColor(1);
+
+      h_mTDC[i_pixel_x][i_pixel_y]->Draw();
+    }
+  }
+  string c_tdc = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_TDC_MPPC_%d.eps",mode.c_str(),runID);
+  c_TDC->SaveAs(c_tdc.c_str());
+  /* string c_tdc = Form("/Users/xusun/WorkSpace/EICPID/figures/BeamTest_mRICH/QA/MPPC/%s/c_TDC_MPPC_%d.png",mode.c_str(),runID); */
+  /* c_TDC->SaveAs(c_tdc.c_str()); */
+}
